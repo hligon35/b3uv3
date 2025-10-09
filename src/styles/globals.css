@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-brand-blue: #7BAFD4;
+  --color-brand-orange: #CC5500;
+  --color-navy: #0A1A2A;
+}
+
+html, body { @apply bg-white text-navy font-body scroll-smooth; }
+body { min-height: 100vh; }
+
+h1,h2,h3,h4,h5,h6 { @apply font-display tracking-wide; }
+
+.section-padding { @apply py-24 px-6 md:px-12 max-w-7xl mx-auto; }
+.bg-grid-light { background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.08) 1px, transparent 0); background-size: 24px 24px; }
+
+.btn { @apply inline-flex items-center justify-center font-semibold rounded-md transition focus:outline-none focus-visible:ring-4 focus-visible:ring-offset-2 focus-visible:ring-brandBlue-dark disabled:opacity-50 disabled:cursor-not-allowed; }
+.btn-primary { @apply bg-brandOrange text-white hover:bg-brandOrange-dark px-6 py-3 shadow-lg; }
+.btn-outline { @apply border-2 border-brandBlue text-brandBlue hover:bg-brandBlue hover:text-navy px-6 py-3; }
+.btn-light { @apply bg-white text-navy hover:bg-brandBlue-light hover:text-navy px-5 py-2; }
+
+.card { @apply bg-white text-navy border border-black/5 rounded-xl p-6 shadow-md transition hover:shadow-xl; }
+.card-dark { @apply bg-white; }
+
+.gradient-hero { background: linear-gradient(135deg, #0A1A2A 0%, #4B86AB 60%, #7BAFD4 100%); }
+.alt-band { background: linear-gradient(135deg, #FFEDE0 0%, #E6F2FA 100%); }
+
+/* Scroll animation helpers */
+.fade-in-up { opacity: 0; transform: translateY(24px); }
+.reveal { opacity: 1 !important; transform: translateY(0) !important; transition: all 0.7s cubic-bezier(.16,.8,.24,1); }
