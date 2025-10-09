@@ -2,11 +2,26 @@
 import Hero from '@/components/Hero';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import MugImage from '@/images/shop/mug.png';
 import ShirtFrontImage from '@/images/shop/shirt_front.png';
 import ShirtBackImage from '@/images/shop/shirt_back.png';
 
 export default function HomePage() {
+  const [isTouch, setIsTouch] = useState(false);
+  const [homeOverlay, setHomeOverlay] = useState<Record<number, boolean>>({});
+
+  // Detect touch / non-hover devices for overlay behavior
+  useEffect(() => {
+    const detect = () => {
+      try {
+        return window.matchMedia && window.matchMedia('(hover: none)').matches;
+      } catch {
+        return 'ontouchstart' in window || (navigator as any).maxTouchPoints > 0;
+      }
+    };
+    setIsTouch(detect());
+  }, []);
   // Most recent B3U Podcast episodes from YouTube (sorted by upload date)
   const podcastEpisodes = [
     {
@@ -186,15 +201,33 @@ export default function HomePage() {
           </div>
           <div className="flex-1 grid grid-cols-2 gap-4">
             {shopProducts.map((productImage, index) => (
-              <div key={index} className="relative group h-48 rounded-lg overflow-hidden bg-white">
+              <div
+                key={index}
+                className="relative group h-48 rounded-lg overflow-hidden bg-white"
+                onClick={(e) => {
+                  if (!isTouch) return; // Only toggle on touch devices
+                  const target = e.target as HTMLElement;
+                  if (target.closest('a')) return; // Don't toggle if clicking the link
+                  setHomeOverlay(prev => ({ ...prev, [index]: !prev[index] }));
+                }}
+              >
                 <Image
                   src={productImage}
                   alt={index === 0 ? 'B3U T-Shirt' : 'B3U Coffee Mug'}
                   fill
                   className="object-contain p-4"
                 />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
-                  <span className="text-white text-sm font-semibold tracking-wide">View</span>
+                <div
+                  className={
+                    `absolute inset-0 flex items-center justify-center transition pointer-events-none ` +
+                    (isTouch
+                      ? (homeOverlay[index] ? 'opacity-100 bg-black/50' : 'opacity-0 bg-black/0')
+                      : 'opacity-0 bg-black/0 group-hover:opacity-100 group-hover:bg-black/50')
+                  }
+                >
+                  <Link href="/shop" className="pointer-events-auto text-white text-sm font-semibold tracking-wide underline-offset-4 hover:underline">
+                    View
+                  </Link>
                 </div>
               </div>
             ))}

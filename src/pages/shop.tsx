@@ -1,6 +1,6 @@
 import Layout from '@/components/Layout';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import MugImage from '@/images/shop/mug.png';
 import ShirtFrontImage from '@/images/shop/shirt_front.png';
 import ShirtBackImage from '@/images/shop/shirt_back.png';
@@ -33,6 +33,20 @@ const products: Product[] = [
 export default function ShopPage() {
   const [cart, setCart] = useState<Product[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState<{[key: number]: number}>({});
+  const [isTouch, setIsTouch] = useState(false);
+  const [showOverlay, setShowOverlay] = useState<{[key:number]: boolean}>({});
+
+  // Detect touch / non-hover devices to adjust overlay behavior
+  useEffect(() => {
+    const checkTouch = () => {
+      try {
+        return window.matchMedia && window.matchMedia('(hover: none)').matches;
+      } catch {
+        return 'ontouchstart' in window || (navigator as any).maxTouchPoints > 0;
+      }
+    };
+    setIsTouch(checkTouch());
+  }, []);
 
   const addToCart = (p: Product) => setCart(c => [...c, p]);
   const removeFromCart = (id: number) => setCart(c => c.filter(p => p.id !== id));
@@ -85,10 +99,20 @@ export default function ShopPage() {
             const currentIndex = currentImageIndex[p.id] || 0;
             const currentImage = p.images[currentIndex];
             const hasMultipleImages = p.images.length > 1;
+            const overlayVisible = isTouch ? !!showOverlay[p.id] : false;
             
             return (
               <div key={p.id} className="card group">
-                <div className="h-64 rounded-md mb-4 relative overflow-hidden bg-white">
+                <div
+                  className="h-64 rounded-md mb-4 relative overflow-hidden bg-white"
+                  onClick={(e) => {
+                    if (!isTouch) return; // Only toggle on touch devices
+                    const target = e.target as HTMLElement;
+                    // Don't toggle if clicking a button (e.g., nav arrows or Add to Cart)
+                    if (target.closest('button')) return;
+                    setShowOverlay(prev => ({ ...prev, [p.id]: !prev[p.id] }));
+                  }}
+                >
                   <Image
                     src={currentImage}
                     alt={`${p.name} ${hasMultipleImages ? `- View ${currentIndex + 1}` : ''}`}
@@ -135,10 +159,20 @@ export default function ShopPage() {
                     </>
                   )}
                   
-                  {/* Add to Cart Overlay - only show when not hovering navigation */}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition pointer-events-none">
-                    <button 
-                      onClick={() => addToCart(p)} 
+                  {/* Add to Cart Overlay: hover on desktop, tap-to-toggle on touch */}
+                  <div
+                    className={
+                      `absolute inset-0 flex items-center justify-center transition pointer-events-none z-0 ` +
+                      (isTouch
+                        ? (overlayVisible ? 'opacity-100 bg-black/30' : 'opacity-0 bg-black/0')
+                        : 'opacity-0 bg-black/0 group-hover:opacity-100 group-hover:bg-black/30')
+                    }
+                  >
+                    <button
+                      onClick={() => {
+                        addToCart(p);
+                        if (isTouch) setShowOverlay(prev => ({ ...prev, [p.id]: false }));
+                      }}
                       className="btn-light text-sm pointer-events-auto"
                     >
                       Add to Cart

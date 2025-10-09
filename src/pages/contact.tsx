@@ -107,7 +107,7 @@ export default function ContactPage() {
                 <div className="text-sm text-gray-600 mb-4">followers</div>
               </div>
               <p className="text-sm text-navy/80 leading-relaxed">Follow me here for events, promotions, exclusive content and more!</p>
-              <a href="#" className="inline-block mt-4 text-pink-500 font-semibold hover:text-pink-600 transition-colors">Follow Now</a>
+              <a href="https://www.instagram.com/burnbreakbecomeunstoppable/?fbclid=IwY2xjawNUu3hleHRuA2FlbQIxMQBicmlkETB3N0ZyaVFxS3NmaFhFM3BvAR5w4Ud2bTNNiFK--1xXjwOvmlf2YSofVszOAhXD7oHHRm7-wtcPr10FbTVSSg_aem_1zMZugrHmz-DKGTTtAisVw" target="_blank" rel="noopener" className="inline-block mt-4 text-pink-500 font-semibold hover:text-pink-600 transition-colors">Follow Now</a>
             </div>
 
             {/* Facebook */}
@@ -122,7 +122,7 @@ export default function ContactPage() {
                 <div className="text-sm text-gray-600 mb-4">followers</div>
               </div>
               <p className="text-sm text-navy/80 leading-relaxed">Follow me here for events, promotions, exclusive content and more!</p>
-              <a href="#" className="inline-block mt-4 text-blue-600 font-semibold hover:text-blue-700 transition-colors">Follow Now</a>
+              <a href="https://www.facebook.com/bree.b3u" target="_blank" rel="noopener" className="inline-block mt-4 text-blue-600 font-semibold hover:text-blue-700 transition-colors">Follow Now</a>
             </div>
 
             {/* TikTok */}
