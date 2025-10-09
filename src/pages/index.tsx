@@ -1,8 +1,67 @@
 ﻿import Layout from '@/components/Layout';
 import Hero from '@/components/Hero';
+import Image from 'next/image';
 import Link from 'next/link';
+import MugImage from '@/images/shop/mug.png';
+import ShirtFrontImage from '@/images/shop/shirt_front.png';
+import ShirtBackImage from '@/images/shop/shirt_back.png';
 
 export default function HomePage() {
+  // Most recent B3U Podcast episodes from YouTube (sorted by upload date)
+  const podcastEpisodes = [
+    {
+      id: 'fCsbrjfzLBc',
+      title: 'Fireside Chat w/ Mrs Rochelle Tucker',
+      duration: '1 hour, 27 minutes',
+      description: 'An inspiring conversation about resilience, faith, and life\'s journey with Mrs Rochelle Tucker.',
+      thumbnail: `https://img.youtube.com/vi/fCsbrjfzLBc/maxresdefault.jpg`,
+      uploadDate: '2 days ago'
+    },
+    {
+      id: 'BiL6SWnquUI',
+      title: 'Reclaim Session w/ Ashley Brown',
+      duration: '35 minutes',
+      description: 'Ashley Brown shares her powerful story of reclaiming her voice and stepping into her purpose.',
+      thumbnail: `https://img.youtube.com/vi/BiL6SWnquUI/maxresdefault.jpg`,
+      uploadDate: '9 days ago'
+    },
+    {
+      id: '8f0zkRp3VUc',
+      title: 'The Altar Experience w/ Prophetess Moina Tucker',
+      duration: '23 minutes',
+      description: 'A transformative altar experience exploring faith, healing, and spiritual breakthrough.',
+      thumbnail: `https://img.youtube.com/vi/8f0zkRp3VUc/maxresdefault.jpg`,
+      uploadDate: '12 days ago'
+    },
+    {
+      id: 'KxyISQUoBWk',
+      title: 'The Altar Experience w/ Chenia Hughes',
+      duration: '33 minutes',
+      description: 'Chenia Hughes shares her journey of transformation and spiritual awakening at the altar.',
+      thumbnail: `https://img.youtube.com/vi/KxyISQUoBWk/maxresdefault.jpg`,
+      uploadDate: '2 weeks ago'
+    },
+    {
+      id: 'LUu8ltxQuLk',
+      title: 'Altar Experience w/ Dr Teresa Hegwood',
+      duration: '9 minutes, 9 seconds',
+      description: 'Dr Teresa Hegwood delivers a powerful message about healing and restoration.',
+      thumbnail: `https://img.youtube.com/vi/LUu8ltxQuLk/maxresdefault.jpg`,
+      uploadDate: '2 weeks ago'
+    },
+    {
+      id: 'MXpm9L2yOSQ',
+      title: 'Altar Experience w/ Pastor Kristie Anderson',
+      duration: '24 minutes',
+      description: 'Pastor Kristie Anderson shares insights on faith, perseverance, and divine purpose.',
+      thumbnail: `https://img.youtube.com/vi/MXpm9L2yOSQ/maxresdefault.jpg`,
+      uploadDate: '3 weeks ago'
+    }
+  ];
+
+  // Shop products for homepage preview
+  const shopProducts = [ShirtFrontImage, MugImage];
+
   return (
     <Layout>
       <Hero />
@@ -34,15 +93,48 @@ export default function HomePage() {
             <h3 className="text-xl text-brandOrange font-semibold mb-4">Burn, Break, Become Unstoppable</h3>
             <p className="text-navy/70 max-w-xl">Conversations featuring stories of resilience, transformation, and the courage to rebuild. Every episode is a reminder that your pain can become your purpose.</p>
           </div>
-          <div className="w-full md:w-[420px] aspect-video bg-black/40 rounded-lg flex items-center justify-center text-white/40 text-sm">B3U Podcast Player</div>
+          <div className="w-full md:w-[420px]">
+            <a href="https://www.youtube.com/channel/UCSrtA1gGlgo4cQUzoSlzZ5w" target="_blank" rel="noopener" className="block aspect-video bg-black/40 rounded-lg flex items-center justify-center text-white/80 text-sm hover:bg-black/60 transition-colors group">
+              <div className="text-center">
+                <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">▶</div>
+                <div>Watch B3U on YouTube</div>
+              </div>
+            </a>
+          </div>
         </div>
         <div className="grid md:grid-cols-3 gap-8">
-          {[1,2,3,4,5,6].map(n => (
-            <div key={n} className="card">
-              <div className="h-40 rounded-md bg-[url('https://picsum.photos/400/300?podcast=')] bg-cover bg-center mb-4" />
-              <h3 className="font-semibold mb-2">Breaking Through Episode {n}</h3>
-              <p className="text-sm text-navy/70 mb-4">Stories of courage, faith, and transformation that inspire others to take back their power.</p>
-              <Link href="/podcast" className="text-brandOrange hover:underline text-sm font-medium">Listen </Link>
+          {podcastEpisodes.map(episode => (
+            <div key={episode.id} className="card">
+              <div className="relative h-40 rounded-md overflow-hidden mb-4 group">
+                <img 
+                  src={episode.thumbnail} 
+                  alt={episode.title}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
+                  <a 
+                    href={`https://www.youtube.com/watch?v=${episode.id}`}
+                    target="_blank"
+                    rel="noopener"
+                    className="text-white text-2xl hover:scale-110 transition-transform"
+                  >
+                    ▶
+                  </a>
+                </div>
+                <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                  {episode.duration}
+                </div>
+              </div>
+              <h3 className="font-semibold mb-2 line-clamp-2">{episode.title}</h3>
+              <p className="text-sm text-navy/70 mb-4 line-clamp-3">{episode.description}</p>
+              <a 
+                href={`https://www.youtube.com/watch?v=${episode.id}`}
+                target="_blank"
+                rel="noopener"
+                className="text-brandOrange hover:underline text-sm font-medium"
+              >
+                Watch Episode →
+              </a>
             </div>
           ))}
         </div>
@@ -93,10 +185,16 @@ export default function HomePage() {
             <Link href="/shop" className="btn-primary">Visit the Shop</Link>
           </div>
           <div className="flex-1 grid grid-cols-2 gap-4">
-            {[1,2,3,4].map(p => (
-              <div key={p} className="relative group h-48 rounded-lg overflow-hidden bg-[url('https://picsum.photos/400/400?product=')] bg-cover bg-center">
+            {shopProducts.map((productImage, index) => (
+              <div key={index} className="relative group h-48 rounded-lg overflow-hidden bg-white">
+                <Image
+                  src={productImage}
+                  alt={index === 0 ? 'B3U T-Shirt' : 'B3U Coffee Mug'}
+                  fill
+                  className="object-contain p-4"
+                />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
-                  <span className="text-sm font-semibold tracking-wide">View</span>
+                  <span className="text-white text-sm font-semibold tracking-wide">View</span>
                 </div>
               </div>
             ))}

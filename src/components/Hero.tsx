@@ -36,7 +36,7 @@ export default function Hero() {
           transition={{ delay: 0.3, duration: 0.8 }}
           className="flex flex-col sm:flex-row gap-4 justify-center"
         >
-          <Link href="/podcast" className="btn-primary">🎙 Listen to The B3U Podcast</Link>
+          <Link href="/podcast" className="btn-primary">Listen to The B3U Podcast</Link>
           <Link href="/contact" className="btn-outline">📅 Book Bree to Speak</Link>
         </motion.div>
       </div>

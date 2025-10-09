@@ -24,6 +24,10 @@ module.exports = {
         display: ['Oswald', 'Impact', 'Arial Black', 'sans-serif'],
         body: ['Inter', 'system-ui', 'sans-serif'],
         script: ['Dancing Script', 'Brush Script MT', 'cursive']
+      },
+      spacing: {
+        '15': '3.75rem', // 60px - 50% larger than h-10 w-10 (40px)
+        '30': '7.5rem',  // 120px - double the current size
       }
     },
   },

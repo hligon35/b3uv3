@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import Image from 'next/image';
+import B3ULogo from '@/images/logos/B3U3D.png';
 
 export default function Footer() {
   return (
@@ -6,8 +8,14 @@ export default function Footer() {
       <div className="section-padding grid md:grid-cols-4 gap-12">
         <div>
           <div className="flex items-center gap-3 mb-4">
-            <span className="h-10 w-10 rounded-full bg-gradient-to-br from-brandBlue to-brandOrange"></span>
-            <span className="font-display text-xl">B3U</span>
+            <div className="h-30 w-30 relative">
+              <Image 
+                src={B3ULogo} 
+                alt="B3U Logo"
+                fill
+                className="object-contain"
+              />
+            </div>
           </div>
           <div className="mb-4">
             <p className="text-lg font-script text-brandOrange mb-2">Bree Charles</p>
@@ -26,7 +34,7 @@ export default function Footer() {
         <div>
           <h4 className="font-semibold mb-3 text-brandOrange">Connect</h4>
           <ul className="space-y-2 text-sm">
-            <li><a className="text-white/80 hover:text-brandOrange" href="#" target="_blank">YouTube</a></li>
+            <li><a className="text-white/80 hover:text-brandOrange" href="https://www.youtube.com/channel/UCSrtA1gGlgo4cQUzoSlzZ5w" target="_blank" rel="noopener">YouTube</a></li>
             <li><a className="text-white/80 hover:text-brandOrange" href="#" target="_blank">Instagram</a></li>
             <li><a className="text-white/80 hover:text-brandOrange" href="#" target="_blank">Facebook</a></li>
             <li><a className="text-white/80 hover:text-brandOrange" href="#" target="_blank">TikTok</a></li>

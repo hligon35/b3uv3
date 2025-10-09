@@ -1,5 +1,7 @@
 import Layout from '@/components/Layout';
 import Image from 'next/image';
+import MelaLogo from '@/images/logos/Melalogo.png';
+import THOHLogo from '@/images/logos/THOHlogo.png';
 
 export default function AboutPage() {
   return (
@@ -41,7 +43,7 @@ export default function AboutPage() {
       <section className="section-padding bg-gradient-to-r from-brandOrange to-red-600 text-white">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">
-            🔥 The Big Take Back
+            The Big Take Back
           </h2>
           <h3 className="text-xl md:text-2xl mb-8 font-semibold">
             Burn the Fear. Break the Cycle. Become Unstoppable.
@@ -75,7 +77,7 @@ export default function AboutPage() {
       <section className="section-padding bg-[#F4F8FB]">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold mb-6 text-center">
-            💎 Her Work in Action
+            Her Work in Action
           </h2>
           <h3 className="text-xl text-center text-navy/80 mb-12">
             Faith. Purpose. Community.
@@ -89,7 +91,7 @@ export default function AboutPage() {
             <div className="card bg-white p-8 text-center">
               <div className="h-20 w-20 mb-6 relative mx-auto">
                 <Image 
-                  src="/Melalogo.png" 
+                  src={MelaLogo} 
                   alt="Mela Whole Foods Logo"
                   fill
                   className="object-contain"
@@ -104,7 +106,7 @@ export default function AboutPage() {
             <div className="card bg-white p-8 text-center">
               <div className="h-20 w-20 mb-6 relative mx-auto">
                 <Image 
-                  src="/THOHlogo.png" 
+                  src={THOHLogo} 
                   alt="House of Humanity Logo"
                   fill
                   className="object-contain"
@@ -127,19 +129,19 @@ export default function AboutPage() {
       <section className="section-padding bg-white">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">
-            🚀 The Movement Continues
+            The Movement Continues
           </h2>
           <p className="text-lg text-navy/80 leading-relaxed mb-10 max-w-3xl mx-auto">
             For Bree, this work is more than motivation — it's divine assignment. Her calling is to help people burn away fear, break destructive patterns, and become who they were created to be.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-            <a href="/podcast" className="btn-primary">🎙 Listen to The B3U Podcast</a>
-            <a href="/contact" className="btn-outline">🗣 Book Bree to Speak</a>
+            <a href="/podcast" className="btn-primary">Listen to The B3U Podcast</a>
+            <a href="/contact" className="btn-outline">Book Bree to Speak</a>
           </div>
           
           <div className="max-w-md mx-auto">
-            <h3 className="text-lg font-semibold mb-4">✉️ Join "The Take Back Weekly" Newsletter</h3>
+            <h3 className="text-lg font-semibold mb-4">Join "The Take Back Weekly" Newsletter</h3>
             <form className="flex flex-col sm:flex-row gap-3">
               <input 
                 type="email" 
