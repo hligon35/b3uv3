@@ -6,6 +6,10 @@ import { useEffect, useState } from 'react';
 import MugImage from '@/images/shop/mug.png';
 import ShirtFrontImage from '@/images/shop/shirt_front.png';
 import ShirtBackImage from '@/images/shop/shirt_back.png';
+import B3Upro from '@/images/content/B3Upro.jpeg';
+import B3Upro1 from '@/images/content/B3Upro1.jpeg';
+import B3Upro2 from '@/images/content/B3Upro2.jpeg';
+import B3Upro3 from '@/images/content/B3Upro3.jpeg';
 
 export default function HomePage() {
   const [isTouch, setIsTouch] = useState(false);
@@ -94,10 +98,18 @@ export default function HomePage() {
             <Link href="/about" className="btn-outline">Learn More About Bree</Link>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <div className="h-40 rounded-lg bg-[url('https://picsum.photos/300/300?speaker')] bg-cover bg-center" />
-            <div className="h-40 rounded-lg bg-[url('https://picsum.photos/300/300?army')] bg-cover bg-center" />
-            <div className="h-40 rounded-lg bg-[url('https://picsum.photos/300/300?podcast')] bg-cover bg-center" />
-            <div className="h-40 rounded-lg bg-[url('https://picsum.photos/300/300?community')] bg-cover bg-center" />
+            {[B3Upro, B3Upro3, B3Upro2, B3Upro1].map((img, i) => (
+              <div key={i} className="relative h-48 rounded-lg overflow-hidden sm:h-52 md:h-56">
+                <Image
+                  src={img}
+                  alt={`Highlight image ${i + 1}`}
+                  fill
+                  className="object-cover object-top"
+                  sizes="(max-width: 768px) 50vw, 25vw"
+                  priority={i === 0}
+                />
+              </div>
+            ))}
           </div>
         </div>
       </section>

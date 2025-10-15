@@ -35,10 +35,10 @@ export default function Footer() {
           <h4 className="font-semibold mb-3 text-brandOrange">Connect</h4>
           <ul className="space-y-2 text-sm">
             <li><a className="text-white/80 hover:text-brandOrange" href="https://www.youtube.com/channel/UCSrtA1gGlgo4cQUzoSlzZ5w" target="_blank" rel="noopener">YouTube</a></li>
-            <li><a className="text-white/80 hover:text-brandOrange" href="https://www.instagram.com/burnbreakbecomeunstoppable/?fbclid=IwY2xjawNUu3hleHRuA2FlbQIxMQBicmlkETB3N0ZyaVFxS3NmaFhFM3BvAR5w4Ud2bTNNiFK--1xXjwOvmlf2YSofVszOAhXD7oHHRm7-wtcPr10FbTVSSg_aem_1zMZugrHmz-DKGTTtAisVw" target="_blank" rel="noopener">Instagram</a></li>
-            <li><a className="text-white/80 hover:text-brandOrange" href="https://www.facebook.com/bree.b3u" target="_blank" rel="noopener">Facebook</a></li>
-            <li><a className="text-white/80 hover:text-brandOrange" href="#" target="_blank">TikTok</a></li>
-            <li><a className="text-white/80 hover:text-brandOrange" href="#" target="_blank">LinkedIn</a></li>
+            <li><a className="text-white/80 hover:text-brandOrange" href="https://www.instagram.com/burnbreakbecomeunstoppable/" target="_blank" rel="noopener noreferrer">Instagram</a></li>
+            <li><a className="text-white/80 hover:text-brandOrange" href="https://www.facebook.com/bree.b3u" target="_blank" rel="noopener noreferrer">Facebook</a></li>
+            <li><a className="text-white/80 hover:text-brandOrange" href="#" target="_blank" rel="noopener noreferrer">TikTok</a></li>
+            <li><a className="text-white/80 hover:text-brandOrange" href="#" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
           </ul>
         </div>
         <div>
