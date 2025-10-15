@@ -2,6 +2,7 @@ import Layout from '@/components/Layout';
 import Image from 'next/image';
 import MelaLogo from '@/images/logos/Melalogo.png';
 import THOHLogo from '@/images/logos/THOHlogo.png';
+import B3Upro from '@/images/content/B3Upro.jpeg';
 
 export default function AboutPage() {
   return (
@@ -29,7 +30,16 @@ export default function AboutPage() {
               </p>
             </div>
             <div className="relative">
-              <div className="h-96 rounded-lg bg-[url('https://picsum.photos/400/600?portrait')] bg-cover bg-center shadow-2xl"></div>
+              <div className="relative h-96 rounded-lg overflow-hidden shadow-2xl">
+                <Image
+                  src={B3Upro}
+                  alt="Bree Charles"
+                  fill
+                  className="object-cover object-top"
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  priority
+                />
+              </div>
               <div className="absolute -bottom-6 -right-6 bg-brandOrange text-white p-6 rounded-lg shadow-lg">
                 <p className="font-semibold text-sm">U.S. Army Veteran</p>
                 <p className="text-xs opacity-90">Transformational Speaker</p>
@@ -46,7 +56,7 @@ export default function AboutPage() {
             The Big Take Back
           </h2>
           <h3 className="text-xl md:text-2xl mb-8 font-semibold">
-            Burn the Fear. Break the Cycle. Become Unstoppable.
+            Breaking Cycles, Building Legacies.
           </h3>
           <div className="max-w-3xl mx-auto">
             <p className="text-lg leading-relaxed mb-6">
