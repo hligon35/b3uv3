@@ -46,7 +46,7 @@ export default function AboutPage() {
             The Big Take Back
           </h2>
           <h3 className="text-xl md:text-2xl mb-8 font-semibold">
-            Burn the Fear. Break the Cycle. Become Unstoppable.
+            Breaking Cycles. Building Legacies.
           </h3>
           <div className="max-w-3xl mx-auto">
             <p className="text-lg leading-relaxed mb-6">

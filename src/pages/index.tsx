@@ -160,7 +160,7 @@ export default function HomePage() {
                 rel="noopener"
                 className="text-brandOrange hover:underline text-sm font-medium"
               >
-                Watch Episode →
+                Watch Episode
               </a>
             </div>
           ))}
@@ -193,7 +193,7 @@ export default function HomePage() {
             </div>
           </div>
           <div className="card">
-            <p className="italic text-sm mb-4">"The Big Take Back isn't just a messageit's a movement. Bree helped me reclaim my voice and my future."</p>
+            <p className="italic text-sm mb-4">"The Big Take Back isn't just a message, it's a movement. Bree helped me reclaim my voice and my future."</p>
             <div className="flex items-center gap-3">
               <span className="h-10 w-10 rounded-full bg-[url('https://picsum.photos/100/100?portrait=3')] bg-cover bg-center" />
               <div>
