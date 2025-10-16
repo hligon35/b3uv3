@@ -1,11 +1,24 @@
 import Layout from '@/components/Layout';
-import Link from 'next/link';
-import { useState } from 'react';
 
-export default function PodcastPage() {
-  const [activeFilter, setActiveFilter] = useState('All');
-  // Real B3U Podcast episodes from Buzzsprout
-  const episodes = [
+type Episode = {
+  id: string;
+  title: string;
+  category: string;
+  duration: string;
+  date: string;
+  description: string;
+  link: string;
+  audioUrl?: string;
+  imageUrl?: string;
+};
+
+type PodcastProps = {
+  episodes: Episode[];
+};
+
+export default function PodcastPage({ episodes }: PodcastProps) {
+  // Fallback hardcoded episodes if needed (used only when no data)
+  const fallbackEpisodes: Episode[] = [
     {
       id: '17967667',
       title: 'Fireside Chat w/ Mrs Rochelle Tucker',
@@ -116,56 +129,47 @@ export default function PodcastPage() {
     }
   ];
 
-  const filters = ['All','Healing','Empowerment','Faith','Purpose','Wisdom','Transformation','Resilience'];
+  const list = episodes && episodes.length ? episodes : fallbackEpisodes;
 
-  // Filter episodes based on active filter
-  const filteredEpisodes = activeFilter === 'All' 
-    ? episodes 
-    : episodes.filter(episode => episode.category === activeFilter);
+  const makeEmbedUrl = (ep: Episode) => {
+    const brand = 'CC5500'; // brand orange without '#'
+    if (ep.audioUrl && ep.audioUrl.includes('/episodes/')) {
+      // Convert the mp3 URL into an embeddable page URL
+      // e.g., https://www.buzzsprout.com/2467135/episodes/17967667-title.mp3
+      //   -> https://www.buzzsprout.com/2467135/episodes/17967667-title?client_source=small_player&player=small&iframe=true&color=CC5500
+      const base = ep.audioUrl.replace(/\.mp3$/i, '');
+      return `${base}?client_source=small_player&player=small&iframe=true&color=${brand}`;
+    }
+    if (ep.link && ep.link.includes('/episodes/')) {
+      return `${ep.link}?client_source=small_player&player=small&iframe=true&color=${brand}`;
+    }
+    // Fallback to show page small player (artist). This won’t be episode-specific.
+    return `https://www.buzzsprout.com/2467135?client_source=small_player&player=small&iframe=true&color=${brand}`;
+  };
 
   return (
     <Layout>
       <section className="section-padding">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-8 mb-12">
           <div>
-            <h1 className="text-4xl font-bold mb-4">The Podcast</h1>
-            <p className="max-w-2xl text-white/80">Browse all episodes. Filter by theme and dive into powerful conversations that inspire action and purpose.</p>
-            <p className="text-sm text-brandOrange mt-2">
-              Showing {filteredEpisodes.length} of {episodes.length} episodes
-              {activeFilter !== 'All' && ` in "${activeFilter}"`}
-            </p>
+            <h1 className="text-4xl font-bold mb-4">Listen To The Podcast</h1>
+            <p className="max-w-2xl text-navy/80">Browse all episodes and dive into powerful conversations that inspire action and purpose.</p>
           </div>
-          <div className="flex gap-3 flex-wrap">
-            {filters.map(f => (
-              <button 
-                key={f} 
-                onClick={() => setActiveFilter(f)}
-                className={`btn-light text-xs md:text-sm transition-colors ${
-                  activeFilter === f 
-                    ? 'bg-brandOrange text-white hover:bg-brandOrange' 
-                    : 'bg-white text-navy hover:bg-brandBlue-light hover:text-navy'
-                }`}
-              >
-                {f}
-              </button>
-            ))}
-          </div>
+          
         </div>
         <div className="grid md:grid-cols-3 gap-8">
-          {filteredEpisodes.map(ep => (
+          {list.map(ep => (
             <div key={ep.id} className="card">
-              <div className="h-40 rounded-md bg-gradient-to-br from-brandBlue to-brandOrange bg-cover bg-center mb-4 flex items-center justify-center">
-                <div className="text-white text-center">
-                  <div className="text-2xl mb-2">♪</div>
-                  <div className="text-xs bg-black/20 px-2 py-1 rounded">{ep.duration}</div>
-                </div>
-              </div>
-              <h3 className="font-semibold mb-1 line-clamp-2">{ep.title}</h3>
-              <p className="text-xs uppercase tracking-wide text-brandOrange mb-2">{ep.category}</p>
-              <p className="text-sm text-white/70 mb-4 line-clamp-3">{ep.description}</p>
-              <div className="flex justify-between items-center">
-                <a href={ep.link} target="_blank" rel="noopener" className="text-brandOrange hover:underline text-sm font-medium">Listen Episode →</a>
-                <span className="text-xs text-white/50">{ep.date.split(' ')[0]} {ep.date.split(' ')[1]}</span>
+              <div className="overflow-hidden rounded-md border border-black/5 shadow-sm bg-white">
+                <iframe
+                  src={makeEmbedUrl(ep)}
+                  title={`Play ${ep.title}`}
+                  loading="lazy"
+                  width="100%"
+                  height="160"
+                  scrolling="no"
+                  frameBorder={0}
+                />
               </div>
             </div>
           ))}
@@ -178,4 +182,18 @@ export default function PodcastPage() {
       </section>
     </Layout>
   );
+}
+
+export async function getStaticProps() {
+  try {
+    const path = await import('node:path');
+    const fs = await import('node:fs');
+    const file = path.join(process.cwd(), 'public', 'data', 'podcast.json');
+    const raw = fs.readFileSync(file, 'utf-8');
+    const data = JSON.parse(raw);
+    return { props: { episodes: data.episodes || [] } };
+  } catch (e) {
+    // If file missing (first build), fallback to empty list; hardcoded list will be used at runtime
+    return { props: { episodes: [] } };
+  }
 }

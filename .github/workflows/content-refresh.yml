@@ -1,0 +1,43 @@
+name: Refresh Content and Deploy
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    # Mondays at 6:00 PM America/Indiana/Indianapolis
+    # GitHub cron uses UTC. To cover DST changes, run at 22:00 UTC (EDT, UTC-4) and 23:00 UTC (EST, UTC-5)
+    - cron: '0 22 * * 1'
+    - cron: '0 23 * * 1'
+
+env:
+  TZ: America/Indiana/Indianapolis
+
+jobs:
+  refresh-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install
+        run: npm ci
+
+      - name: Refresh podcast and YouTube feeds
+        run: |
+          npm run fetch:podcast
+          npm run fetch:youtube
+
+      - name: Build static site
+        run: npm run build:static
+
+      - name: Prepare GitHub Pages artifacts
+        run: node scripts/prepare-pages.mjs
+
+      - name: Deploy to gh-pages branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/deploy.mjs

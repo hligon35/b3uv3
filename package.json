@@ -6,8 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "build:static": "next build",
+    "fetch:podcast": "node scripts/fetch-podcast.mjs 24",
+  "fetch:youtube": "node scripts/fetch-youtube.mjs 6",
+  "refresh:content": "npm run fetch:podcast && npm run fetch:youtube",
     "predeploy": "npm run build:static && node scripts/prepare-pages.mjs",
-  "deploy": "node scripts/deploy.mjs",
+    "deploy": "node scripts/deploy.mjs",
     "start": "next start",
     "lint": "next lint",
     "format": "prettier --write ."
@@ -32,8 +35,12 @@
     "eslint": "^8.57.0",
     "eslint-config-next": "^14.2.5",
     "gh-pages": "^6.3.0",
+    "jimp": "^1.6.0",
+    "jsqr": "^1.4.0",
     "postcss": "^8.4.38",
     "prettier": "^3.3.3",
+    "qrcode-reader": "^1.0.4",
+    "rss-parser": "^3.13.0",
     "tailwindcss": "^3.4.7",
     "typescript": "^5.4.5"
   }
