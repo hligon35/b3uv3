@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from 'react';
 import MugImage from '@/images/shop/mug.png';
 import ShirtFrontImage from '@/images/shop/shirt_front.png';
 import ShirtBackImage from '@/images/shop/shirt_back.png';
+import QRCode from '@/images/shop/qrcode.png';
+import ZelleQR from '@/images/shop/Zelle qr.png';
 
 interface Product { 
   id: number; 
@@ -49,6 +51,10 @@ export default function ShopPage() {
   const [paypalReady, setPaypalReady] = useState(false);
   const [paypalError, setPaypalError] = useState<string | null>(null);
   const paypalRef = useRef<HTMLDivElement | null>(null);
+
+  // Optional external destinations for QR codes
+  const QR_LINK = process.env.NEXT_PUBLIC_QR_LINK || 'https://www.paypal.com/us/digital-wallet/mobile-apps';
+  const ZELLE_LINK = process.env.NEXT_PUBLIC_ZELLE_LINK || 'https://enroll.zellepay.com/qr-codes?data=eyJuYW1lIjoiQjNVIEwuTC5DLiIsImFjdGlvbiI6InBheW1lbnQiLCJ0b2tlbiI6IjgwNDM4NTI1MTIifQ==';
 
   const addToCart = (p: Product) => {
     if (p.sizes && !selectedSize[p.id]) {
@@ -222,6 +228,41 @@ export default function ShopPage() {
                 </button>
               </div>
             )}
+
+            {/* QR Codes */}
+            <div className="mt-5 border-t border-black/10 pt-4">
+              <h4 className="font-semibold text-sm mb-2">Quick Pay via QR</h4>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="text-center">
+                  <a
+                    href={QR_LINK || (QRCode as any).src}
+                    target="_blank"
+                    rel="noopener"
+                    className="block"
+                    aria-label="Open QR code destination"
+                  >
+                    <div className="relative w-28 h-28 mx-auto rounded-md overflow-hidden bg-white">
+                      <Image src={QRCode} alt="QR code" fill className="object-contain p-1" />
+                    </div>
+                  </a>
+                  <div className="text-xs text-navy/60 mt-1">QR Code</div>
+                </div>
+                <div className="text-center">
+                  <a
+                    href={ZELLE_LINK || (ZelleQR as any).src}
+                    target="_blank"
+                    rel="noopener"
+                    className="block"
+                    aria-label="Open Zelle QR destination"
+                  >
+                    <div className="relative w-28 h-28 mx-auto rounded-md overflow-hidden bg-white">
+                      <Image src={ZelleQR} alt="Zelle QR code" fill className="object-contain p-1" />
+                    </div>
+                  </a>
+                  <div className="text-xs text-navy/60 mt-1">Zelle</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <div className="grid md:grid-cols-2 gap-8">
