@@ -93,7 +93,7 @@ export default function HomePage({ videos }: HomeProps) {
                 alt={`Highlight image ${i + 1}`}
                 width={800}
                 height={800}
-                className="w-full aspect-square rounded-3xl object-cover object-center"
+                className={`w-full aspect-square rounded-3xl object-cover ${i === 2 ? 'object-top' : 'object-center'}`}
                 sizes="(max-width: 768px) 50vw, 25vw"
                 priority={i === 0}
               />
@@ -273,8 +273,29 @@ export default function HomePage({ videos }: HomeProps) {
         <div className="max-w-2xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Join "The Take Back Weekly"</h2>
           <p className="text-navy/70 mb-6">Get new episodes, inspiration, and community opportunities delivered to your inbox.</p>
-          <form className="flex flex-col sm:flex-row gap-4 justify-center">
-            <input type="email" required placeholder="Email address" className="flex-1 px-5 py-3 rounded-md bg-white border border-black/10 focus:outline-none focus:ring-2 focus:ring-brandBlue" />
+          <form
+            action="https://formsubmit.co/info@b3unstoppable.net"
+            method="POST"
+            className="flex flex-col sm:flex-row gap-4 justify-center"
+          >
+            {/* helpers */}
+            <input type="hidden" name="_subject" value="New newsletter subscriber (b3unstoppable.net)" />
+            <input type="hidden" name="_template" value="table" />
+            <input type="hidden" name="_next" value="/#newsletter?subscribed=1" />
+            <input type="hidden" name="_captcha" value="false" />
+            <input type="text" name="_honey" className="hidden" aria-hidden="true" />
+            <input
+              type="hidden"
+              name="_autoresponse"
+              value="Thanks for joining The Take Back Weekly! You’re on the list. Look out for new episodes, inspiration, and community updates from B3U. — Team B3U"
+            />
+            <input
+              type="email"
+              name="email"
+              required
+              placeholder="Email address"
+              className="flex-1 px-5 py-3 rounded-md bg-white border border-black/10 focus:outline-none focus:ring-2 focus:ring-brandBlue"
+            />
             <button className="btn-primary" type="submit">Subscribe</button>
           </form>
         </div>
