@@ -18,7 +18,7 @@ export default function AboutPage() {
           </p>
           
           <div className="grid md:grid-cols-2 gap-12 items-center mb-16">
-            <div>
+            <div className="order-1 md:order-2">
               <p className="text-lg text-navy/80 leading-relaxed mb-6">
                 Bree Charles is a transformational speaker, author, U.S. Army veteran, and creator of the B3U Podcast – Burn, Break, Become Unstoppable. Her story is one of courage, faith, and relentless resilience.
               </p>
@@ -29,7 +29,7 @@ export default function AboutPage() {
                 Her years in the U.S. Army taught her leadership, strength, and discipline — qualities that now fuel her mission to help others rise above fear, rebuild after pain, and step boldly into their God-given purpose. Through her voice, Bree helps others take back their power from trauma and doubt, transforming their pain into legacy.
               </p>
             </div>
-            <div className="relative">
+            <div className="relative order-2 md:order-1">
               <Image
                 src={aboutBree}
                 alt="Bree Charles"
