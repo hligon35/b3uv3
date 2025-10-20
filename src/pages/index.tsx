@@ -5,10 +5,10 @@ import Link from 'next/link';
 import MugImage from '@/images/shop/mug.png';
 import ShirtFrontImage from '@/images/shop/shirt_front.png';
 import ShirtBackImage from '@/images/shop/shirt_back.png';
-import B3Upro from '@/images/content/B3Upro.jpeg';
-import B3Upro1 from '@/images/content/B3Upro1.jpeg';
-import B3Upro2 from '@/images/content/B3Upro2.jpeg';
-import B3Upro3 from '@/images/content/B3Upro3.jpeg';
+import about1 from '@/images/content/about1.jpeg';
+import about2 from '@/images/content/about2.jpeg';
+import about3 from '@/images/content/about3.jpeg';
+import about4 from '@/images/content/about4.jpeg';
 import B3ULogo from '@/images/logos/B3U3D.png';
 import { useMemo } from 'react';
 
@@ -86,17 +86,17 @@ export default function HomePage({ videos }: HomeProps) {
             <Link href="/about" className="btn-outline">Learn More About Bree</Link>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            {[B3Upro, B3Upro3, B3Upro2, B3Upro1].map((img, i) => (
-              <div key={i} className="relative h-48 rounded-lg overflow-hidden sm:h-52 md:h-56">
-                <Image
-                  src={img}
-                  alt={`Highlight image ${i + 1}`}
-                  fill
-                  className="object-cover object-top"
-                  sizes="(max-width: 768px) 50vw, 25vw"
-                  priority={i === 0}
-                />
-              </div>
+            {[about1, about4, about3, about2].map((img, i) => (
+              <Image
+                key={i}
+                src={img}
+                alt={`Highlight image ${i + 1}`}
+                width={800}
+                height={800}
+                className="w-full aspect-square rounded-3xl object-cover object-center"
+                sizes="(max-width: 768px) 50vw, 25vw"
+                priority={i === 0}
+              />
             ))}
           </div>
         </div>

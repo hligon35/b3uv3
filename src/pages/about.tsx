@@ -2,7 +2,7 @@ import Layout from '@/components/Layout';
 import Image from 'next/image';
 import MelaLogo from '@/images/logos/Melalogo.png';
 import THOHLogo from '@/images/logos/THOHlogo.png';
-import B3Upro from '@/images/content/B3Upro.jpeg';
+import aboutBree from '@/images/content/aboutBree.jpeg';
 
 export default function AboutPage() {
   return (
@@ -30,16 +30,13 @@ export default function AboutPage() {
               </p>
             </div>
             <div className="relative">
-              <div className="relative h-96 rounded-lg overflow-hidden shadow-2xl">
-                <Image
-                  src={B3Upro}
-                  alt="Bree Charles"
-                  fill
-                  className="object-cover object-top"
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  priority
-                />
-              </div>
+              <Image
+                src={aboutBree}
+                alt="Bree Charles"
+                className="w-full h-auto rounded-3xl shadow-2xl"
+                sizes="(max-width: 768px) 100vw, 50vw"
+                priority
+              />
               <div className="absolute -bottom-6 -right-6 bg-brandOrange text-white p-6 rounded-lg shadow-lg">
                 <p className="font-semibold text-sm">U.S. Army Veteran</p>
                 <p className="text-xs opacity-90">Transformational Speaker</p>
