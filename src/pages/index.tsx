@@ -70,6 +70,51 @@ export default function HomePage({ videos }: HomeProps) {
   // Shop products for homepage preview
   const shopProducts = [ShirtFrontImage, MugImage];
 
+  // Overlay behavior for home shop tiles
+  const [isTouch, setIsTouch] = useState(false);
+  const [homeOverlay, setHomeOverlay] = useState<Record<number, boolean>>({});
+  const API_ENDPOINT = '/api/submit';
+  const [subscribed, setSubscribed] = useState(false);
+
+  async function handleNewsletterSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const data = new FormData(form);
+    try {
+      const body: Record<string, any> = {};
+      data.forEach((v, k) => { body[k] = v; });
+      const res = await fetch(API_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fields: body }),
+      });
+      if (res.ok) {
+        const next = (data.get('_next') as string) || '/?subscribed=1#newsletter';
+        // Update URL without reloading and scroll to the newsletter section
+        try { window.history.replaceState(null, '', next); } catch {}
+        setSubscribed(true);
+        try { document.getElementById('newsletter')?.scrollIntoView({ behavior: 'smooth' }); } catch {}
+        try {
+          const emailInput = form.querySelector('input[name="email"]') as HTMLInputElement | null;
+          if (emailInput) emailInput.value = '';
+        } catch {}
+        return;
+      }
+    } catch {}
+    // No fallback submit to avoid page reload; optionally show an error.
+  }
+
+  useEffect(() => {
+    const detect = () => {
+      try {
+        return window.matchMedia && window.matchMedia('(hover: none)').matches;
+      } catch {
+        return 'ontouchstart' in window || (navigator as any).maxTouchPoints > 0;
+      }
+    };
+    setIsTouch(detect());
+  }, []);
+
   return (
     <Layout>
       <Hero />
@@ -293,14 +338,15 @@ export default function HomePage({ videos }: HomeProps) {
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Join "The Take Back Weekly"</h2>
           <p className="text-navy/70 mb-6">Get new episodes, inspiration, and community opportunities delivered to your inbox.</p>
           <form
-            action="https://formsubmit.co/info@b3unstoppable.net"
+            action="https://formsubmit.co/el/figabe"
             method="POST"
             className="flex flex-col sm:flex-row gap-4 justify-center"
+            onSubmit={handleNewsletterSubmit}
           >
             {/* helpers */}
-            <input type="hidden" name="_subject" value="New newsletter subscriber (b3unstoppable.net)" />
+            <input type="hidden" name="_subject" value="B3U Website — Newsletter Subscription" />
             <input type="hidden" name="_template" value="table" />
-            <input type="hidden" name="_next" value="/#newsletter?subscribed=1" />
+            <input type="hidden" name="_next" value="/?subscribed=1#newsletter" />
             <input type="hidden" name="_captcha" value="false" />
             <input type="text" name="_honey" className="hidden" aria-hidden="true" />
             <input
@@ -316,6 +362,11 @@ export default function HomePage({ videos }: HomeProps) {
               className="flex-1 px-5 py-3 rounded-md bg-white border border-black/10 focus:outline-none focus:ring-2 focus:ring-brandBlue"
             />
             <button className="btn-primary" type="submit">Subscribe</button>
+            {subscribed && (
+              <div className="w-full text-sm text-green-700 bg-green-50 border border-green-200 rounded-md px-3 py-2 sm:ml-4 sm:mt-0 mt-2">
+                Thanks! You7re subscribed.
+              </div>
+            )}
           </form>
         </div>
       </section>

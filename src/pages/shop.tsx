@@ -47,6 +47,14 @@ export default function ShopPage() {
   const [currentImageIndex, setCurrentImageIndex] = useState<{[key: number]: number}>({});
   const [isTouch, setIsTouch] = useState(false);
   const [showOverlay, setShowOverlay] = useState<{[key:number]: boolean}>({});
+  const [selectedSize, setSelectedSize] = useState<Record<number, string | ''>>({});
+  const [sizeError, setSizeError] = useState<Record<number, boolean>>({});
+
+  // PayPal UI state
+  const [paypalReady, setPaypalReady] = useState(false);
+  const [paypalError, setPaypalError] = useState<string | null>(null);
+  const [showCheckout, setShowCheckout] = useState(false);
+  const paypalRef = useRef<HTMLDivElement | null>(null);
 
   // Detect touch / non-hover devices to adjust overlay behavior
   useEffect(() => {

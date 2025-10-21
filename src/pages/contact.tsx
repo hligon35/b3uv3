@@ -1,5 +1,30 @@
 import Layout from '@/components/Layout';
 
+const API_ENDPOINT = '/api/submit';
+
+async function handleContactSubmit(e: React.FormEvent<HTMLFormElement>) {
+  e.preventDefault();
+  const form = e.currentTarget;
+  const data = new FormData(form);
+  try {
+    const body: Record<string, any> = {};
+    data.forEach((v, k) => { body[k] = v; });
+    const res = await fetch(API_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fields: body }),
+    });
+    if (res.ok) {
+      const next = (data.get('_next') as string) || '/contact?sent=1';
+      window.location.href = next;
+      return;
+    }
+  } catch (err) {
+    // ignore and fall back to normal submit
+  }
+  // Do nothing else to avoid page reload; consider showing an error message if needed.
+}
+
 export default function ContactPage() {
   return (
     <Layout>
@@ -15,12 +40,13 @@ export default function ContactPage() {
             <div className="card bg-white shadow-2xl">
               <h2 className="text-2xl font-bold mb-6 text-navy">Send a Message</h2>
               <form
-                action="https://formsubmit.co/info@b3unstoppable.net"
+                action="https://formsubmit.co/el/figabe"
                 method="POST"
                 className="space-y-6"
+                onSubmit={handleContactSubmit}
               >
                 {/* FormSubmit helpers */}
-                <input type="hidden" name="_subject" value="New contact via b3unstoppable.net" />
+                <input type="hidden" name="_subject" value="B3U Website — Contact Form Submission" />
                 <input type="hidden" name="_template" value="box" />
                 <input type="hidden" name="_next" value="/contact?sent=1" />
                 <input type="hidden" name="_captcha" value="false" />
