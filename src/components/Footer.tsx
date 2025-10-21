@@ -37,8 +37,8 @@ export default function Footer() {
             <li><a className="text-white/80 hover:text-brandOrange" href="https://www.youtube.com/channel/UCSrtA1gGlgo4cQUzoSlzZ5w" target="_blank" rel="noopener">YouTube</a></li>
             <li><a className="text-white/80 hover:text-brandOrange" href="https://www.instagram.com/burnbreakbecomeunstoppable/" target="_blank" rel="noopener noreferrer">Instagram</a></li>
             <li><a className="text-white/80 hover:text-brandOrange" href="https://www.facebook.com/bree.b3u" target="_blank" rel="noopener noreferrer">Facebook</a></li>
-            <li><a className="text-white/80 hover:text-brandOrange" href="#" target="_blank" rel="noopener noreferrer">TikTok</a></li>
-            <li><a className="text-white/80 hover:text-brandOrange" href="#" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
+            <li><a className="text-white/80 hover:text-brandOrange" href="https://www.tiktok.com/@bree_charles" target="_blank" rel="noopener noreferrer">TikTok</a></li>
+            <li><a className="text-white/80 hover:text-brandOrange" href="https://www.linkedin.com/in/bridget-charles-375534169?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
           </ul>
         </div>
         <div>

@@ -1,0 +1,56 @@
+{
+  "source": "https://www.youtube.com/feeds/videos.xml?channel_id=UCSrtA1gGlgo4cQUzoSlzZ5w",
+  "channelId": "UCSrtA1gGlgo4cQUzoSlzZ5w",
+  "fetchedAt": "2025-10-16T20:39:40.117Z",
+  "count": 6,
+  "videos": [
+    {
+      "id": "smXC3Z2sbec",
+      "title": "Fireside Chat with Mrs Rochelle Tucker",
+      "description": "",
+      "thumbnail": "https://img.youtube.com/vi/smXC3Z2sbec/maxresdefault.jpg",
+      "publishedAt": "October 11, 2025",
+      "link": "https://www.youtube.com/watch?v=smXC3Z2sbec"
+    },
+    {
+      "id": "BiL6SWnquUI",
+      "title": "Reclaim Session w/ Ashley Brown",
+      "description": "",
+      "thumbnail": "https://img.youtube.com/vi/BiL6SWnquUI/maxresdefault.jpg",
+      "publishedAt": "September 29, 2025",
+      "link": "https://www.youtube.com/watch?v=BiL6SWnquUI"
+    },
+    {
+      "id": "8f0zkRp3VUc",
+      "title": "The Altar Experience w/ Prophetess Moina Tucker",
+      "description": "",
+      "thumbnail": "https://img.youtube.com/vi/8f0zkRp3VUc/maxresdefault.jpg",
+      "publishedAt": "September 26, 2025",
+      "link": "https://www.youtube.com/watch?v=8f0zkRp3VUc"
+    },
+    {
+      "id": "KxyISQUoBWk",
+      "title": "The Altar Experience w/ Chenia Hughes",
+      "description": "",
+      "thumbnail": "https://img.youtube.com/vi/KxyISQUoBWk/maxresdefault.jpg",
+      "publishedAt": "September 22, 2025",
+      "link": "https://www.youtube.com/watch?v=KxyISQUoBWk"
+    },
+    {
+      "id": "LUu8ltxQuLk",
+      "title": "Altar Experience w/ Dr Teresa Hegwood",
+      "description": "",
+      "thumbnail": "https://img.youtube.com/vi/LUu8ltxQuLk/maxresdefault.jpg",
+      "publishedAt": "September 19, 2025",
+      "link": "https://www.youtube.com/watch?v=LUu8ltxQuLk"
+    },
+    {
+      "id": "MXpm9L2yOSQ",
+      "title": "Altar Experience w/ Pastor Kristie Anderson",
+      "description": "",
+      "thumbnail": "https://img.youtube.com/vi/MXpm9L2yOSQ/maxresdefault.jpg",
+      "publishedAt": "September 15, 2025",
+      "link": "https://www.youtube.com/watch?v=MXpm9L2yOSQ"
+    }
+  ]
+}

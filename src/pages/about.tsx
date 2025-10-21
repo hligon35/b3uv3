@@ -2,6 +2,7 @@ import Layout from '@/components/Layout';
 import Image from 'next/image';
 import MelaLogo from '@/images/logos/Melalogo.png';
 import THOHLogo from '@/images/logos/THOHlogo.png';
+import aboutBree from '@/images/content/aboutBree.jpeg';
 
 export default function AboutPage() {
   return (
@@ -17,7 +18,7 @@ export default function AboutPage() {
           </p>
           
           <div className="grid md:grid-cols-2 gap-12 items-center mb-16">
-            <div>
+            <div className="order-1 md:order-2">
               <p className="text-lg text-navy/80 leading-relaxed mb-6">
                 Bree Charles is a transformational speaker, author, U.S. Army veteran, and creator of the B3U Podcast – Burn, Break, Become Unstoppable. Her story is one of courage, faith, and relentless resilience.
               </p>
@@ -28,8 +29,14 @@ export default function AboutPage() {
                 Her years in the U.S. Army taught her leadership, strength, and discipline — qualities that now fuel her mission to help others rise above fear, rebuild after pain, and step boldly into their God-given purpose. Through her voice, Bree helps others take back their power from trauma and doubt, transforming their pain into legacy.
               </p>
             </div>
-            <div className="relative">
-              <div className="h-96 rounded-lg bg-[url('https://picsum.photos/400/600?portrait')] bg-cover bg-center shadow-2xl"></div>
+            <div className="relative order-2 md:order-1">
+              <Image
+                src={aboutBree}
+                alt="Bree Charles"
+                className="w-full h-auto rounded-3xl shadow-2xl"
+                sizes="(max-width: 768px) 100vw, 50vw"
+                priority
+              />
               <div className="absolute -bottom-6 -right-6 bg-brandOrange text-white p-6 rounded-lg shadow-lg">
                 <p className="font-semibold text-sm">U.S. Army Veteran</p>
                 <p className="text-xs opacity-90">Transformational Speaker</p>

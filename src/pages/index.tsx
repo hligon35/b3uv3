@@ -6,77 +6,66 @@ import { useEffect, useState } from 'react';
 import MugImage from '@/images/shop/mug.png';
 import ShirtFrontImage from '@/images/shop/shirt_front.png';
 import ShirtBackImage from '@/images/shop/shirt_back.png';
-import B3Upro from '@/images/content/B3Upro.jpeg';
-import B3Upro1 from '@/images/content/B3Upro1.jpeg';
-import B3Upro2 from '@/images/content/B3Upro2.jpeg';
-import B3Upro3 from '@/images/content/B3Upro3.jpeg';
+import about1 from '@/images/content/about1.jpeg';
+import about2 from '@/images/content/about2.jpeg';
+import about3 from '@/images/content/about3.jpeg';
+import about4 from '@/images/content/about4.jpeg';
+import B3ULogo from '@/images/logos/B3U3D.png';
+import { useMemo } from 'react';
 
-export default function HomePage() {
-  const [isTouch, setIsTouch] = useState(false);
-  const [homeOverlay, setHomeOverlay] = useState<Record<number, boolean>>({});
+type YtVideo = { id: string; title: string; description: string; thumbnail: string; link?: string; publishedAt?: string; uploadDate?: string };
 
-  // Detect touch / non-hover devices for overlay behavior
-  useEffect(() => {
-    const detect = () => {
-      try {
-        return window.matchMedia && window.matchMedia('(hover: none)').matches;
-      } catch {
-        return 'ontouchstart' in window || (navigator as any).maxTouchPoints > 0;
-      }
-    };
-    setIsTouch(detect());
-  }, []);
+type HomeProps = {
+  videos: YtVideo[];
+};
+
+export default function HomePage({ videos }: HomeProps) {
   // Most recent B3U Podcast episodes from YouTube (sorted by upload date)
-  const podcastEpisodes = [
+  const fallbackVideos: YtVideo[] = [
     {
       id: 'fCsbrjfzLBc',
       title: 'Fireside Chat w/ Mrs Rochelle Tucker',
-      duration: '1 hour, 27 minutes',
-      description: 'An inspiring conversation about resilience, faith, and life\'s journey with Mrs Rochelle Tucker.',
+      description: 'An inspiring conversation about resilience, faith, and life\'s journey with Mrs Rochelle Tucker. (1h 27m)',
       thumbnail: `https://img.youtube.com/vi/fCsbrjfzLBc/maxresdefault.jpg`,
       uploadDate: '2 days ago'
     },
     {
       id: 'BiL6SWnquUI',
       title: 'Reclaim Session w/ Ashley Brown',
-      duration: '35 minutes',
-      description: 'Ashley Brown shares her powerful story of reclaiming her voice and stepping into her purpose.',
+      description: 'Ashley Brown shares her powerful story of reclaiming her voice and stepping into her purpose. (35m)',
       thumbnail: `https://img.youtube.com/vi/BiL6SWnquUI/maxresdefault.jpg`,
       uploadDate: '9 days ago'
     },
     {
       id: '8f0zkRp3VUc',
       title: 'The Altar Experience w/ Prophetess Moina Tucker',
-      duration: '23 minutes',
-      description: 'A transformative altar experience exploring faith, healing, and spiritual breakthrough.',
+      description: 'A transformative altar experience exploring faith, healing, and spiritual breakthrough. (23m)',
       thumbnail: `https://img.youtube.com/vi/8f0zkRp3VUc/maxresdefault.jpg`,
       uploadDate: '12 days ago'
     },
     {
       id: 'KxyISQUoBWk',
       title: 'The Altar Experience w/ Chenia Hughes',
-      duration: '33 minutes',
-      description: 'Chenia Hughes shares her journey of transformation and spiritual awakening at the altar.',
+      description: 'Chenia Hughes shares her journey of transformation and spiritual awakening at the altar. (33m)',
       thumbnail: `https://img.youtube.com/vi/KxyISQUoBWk/maxresdefault.jpg`,
       uploadDate: '2 weeks ago'
     },
     {
       id: 'LUu8ltxQuLk',
       title: 'Altar Experience w/ Dr Teresa Hegwood',
-      duration: '9 minutes, 9 seconds',
-      description: 'Dr Teresa Hegwood delivers a powerful message about healing and restoration.',
+      description: 'Dr Teresa Hegwood delivers a powerful message about healing and restoration. (9m 9s)',
       thumbnail: `https://img.youtube.com/vi/LUu8ltxQuLk/maxresdefault.jpg`,
       uploadDate: '2 weeks ago'
     },
     {
       id: 'MXpm9L2yOSQ',
       title: 'Altar Experience w/ Pastor Kristie Anderson',
-      duration: '24 minutes',
-      description: 'Pastor Kristie Anderson shares insights on faith, perseverance, and divine purpose.',
+      description: 'Pastor Kristie Anderson shares insights on faith, perseverance, and divine purpose. (24m)',
       thumbnail: `https://img.youtube.com/vi/MXpm9L2yOSQ/maxresdefault.jpg`,
       uploadDate: '3 weeks ago'
     }
   ];
+  const podcastEpisodes: YtVideo[] = useMemo(() => (videos && videos.length ? videos : fallbackVideos), [videos]);
 
   // Shop products for homepage preview
   const shopProducts = [ShirtFrontImage, MugImage];
@@ -98,17 +87,17 @@ export default function HomePage() {
             <Link href="/about" className="btn-outline">Learn More About Bree</Link>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            {[B3Upro, B3Upro3, B3Upro2, B3Upro1].map((img, i) => (
-              <div key={i} className="relative h-48 rounded-lg overflow-hidden sm:h-52 md:h-56">
-                <Image
-                  src={img}
-                  alt={`Highlight image ${i + 1}`}
-                  fill
-                  className="object-cover object-top"
-                  sizes="(max-width: 768px) 50vw, 25vw"
-                  priority={i === 0}
-                />
-              </div>
+            {[about1, about4, about3, about2].map((img, i) => (
+              <Image
+                key={i}
+                src={img}
+                alt={`Highlight image ${i + 1}`}
+                width={800}
+                height={800}
+                className={`w-full aspect-square rounded-3xl object-cover ${i === 2 ? 'object-top' : 'object-center'}`}
+                sizes="(max-width: 768px) 50vw, 25vw"
+                priority={i === 0}
+              />
             ))}
           </div>
         </div>
@@ -121,10 +110,58 @@ export default function HomePage() {
             <p className="text-navy/70 max-w-xl">Conversations featuring stories of resilience, transformation, and the courage to rebuild. Every episode is a reminder that your pain can become your purpose.</p>
           </div>
           <div className="w-full md:w-[420px]">
-            <a href="https://www.youtube.com/channel/UCSrtA1gGlgo4cQUzoSlzZ5w" target="_blank" rel="noopener" className="block aspect-video bg-black/40 rounded-lg flex items-center justify-center text-white/80 text-sm hover:bg-black/60 transition-colors group">
-              <div className="text-center">
-                <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">▶</div>
-                <div>Watch B3U on YouTube</div>
+            <a
+              href="https://www.youtube.com/channel/UCSrtA1gGlgo4cQUzoSlzZ5w"
+              target="_blank"
+              rel="noopener"
+              aria-label="Watch B3U on YouTube"
+              className="group relative block aspect-video overflow-hidden rounded-xl shadow-xl ring-1 ring-black/10"
+            >
+              {/* background gradient */}
+              <div className="absolute inset-0 bg-gradient-to-br from-navy via-[#0f2338] to-brandBlue" />
+
+              {/* subtle animated glow on hover */}
+              <div className="pointer-events-none absolute -inset-8 bg-gradient-to-r from-brandOrange/25 via-transparent to-brandBlue-light/25 blur-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+
+              {/* 3D logo */}
+              <div className="absolute inset-0">
+                <Image
+                  src={B3ULogo}
+                  alt="B3U logo"
+                  fill
+                  className="object-contain p-0 md:p-2 scale-150 md:scale-150 transition-transform duration-500 ease-out group-hover:scale-[1.6] group-hover:rotate-[1.5deg]"
+                  sizes="(max-width: 768px) 100vw, 420px"
+                  priority
+                />
+              </div>
+
+              {/* gradient overlay for readability */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
+
+              {/* top-left label */}
+              <div className="absolute left-3 top-3">
+                <span className="inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-[11px] font-semibold text-navy shadow-sm">
+                  <span className="h-1.5 w-1.5 rounded-full bg-brandOrange shadow-[0_0_0_3px_rgba(204,85,0,0.15)]" />
+                  B3U on YouTube
+                </span>
+              </div>
+
+              {/* center play button
+              <div className="absolute inset-0 grid place-items-center">
+                <div className="relative">
+                  {/* ripple */}
+                  {/* <span className="pointer-events-none absolute inset-0 rounded-full bg-brandOrange/30 blur-xl scale-0 opacity-0 transition-all duration-500 group-hover:scale-100 group-hover:opacity-100" />
+                  <span className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-white/95 text-navy shadow-lg ring-1 ring-black/10 transition-transform duration-300 group-hover:scale-110">
+                    <span className="ml-0.5 text-xl">▶</span>
+                  </span>
+                </div>
+              </div> */}
+
+              {/* bottom-right caption */}
+              <div className="absolute bottom-3 right-3">
+                <span className="rounded-md bg-black/50 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur">
+                  Watch now
+                </span>
               </div>
             </a>
           </div>
@@ -148,9 +185,14 @@ export default function HomePage() {
                     ▶
                   </a>
                 </div>
-                <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                  {episode.duration}
-                </div>
+                {(() => {
+                  const dateLabel = episode.publishedAt || episode.uploadDate;
+                  return dateLabel ? (
+                    <div className="absolute bottom-2 right-2 bg-black/70 text-white text-[10px] px-2 py-1 rounded">
+                      {dateLabel}
+                    </div>
+                  ) : null;
+                })()}
               </div>
               <h3 className="font-semibold mb-2 line-clamp-2">{episode.title}</h3>
               <p className="text-sm text-navy/70 mb-4 line-clamp-3">{episode.description}</p>
@@ -250,12 +292,46 @@ export default function HomePage() {
         <div className="max-w-2xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Join "The Take Back Weekly"</h2>
           <p className="text-navy/70 mb-6">Get new episodes, inspiration, and community opportunities delivered to your inbox.</p>
-          <form className="flex flex-col sm:flex-row gap-4 justify-center">
-            <input type="email" required placeholder="Email address" className="flex-1 px-5 py-3 rounded-md bg-white border border-black/10 focus:outline-none focus:ring-2 focus:ring-brandBlue" />
+          <form
+            action="https://formsubmit.co/info@b3unstoppable.net"
+            method="POST"
+            className="flex flex-col sm:flex-row gap-4 justify-center"
+          >
+            {/* helpers */}
+            <input type="hidden" name="_subject" value="New newsletter subscriber (b3unstoppable.net)" />
+            <input type="hidden" name="_template" value="table" />
+            <input type="hidden" name="_next" value="/#newsletter?subscribed=1" />
+            <input type="hidden" name="_captcha" value="false" />
+            <input type="text" name="_honey" className="hidden" aria-hidden="true" />
+            <input
+              type="hidden"
+              name="_autoresponse"
+              value="Thanks for joining The Take Back Weekly! You’re on the list. Look out for new episodes, inspiration, and community updates from B3U. — Team B3U"
+            />
+            <input
+              type="email"
+              name="email"
+              required
+              placeholder="Email address"
+              className="flex-1 px-5 py-3 rounded-md bg-white border border-black/10 focus:outline-none focus:ring-2 focus:ring-brandBlue"
+            />
             <button className="btn-primary" type="submit">Subscribe</button>
           </form>
         </div>
       </section>
     </Layout>
   );
+}
+
+export async function getStaticProps() {
+  try {
+    const path = await import('node:path');
+    const fs = await import('node:fs');
+    const file = path.join(process.cwd(), 'public', 'data', 'youtube.json');
+    const raw = fs.readFileSync(file, 'utf-8');
+    const data = JSON.parse(raw);
+    return { props: { videos: data.videos || [] } };
+  } catch (e) {
+    return { props: { videos: [] } };
+  }
 }

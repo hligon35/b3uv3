@@ -1,10 +1,22 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import BreeHero from '@/images/content/bree_hero.jpeg';
+import Image from 'next/image';
 
 export default function Hero() {
   return (
     <section className="relative min-h-[90vh] flex items-center justify-center gradient-hero overflow-hidden">
-      <div className="absolute inset-0 opacity-20 mix-blend-multiply bg-[url('https://picsum.photos/1200/800?blur=3')] bg-cover bg-center" />
+      {/* Background image */}
+      <div className="absolute inset-0">
+        <Image
+          src={BreeHero}
+          alt="Bree Charles hero background"
+          fill
+          priority
+          className="object-cover object-center opacity-30"
+          sizes="100vw"
+        />
+      </div>
       <div className="section-padding relative z-10 text-center">
         <motion.h1
           initial={{ opacity: 0, y: 40 }}

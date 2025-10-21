@@ -14,12 +14,28 @@ export default function ContactPage() {
             {/* Contact Form */}
             <div className="card bg-white shadow-2xl">
               <h2 className="text-2xl font-bold mb-6 text-navy">Send a Message</h2>
-              <form className="space-y-6">
+              <form
+                action="https://formsubmit.co/info@b3unstoppable.net"
+                method="POST"
+                className="space-y-6"
+              >
+                {/* FormSubmit helpers */}
+                <input type="hidden" name="_subject" value="New contact via b3unstoppable.net" />
+                <input type="hidden" name="_template" value="box" />
+                <input type="hidden" name="_next" value="/contact?sent=1" />
+                <input type="hidden" name="_captcha" value="false" />
+                <input type="text" name="_honey" className="hidden" aria-hidden="true" />
+                <input
+                  type="hidden"
+                  name="_autoresponse"
+                  value="Thank you for contacting B3U! We received your message and will reply within 1–2 business days. If this is urgent, reply to this email and we’ll do our best to prioritize. — Team B3U"
+                />
                 <div>
                   <label className="block text-sm font-semibold text-navy mb-2">Full Name *</label>
                   <input 
                     required 
                     type="text"
+                    name="name"
                     placeholder="Enter your full name"
                     className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-brandOrange focus:outline-none transition-colors bg-gray-50 focus:bg-white" 
                   />
@@ -29,6 +45,7 @@ export default function ContactPage() {
                   <input 
                     required 
                     type="email"
+                    name="email"
                     placeholder="Enter your email address"
                     className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-brandOrange focus:outline-none transition-colors bg-gray-50 focus:bg-white" 
                   />
@@ -37,6 +54,7 @@ export default function ContactPage() {
                   <label className="block text-sm font-semibold text-navy mb-2">Subject</label>
                   <select 
                     title="Select a subject for your message"
+                    name="subject"
                     className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-brandOrange focus:outline-none transition-colors bg-gray-50 focus:bg-white"
                   >
                     <option value="">Select a topic</option>
@@ -52,6 +70,7 @@ export default function ContactPage() {
                   <textarea 
                     required 
                     rows={6}
+                    name="message"
                     placeholder="Tell us about your inquiry..."
                     className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-brandOrange focus:outline-none transition-colors bg-gray-50 focus:bg-white resize-none" 
                   />
