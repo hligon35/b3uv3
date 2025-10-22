@@ -160,8 +160,8 @@ export default function HomePage({ videos }: HomeProps) {
               aria-label="Watch B3U on YouTube"
               className="group relative block aspect-video overflow-hidden rounded-xl shadow-xl ring-1 ring-black/10"
             >
-              {/* background gradient */}
-              <div className="absolute inset-0 bg-gradient-to-br from-navy via-[#0f2338] to-brandBlue" />
+              {/* background gradient (light white-blue) */}
+              <div className="absolute inset-0 bg-gradient-to-br from-white via-[#EEF5FF] to-[#CFE6FF]" />
 
               {/* subtle animated glow on hover */}
               <div className="pointer-events-none absolute -inset-8 bg-gradient-to-r from-brandOrange/25 via-transparent to-brandBlue-light/25 blur-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
@@ -178,8 +178,8 @@ export default function HomePage({ videos }: HomeProps) {
                 />
               </div>
 
-              {/* gradient overlay for readability */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
+              {/* subtle gradient overlay for readability on light bg */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-black/0 to-transparent" />
 
               {/* top-left label */}
               <div className="absolute left-3 top-3">
@@ -188,17 +188,6 @@ export default function HomePage({ videos }: HomeProps) {
                   B3U on YouTube
                 </span>
               </div>
-
-              {/* center play button
-              <div className="absolute inset-0 grid place-items-center">
-                <div className="relative">
-                  {/* ripple */}
-                  {/* <span className="pointer-events-none absolute inset-0 rounded-full bg-brandOrange/30 blur-xl scale-0 opacity-0 transition-all duration-500 group-hover:scale-100 group-hover:opacity-100" />
-                  <span className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-white/95 text-navy shadow-lg ring-1 ring-black/10 transition-transform duration-300 group-hover:scale-110">
-                    <span className="ml-0.5 text-xl">▶</span>
-                  </span>
-                </div>
-              </div> */}
 
               {/* bottom-right caption */}
               <div className="absolute bottom-3 right-3">
@@ -251,7 +240,7 @@ export default function HomePage({ videos }: HomeProps) {
           ))}
         </div>
       </section>
-      <section id="community" className="section-padding alt-band">
+      {/* <section id="community" className="section-padding alt-band">
         <div className="text-center mb-12 max-w-3xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">The Take Back Community</h2>
           <p className="text-white/90">Stories from listeners who have found the courage to burn away fear, break cycles, and become unstoppable.</p>
@@ -288,7 +277,7 @@ export default function HomePage({ videos }: HomeProps) {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
       <section id="shop" className="section-padding bg-[#FFF5EE]">
         <div className="flex flex-col md:flex-row items-center gap-12">
           <div className="flex-1">
