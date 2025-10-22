@@ -54,6 +54,9 @@ jobs:
 
       - name: Build static site
         if: ${{ steps.window.outputs.run == 'true' }}
+        env:
+          NEXT_PUBLIC_FORMS_API: ${{ vars.NEXT_PUBLIC_FORMS_API }}
+          CUSTOM_DOMAIN: ${{ vars.CUSTOM_DOMAIN }}
         run: npm run predeploy
 
       - name: Deploy to GitHub Pages

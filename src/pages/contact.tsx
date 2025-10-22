@@ -1,11 +1,12 @@
 import Layout from '@/components/Layout';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const FORMS_API = (process.env.NEXT_PUBLIC_FORMS_API || '').replace(/\/$/, '');
 
 export default function ContactPage() {
   const [sent, setSent] = useState(false);
   const [pending, setPending] = useState(false);
+  const [t0, setT0] = useState('');
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
 
   const onSubmit = () => {
@@ -15,6 +16,10 @@ export default function ContactPage() {
       setPending(false);
     }, 1200);
   };
+
+  useEffect(() => {
+    try { setT0(String(Date.now())); } catch {}
+  }, []);
 
   return (
     <Layout>
@@ -36,6 +41,9 @@ export default function ContactPage() {
                 target="contact_iframe"
                 onSubmit={onSubmit}
               >
+                {/* bot protection: honeypot + timestamp */}
+                <input type="text" name="hp" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
+                <input type="hidden" name="t0" value={t0} />
                 <div>
                   <label className="block text-sm font-semibold text-navy mb-2">Full Name *</label>
                   <input 

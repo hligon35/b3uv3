@@ -76,6 +76,7 @@ export default function HomePage({ videos }: HomeProps) {
   const [subscribed, setSubscribed] = useState(false);
   const [subPending, setSubPending] = useState(false);
   const newsletterIframeRef = useRef<HTMLIFrameElement | null>(null);
+  const [t0, setT0] = useState('');
 
   const FORMS_API = (process.env.NEXT_PUBLIC_FORMS_API || '').replace(/\/$/, '');
 
@@ -97,6 +98,10 @@ export default function HomePage({ videos }: HomeProps) {
       }
     };
     setIsTouch(detect());
+  }, []);
+
+  useEffect(() => {
+    try { setT0(String(Date.now())); } catch {}
   }, []);
 
   return (
@@ -317,6 +322,9 @@ export default function HomePage({ videos }: HomeProps) {
             target="newsletter_iframe"
             onSubmit={handleNewsletterSubmit}
           >
+            {/* bot protection: honeypot + timestamp */}
+            <input type="text" name="hp" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
+            <input type="hidden" name="t0" value={t0} />
             <input
               type="email"
               name="email"

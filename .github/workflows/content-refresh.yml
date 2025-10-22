@@ -32,9 +32,13 @@ jobs:
           npm run fetch:youtube
 
       - name: Build static site
+        env:
+          NEXT_PUBLIC_FORMS_API: ${{ vars.NEXT_PUBLIC_FORMS_API }}
         run: npm run build:static
 
       - name: Prepare GitHub Pages artifacts
+        env:
+          CUSTOM_DOMAIN: ${{ vars.CUSTOM_DOMAIN }}
         run: node scripts/prepare-pages.mjs
 
       - name: Deploy to gh-pages branch

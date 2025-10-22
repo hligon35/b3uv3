@@ -1,12 +1,13 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import B3ULogo from '@/images/logos/B3U3D.png';
 
 export default function Footer() {
   const FORMS_API = (process.env.NEXT_PUBLIC_FORMS_API || '').replace(/\/$/, '');
   const [footSubbed, setFootSubbed] = useState(false);
   const [footPending, setFootPending] = useState(false);
+  const [t0, setT0] = useState('');
   const footIframeRef = useRef<HTMLIFrameElement | null>(null);
   const onFootSubmit = () => {
     setFootPending(true);
@@ -15,6 +16,9 @@ export default function Footer() {
       setFootPending(false);
     }, 1200);
   };
+  useEffect(() => {
+    try { setT0(String(Date.now())); } catch {}
+  }, []);
   return (
     <footer className="bg-navy text-white border-t border-white/10 mt-32">
       <div className="section-padding grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 md:gap-12">
@@ -84,6 +88,9 @@ export default function Footer() {
             target="footer_news_iframe"
             onSubmit={onFootSubmit}
           >
+            {/* bot protection: honeypot + timestamp */}
+            <input type="text" name="hp" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
+            <input type="hidden" name="t0" value={t0} />
             <input name="email" type="email" required placeholder="Email address" className="w-full px-4 py-2 rounded-md bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-brandBlue" />
             <button className="btn-primary w-full disabled:opacity-50" type="submit" disabled={footPending}>
               {footPending ? 'Subscribing…' : 'Subscribe'}

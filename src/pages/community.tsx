@@ -19,6 +19,7 @@ export default function CommunityPage() {
   const [submitted, setSubmitted] = useState(false);
   const storyIframeRef = useRef<HTMLIFrameElement | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [t0, setT0] = useState('');
 
   // Load approved stories from API if configured
   // Load approved stories via JSONP to avoid CORS issues
@@ -37,6 +38,10 @@ export default function CommunityPage() {
       try { document.body.removeChild(s); } catch {}
       try { delete (window as any)[cbName]; } catch {}
     };
+  }, []);
+
+  useEffect(() => {
+    try { setT0(String(Date.now())); } catch {}
   }, []);
 
   const displayCount = 6; // number of cards to show at minimum
@@ -64,6 +69,9 @@ export default function CommunityPage() {
           method="POST"
           target="story_iframe"
         >
+          {/* bot protection: honeypot + timestamp */}
+          <input type="text" name="hp" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
+          <input type="hidden" name="t0" value={t0} />
           <div className="bg-white border border-black/10 rounded-xl shadow-sm p-6 md:p-8">
             <div className="mb-6">
               <h2 className="text-2xl font-semibold">Share Your Story</h2>
