@@ -26,42 +26,42 @@ export default function HomePage({ videos }: HomeProps) {
       id: 'fCsbrjfzLBc',
       title: 'Fireside Chat w/ Mrs Rochelle Tucker',
       description: 'An inspiring conversation about resilience, faith, and life\'s journey with Mrs Rochelle Tucker. (1h 27m)',
-      thumbnail: `https://img.youtube.com/vi/fCsbrjfzLBc/maxresdefault.jpg`,
+      thumbnail: `https://img.youtube.com/vi/fCsbrjfzLBc/hqdefault.jpg`,
       uploadDate: '2 days ago'
     },
     {
       id: 'BiL6SWnquUI',
       title: 'Reclaim Session w/ Ashley Brown',
       description: 'Ashley Brown shares her powerful story of reclaiming her voice and stepping into her purpose. (35m)',
-      thumbnail: `https://img.youtube.com/vi/BiL6SWnquUI/maxresdefault.jpg`,
+      thumbnail: `https://img.youtube.com/vi/BiL6SWnquUI/hqdefault.jpg`,
       uploadDate: '9 days ago'
     },
     {
       id: '8f0zkRp3VUc',
       title: 'The Altar Experience w/ Prophetess Moina Tucker',
       description: 'A transformative altar experience exploring faith, healing, and spiritual breakthrough. (23m)',
-      thumbnail: `https://img.youtube.com/vi/8f0zkRp3VUc/maxresdefault.jpg`,
+      thumbnail: `https://img.youtube.com/vi/8f0zkRp3VUc/hqdefault.jpg`,
       uploadDate: '12 days ago'
     },
     {
       id: 'KxyISQUoBWk',
       title: 'The Altar Experience w/ Chenia Hughes',
       description: 'Chenia Hughes shares her journey of transformation and spiritual awakening at the altar. (33m)',
-      thumbnail: `https://img.youtube.com/vi/KxyISQUoBWk/maxresdefault.jpg`,
+      thumbnail: `https://img.youtube.com/vi/KxyISQUoBWk/hqdefault.jpg`,
       uploadDate: '2 weeks ago'
     },
     {
       id: 'LUu8ltxQuLk',
       title: 'Altar Experience w/ Dr Teresa Hegwood',
       description: 'Dr Teresa Hegwood delivers a powerful message about healing and restoration. (9m 9s)',
-      thumbnail: `https://img.youtube.com/vi/LUu8ltxQuLk/maxresdefault.jpg`,
+      thumbnail: `https://img.youtube.com/vi/LUu8ltxQuLk/hqdefault.jpg`,
       uploadDate: '2 weeks ago'
     },
     {
       id: 'MXpm9L2yOSQ',
       title: 'Altar Experience w/ Pastor Kristie Anderson',
       description: 'Pastor Kristie Anderson shares insights on faith, perseverance, and divine purpose. (24m)',
-      thumbnail: `https://img.youtube.com/vi/MXpm9L2yOSQ/maxresdefault.jpg`,
+      thumbnail: `https://img.youtube.com/vi/MXpm9L2yOSQ/hqdefault.jpg`,
       uploadDate: '3 weeks ago'
     }
   ];

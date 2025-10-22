@@ -1,30 +1,22 @@
 {
   "source": "https://www.youtube.com/feeds/videos.xml?channel_id=UCSrtA1gGlgo4cQUzoSlzZ5w",
   "channelId": "UCSrtA1gGlgo4cQUzoSlzZ5w",
-  "fetchedAt": "2025-10-22T16:27:52.317Z",
+  "fetchedAt": "2025-10-22T16:50:21.793Z",
   "count": 6,
   "videos": [
     {
       "id": "6ftUmpAkQXk",
       "title": "Addiction & How to Fight It w/ Bree Charles",
       "description": "",
-      "thumbnail": "https://img.youtube.com/vi/6ftUmpAkQXk/maxresdefault.jpg",
+      "thumbnail": "https://img.youtube.com/vi/6ftUmpAkQXk/hqdefault.jpg",
       "publishedAt": "October 20, 2025",
       "link": "https://www.youtube.com/watch?v=6ftUmpAkQXk"
-    },
-    {
-      "id": "H5I5XUn-6Ek",
-      "title": "Addiction & How to Fight It!",
-      "description": "",
-      "thumbnail": "https://img.youtube.com/vi/H5I5XUn-6Ek/maxresdefault.jpg",
-      "publishedAt": "October 20, 2025",
-      "link": "https://www.youtube.com/watch?v=H5I5XUn-6Ek"
     },
     {
       "id": "smXC3Z2sbec",
       "title": "Fireside Chat with Mrs Rochelle Tucker",
       "description": "",
-      "thumbnail": "https://img.youtube.com/vi/smXC3Z2sbec/maxresdefault.jpg",
+      "thumbnail": "https://img.youtube.com/vi/smXC3Z2sbec/hqdefault.jpg",
       "publishedAt": "October 11, 2025",
       "link": "https://www.youtube.com/watch?v=smXC3Z2sbec"
     },
@@ -32,25 +24,33 @@
       "id": "BiL6SWnquUI",
       "title": "Reclaim Session w/ Ashley Brown",
       "description": "",
-      "thumbnail": "https://img.youtube.com/vi/BiL6SWnquUI/maxresdefault.jpg",
+      "thumbnail": "https://img.youtube.com/vi/BiL6SWnquUI/hqdefault.jpg",
       "publishedAt": "September 29, 2025",
       "link": "https://www.youtube.com/watch?v=BiL6SWnquUI"
-    },
-    {
-      "id": "QXZlgZJxosU",
-      "title": "Reclaim Session w/ Ashley Brown",
-      "description": "",
-      "thumbnail": "https://img.youtube.com/vi/QXZlgZJxosU/maxresdefault.jpg",
-      "publishedAt": "October 20, 2025",
-      "link": "https://www.youtube.com/watch?v=QXZlgZJxosU"
     },
     {
       "id": "8f0zkRp3VUc",
       "title": "The Altar Experience w/ Prophetess Moina Tucker",
       "description": "",
-      "thumbnail": "https://img.youtube.com/vi/8f0zkRp3VUc/maxresdefault.jpg",
+      "thumbnail": "https://img.youtube.com/vi/8f0zkRp3VUc/hqdefault.jpg",
       "publishedAt": "September 26, 2025",
       "link": "https://www.youtube.com/watch?v=8f0zkRp3VUc"
+    },
+    {
+      "id": "KxyISQUoBWk",
+      "title": "The Altar Experience w/ Chenia Hughes",
+      "description": "",
+      "thumbnail": "https://img.youtube.com/vi/KxyISQUoBWk/hqdefault.jpg",
+      "publishedAt": "September 22, 2025",
+      "link": "https://www.youtube.com/watch?v=KxyISQUoBWk"
+    },
+    {
+      "id": "LUu8ltxQuLk",
+      "title": "Altar Experience w/ Dr Teresa Hegwood",
+      "description": "",
+      "thumbnail": "https://img.youtube.com/vi/LUu8ltxQuLk/hqdefault.jpg",
+      "publishedAt": "September 19, 2025",
+      "link": "https://www.youtube.com/watch?v=LUu8ltxQuLk"
     }
   ]
 }

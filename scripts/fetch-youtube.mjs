@@ -46,7 +46,12 @@ async function main() {
       thumbnail = mg['media:thumbnail']['$'].url;
     }
     if (!thumbnail && id) {
-      thumbnail = `https://img.youtube.com/vi/${id}/maxresdefault.jpg`;
+      thumbnail = `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+    }
+
+    // Ensure we don't use maxresdefault (404s are common). Prefer hqdefault for reliability.
+    if (thumbnail && /(?:img\.youtube\.com|i\.ytimg\.com)\//.test(thumbnail)) {
+      thumbnail = thumbnail.replace(/maxresdefault\.jpg/i, 'hqdefault.jpg');
     }
 
     return {
