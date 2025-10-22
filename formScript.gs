@@ -29,7 +29,10 @@ function sheet() {
 function nowISO() { return new Date().toISOString(); }
 function toWebToken(s) { return Utilities.base64EncodeWebSafe(s); }
 function sign(payload) {
-  const sig = Utilities.computeHmacSha256Signature(payload, SECRET);
+  // Ensure proper string inputs; Apps Script will throw if value is undefined/null
+  const value = String(payload);
+  const key = String(SECRET || '');
+  const sig = Utilities.computeHmacSha256Signature(value, key);
   return toWebToken(sig);
 }
 
@@ -57,7 +60,8 @@ function findRowById(id) {
 // ---- Handlers ----
 // POST router: /submit, /contact, /newsletter
 function doPost(e) {
-  const path = (e.pathInfo || '').replace(/^\//, '').toLowerCase();
+  e = e || { parameter: {}, pathInfo: '' };
+  const path = (String(e.pathInfo || '')).replace(/^\//, '').toLowerCase();
   if (path === 'submit') return handleStorySubmit(e);
   if (path === 'contact') return handleContact(e);
   if (path === 'newsletter') return handleNewsletter(e);
@@ -67,7 +71,8 @@ function doPost(e) {
 
 // GET router: /stories (JSON / JSONP), /moderate (approve/deny), default info
 function doGet(e) {
-  const path = (e.pathInfo || '').replace(/^\//, '').toLowerCase();
+  e = e || { parameter: {}, pathInfo: '' };
+  const path = (String(e.pathInfo || '')).replace(/^\//, '').toLowerCase();
   if (path === 'stories' || (e.parameter.endpoint || '').toLowerCase() === 'stories') {
     return handleStoriesList(e);
   }
@@ -243,6 +248,7 @@ function handleStoriesList(e) {
 
 // ---- Approve / Deny ----
 function handleModerate(e) {
+  e = e || { parameter: {} };
   const id = (e.parameter.id || '').toString();
   const action = (e.parameter.action || '').toString().toLowerCase(); // approve|deny
   const token = (e.parameter.token || '').toString();
