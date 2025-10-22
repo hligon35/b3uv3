@@ -1,5 +1,7 @@
 import { createRequire } from 'node:module';
 import { join } from 'node:path';
+import { readFile, access } from 'node:fs/promises';
+import { constants as fsConstants } from 'node:fs';
 
 const require = createRequire(import.meta.url);
 const ghpages = require('gh-pages');
@@ -14,8 +16,16 @@ const defaultUser = {
   email: process.env.GIT_AUTHOR_EMAIL || 'github-actions[bot]@users.noreply.github.com',
 };
 
-// Optional: set CUSTOM_DOMAIN to automatically create a CNAME file on the gh-pages branch
-const customDomain = process.env.CUSTOM_DOMAIN;
+// Optional: set CUSTOM_DOMAIN or commit a CNAME file at repo root to create a CNAME on gh-pages
+let customDomain = process.env.CUSTOM_DOMAIN;
+if (!customDomain) {
+  const rootCnamePath = join(process.cwd(), 'CNAME');
+  try {
+    await access(rootCnamePath, fsConstants.F_OK);
+    const content = (await readFile(rootCnamePath, 'utf8')).trim();
+    if (content) customDomain = content;
+  } catch {}
+}
 
 ghpages.publish(
   outDir,
@@ -25,7 +35,7 @@ ghpages.publish(
     dotfiles: true, // include .nojekyll
     history: false,
     user: defaultUser,
-    ...(customDomain ? { cname: customDomain } : {}),
+  ...(customDomain ? { cname: customDomain } : {}),
     // If running in GitHub Actions, set repo explicitly (auth comes from checkout credentials)
     ...(repoUrl ? { repo: repoUrl } : {}),
   },
