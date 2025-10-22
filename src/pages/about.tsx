@@ -53,7 +53,7 @@ export default function AboutPage() {
             The Big Take Back
           </h2>
           <h3 className="text-xl md:text-2xl mb-8 font-semibold">
-            Breaking Cycles, Building Legacies.
+            Breaking Cycles. Building Legacies.
           </h3>
           <div className="max-w-3xl mx-auto">
             <p className="text-lg leading-relaxed mb-6">
@@ -95,7 +95,13 @@ export default function AboutPage() {
           </p>
 
           <div className="grid md:grid-cols-2 gap-8 mb-12">
-            <div className="card bg-white p-8 text-center">
+            <a
+              href="https://www.melawholefoodsva.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Visit Mela Whole Foods website"
+              className="card bg-white p-8 text-center block hover:shadow-lg transition-shadow focus:outline-none focus:ring-2 focus:ring-brandOrange"
+            >
               <div className="h-20 w-20 mb-6 relative mx-auto">
                 <Image 
                   src={MelaLogo} 
@@ -108,9 +114,15 @@ export default function AboutPage() {
               <p className="text-navy/80">
                 Her mobile grocery bus bringing healthy, affordable food to underserved communities.
               </p>
-            </div>
-            
-            <div className="card bg-white p-8 text-center">
+            </a>
+
+            <a
+              href="https://www.thehouseofhumanity.org/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Visit The House of Humanity website"
+              className="card bg-white p-8 text-center block hover:shadow-lg transition-shadow focus:outline-none focus:ring-2 focus:ring-brandOrange"
+            >
               <div className="h-20 w-20 mb-6 relative mx-auto">
                 <Image 
                   src={THOHLogo} 
@@ -123,7 +135,7 @@ export default function AboutPage() {
               <p className="text-navy/80">
                 Her nonprofit dedicated to housing and healing for individuals overcoming hardship.
               </p>
-            </div>
+            </a>
           </div>
 
           <p className="text-center text-lg text-navy/80 italic">

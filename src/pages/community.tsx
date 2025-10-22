@@ -73,27 +73,31 @@ export default function CommunityPage() {
         </form>
       </section>
   <section className="section-padding bg-[#F4F8FB]">
-        <h2 className="text-3xl font-bold mb-8">Coming Soon</h2>
-        <div className="grid md:grid-cols-2 gap-6">
-          {/* Book Coming Soon */}
-          <div className="card flex items-center gap-5 p-6 md:p-8">
-            <div className="h-20 w-20 rounded-lg bg-gradient-to-br from-brandOrange to-red-500 text-white flex items-center justify-center text-3xl shadow-lg">
-              📘
+        <h2 className="text-3xl font-bold mb-8">Event Gallery</h2>
+        <div className="grid md:grid-cols-2 gap-8">
+          {/* Book Event Card */}
+          <div className="card p-0 overflow-hidden">
+            <div className="relative h-56">
+              <div className="absolute inset-0 bg-[url('https://picsum.photos/600/400?book')] bg-cover bg-center" />
+              <div className="absolute inset-0 bg-black/20" />
+              <span className="absolute top-3 left-3 bg-brandOrange text-white text-xs font-semibold px-3 py-1 rounded-full">Coming Soon</span>
             </div>
-            <div>
-              <h3 className="text-xl font-semibold mb-1">Book — Coming Soon</h3>
-              <p className="text-navy/70 text-sm">Bree’s debut book is on the way — a powerful guide to burning fear, breaking cycles, and becoming unstoppable.</p>
+            <div className="p-6">
+              <h3 className="text-xl font-bold mb-2">The Big Take Back</h3>
+              <p className="text-navy/70 text-sm">Stay tuned for details on Bree's upcoming book release.</p>
             </div>
           </div>
 
-          {/* Speaking Engagement Coming Soon */}
-          <div className="card flex items-center gap-5 p-6 md:p-8">
-            <div className="h-20 w-20 rounded-lg bg-gradient-to-br from-brandOrange to-red-500 text-white flex items-center justify-center text-3xl shadow-lg">
-              🎤
+          {/* Speaking Engagement Event Card */}
+          <div className="card p-0 overflow-hidden">
+            <div className="relative h-56">
+              <div className="absolute inset-0 bg-[url('https://picsum.photos/600/400?speaking')] bg-cover bg-center" />
+              <div className="absolute inset-0 bg-black/20" />
+              <span className="absolute top-3 left-3 bg-brandOrange text-white text-xs font-semibold px-3 py-1 rounded-full">Coming Soon</span>
             </div>
-            <div>
-              <h3 className="text-xl font-semibold mb-1">Speaking Engagements — Coming Soon</h3>
-              <p className="text-navy/70 text-sm">Live dates and appearances will be announced soon. Want Bree at your next event? <a href="/contact" className="text-brandOrange underline">Contact us</a>.</p>
+            <div className="p-6">
+              <h3 className="text-xl font-bold mb-2">Speaking Engagement</h3>
+              <p className="text-navy/70 text-sm">Dates and locations will be announced here soon.</p>
             </div>
           </div>
         </div>

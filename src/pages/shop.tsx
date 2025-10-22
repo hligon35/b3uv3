@@ -45,12 +45,28 @@ const products: Product[] = [
 export default function ShopPage() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState<{[key: number]: number}>({});
-  const [selectedSize, setSelectedSize] = useState<{[key: number]: string | undefined}>({});
-  const [sizeError, setSizeError] = useState<{[key: number]: boolean}>({});
-  const [showCheckout, setShowCheckout] = useState(false);
+  const [isTouch, setIsTouch] = useState(false);
+  const [showOverlay, setShowOverlay] = useState<{[key:number]: boolean}>({});
+  const [selectedSize, setSelectedSize] = useState<Record<number, string | ''>>({});
+  const [sizeError, setSizeError] = useState<Record<number, boolean>>({});
+
+  // PayPal UI state
   const [paypalReady, setPaypalReady] = useState(false);
   const [paypalError, setPaypalError] = useState<string | null>(null);
+  const [showCheckout, setShowCheckout] = useState(false);
   const paypalRef = useRef<HTMLDivElement | null>(null);
+
+  // Detect touch / non-hover devices to adjust overlay behavior
+  useEffect(() => {
+    const checkTouch = () => {
+      try {
+        return window.matchMedia && window.matchMedia('(hover: none)').matches;
+      } catch {
+        return 'ontouchstart' in window || (navigator as any).maxTouchPoints > 0;
+      }
+    };
+    setIsTouch(checkTouch());
+  }, []);
 
   // Optional external destinations for QR codes
   const QR_LINK = process.env.NEXT_PUBLIC_QR_LINK || 'https://www.paypal.com/us/digital-wallet/mobile-apps';
@@ -270,10 +286,20 @@ export default function ShopPage() {
             const currentIndex = currentImageIndex[p.id] || 0;
             const currentImage = p.images[currentIndex];
             const hasMultipleImages = p.images.length > 1;
+            const overlayVisible = isTouch ? !!showOverlay[p.id] : false;
             
             return (
-              <div key={p.id} className="card group flex flex-col h-full">
-                <div className="h-64 rounded-md mb-4 relative overflow-hidden bg-white">
+              <div key={p.id} className="card group">
+                <div
+                  className="h-64 rounded-md mb-4 relative overflow-hidden bg-white"
+                  onClick={(e) => {
+                    if (!isTouch) return; // Only toggle on touch devices
+                    const target = e.target as HTMLElement;
+                    // Don't toggle if clicking a button (e.g., nav arrows or Add to Cart)
+                    if (target.closest('button')) return;
+                    setShowOverlay(prev => ({ ...prev, [p.id]: !prev[p.id] }));
+                  }}
+                >
                   <Image
                     src={currentImage}
                     alt={`${p.name} ${hasMultipleImages ? `- View ${currentIndex + 1}` : ''}`}

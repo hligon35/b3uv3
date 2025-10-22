@@ -1,5 +1,30 @@
 import Layout from '@/components/Layout';
 
+const API_ENDPOINT = '/api/submit';
+
+async function handleContactSubmit(e: React.FormEvent<HTMLFormElement>) {
+  e.preventDefault();
+  const form = e.currentTarget;
+  const data = new FormData(form);
+  try {
+    const body: Record<string, any> = {};
+    data.forEach((v, k) => { body[k] = v; });
+    const res = await fetch(API_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fields: body }),
+    });
+    if (res.ok) {
+      const next = (data.get('_next') as string) || '/contact?sent=1';
+      window.location.href = next;
+      return;
+    }
+  } catch (err) {
+    // ignore and fall back to normal submit
+  }
+  // Do nothing else to avoid page reload; consider showing an error message if needed.
+}
+
 export default function ContactPage() {
   return (
     <Layout>
@@ -15,12 +40,13 @@ export default function ContactPage() {
             <div className="card bg-white shadow-2xl">
               <h2 className="text-2xl font-bold mb-6 text-navy">Send a Message</h2>
               <form
-                action="https://formsubmit.co/info@b3unstoppable.net"
+                action="https://formsubmit.co/el/figabe"
                 method="POST"
                 className="space-y-6"
+                onSubmit={handleContactSubmit}
               >
                 {/* FormSubmit helpers */}
-                <input type="hidden" name="_subject" value="New contact via b3unstoppable.net" />
+                <input type="hidden" name="_subject" value="B3U Website — Contact Form Submission" />
                 <input type="hidden" name="_template" value="box" />
                 <input type="hidden" name="_next" value="/contact?sent=1" />
                 <input type="hidden" name="_captcha" value="false" />
@@ -126,7 +152,7 @@ export default function ContactPage() {
                 <div className="text-sm text-gray-600 mb-4">followers</div> */}
               </div>
               <p className="text-sm text-navy/80 leading-relaxed">Follow me here for events, promotions, exclusive content and more!</p>
-              <a href="#" className="inline-block mt-4 text-pink-500 font-semibold hover:text-pink-600 transition-colors">Follow Now</a>
+              <a href="https://www.instagram.com/burnbreakbecomeunstoppable/?fbclid=IwY2xjawNUu3hleHRuA2FlbQIxMQBicmlkETB3N0ZyaVFxS3NmaFhFM3BvAR5w4Ud2bTNNiFK--1xXjwOvmlf2YSofVszOAhXD7oHHRm7-wtcPr10FbTVSSg_aem_1zMZugrHmz-DKGTTtAisVw" target="_blank" rel="noopener" className="inline-block mt-4 text-pink-500 font-semibold hover:text-pink-600 transition-colors">Follow Now</a>
             </div>
 
             {/* Facebook */}
@@ -141,7 +167,7 @@ export default function ContactPage() {
                 <div className="text-sm text-gray-600 mb-4">followers</div> */}
               </div>
               <p className="text-sm text-navy/80 leading-relaxed">Follow me here for events, promotions, exclusive content and more!</p>
-              <a href="#" className="inline-block mt-4 text-blue-600 font-semibold hover:text-blue-700 transition-colors">Follow Now</a>
+              <a href="https://www.facebook.com/bree.b3u" target="_blank" rel="noopener" className="inline-block mt-4 text-blue-600 font-semibold hover:text-blue-700 transition-colors">Follow Now</a>
             </div>
 
             {/* TikTok */}
@@ -155,7 +181,7 @@ export default function ContactPage() {
                 {/* <div className="text-3xl font-bold text-navy mb-1">453K</div>
                 <div className="text-sm text-gray-600 mb-4">followers</div> */}
               </div>
-              <p className="text-sm text-navy/80 leading-relaxed">Follow me here for bonus motivational content <br /> and more.</p>
+              <p className="text-sm text-navy/80 leading-relaxed">Follow me here for bonus motivational content<br />and more.</p>
               <a href="#" className="inline-block mt-4 text-black font-semibold hover:text-gray-800 transition-colors">Follow Now</a>
             </div>
           </div>
