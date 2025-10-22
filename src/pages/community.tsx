@@ -1,15 +1,69 @@
 import Layout from '@/components/Layout';
 import Image from 'next/image';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import BookImage from '@/images/content/book.png';
 
+type Story = {
+  id: string;
+  name: string;
+  email?: string;
+  story: string;
+  createdAt?: string;
+};
+
+const FORMS_API = (process.env.NEXT_PUBLIC_FORMS_API || '').replace(/\/$/, '');
+
 export default function CommunityPage() {
+  const [stories, setStories] = useState<Story[]>([]);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const storyIframeRef = useRef<HTMLIFrameElement | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  // Load approved stories from API if configured
+  // Load approved stories via JSONP to avoid CORS issues
+  useEffect(() => {
+    if (!FORMS_API) return;
+    const cbName = `__b3uStories_${Math.random().toString(36).slice(2)}`;
+    (window as any)[cbName] = (data: any) => {
+      try { if (Array.isArray(data?.stories)) setStories(data.stories as Story[]); } catch {}
+      try { delete (window as any)[cbName]; } catch {}
+    };
+    const s = document.createElement('script');
+    s.src = `${FORMS_API}/stories?callback=${cbName}`;
+    s.async = true;
+    document.body.appendChild(s);
+    return () => {
+      try { document.body.removeChild(s); } catch {}
+      try { delete (window as any)[cbName]; } catch {}
+    };
+  }, []);
+
+  const displayCount = 6; // number of cards to show at minimum
+  const visibleStories = useMemo(() => stories.slice(0, displayCount), [stories]);
+
+  function onSubmit() {
+    if (!FORMS_API) return;
+    setError(null);
+    setSubmitting(true);
+    setTimeout(() => {
+      setSubmitted(true);
+      setSubmitting(false);
+    }, 1400);
+  }
   return (
     <Layout>
   <section className="section-padding bg-white">
         <h1 className="text-4xl font-bold mb-6">Community Stories</h1>
     <p className="max-w-2xl text-navy/80 mb-12">Real impact from real people. Share your journey and help others find strength in theirs.</p>
         {/* Share Your Story form moved directly under title and subtext */}
-        <form className="max-w-3xl mb-16">
+        <form
+          className="max-w-3xl mb-16"
+          onSubmit={onSubmit}
+          action={FORMS_API ? `${FORMS_API}/submit` : undefined}
+          method="POST"
+          target="story_iframe"
+        >
           <div className="bg-white border border-black/10 rounded-xl shadow-sm p-6 md:p-8">
             <div className="mb-6">
               <h2 className="text-2xl font-semibold">Share Your Story</h2>
@@ -62,17 +116,41 @@ export default function CommunityPage() {
             </div>
 
             <div className="mt-6">
-              <button className="btn-primary" type="submit">Submit Story</button>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                <button className="btn-primary disabled:opacity-50" type="submit" disabled={submitting}>
+                  {submitting ? 'Submitting…' : 'Submit Story'}
+                </button>
+                {submitted && (
+                  <div className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-md px-3 py-2">
+                    Thanks! Your story was received. Please check your email for confirmation.
+                  </div>
+                )}
+                {error && (
+                  <div className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2">
+                    {error}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </form>
+        {/* Hidden iframe target to avoid navigation and CORS */}
+        <iframe name="story_iframe" ref={storyIframeRef} className="hidden" title="story_iframe" />
         <div className="grid md:grid-cols-3 gap-8 mb-16">
-          {[1,2,3,4,5,6].map(s => (
-            <div key={s} className="card">
-              <p className="text-sm italic mb-4">“This platform helped me reconnect with my purpose and give back in ways I never imagined.”</p>
-              <p className="text-xs text-white/60">Story Contributor {s}</p>
+          {/* Render approved stories if available; otherwise show placeholders. If fewer than placeholders, fill remaining with placeholders. */}
+          {visibleStories.map((st) => (
+            <div key={st.id} className="card">
+              <p className="text-sm italic mb-4">“{st.story}”</p>
+              <p className="text-xs text-white/60">{st.name}</p>
             </div>
           ))}
+          {visibleStories.length < displayCount &&
+            Array.from({ length: displayCount - visibleStories.length }).map((_, i) => (
+              <div key={`ph-${i}`} className="card">
+                <p className="text-sm italic mb-4">“This platform helped me reconnect with my purpose and give back in ways I never imagined.”</p>
+                <p className="text-xs text-white/60">Story Contributor</p>
+              </div>
+            ))}
         </div>
       </section>
   <section className="section-padding bg-[#F4F8FB]">

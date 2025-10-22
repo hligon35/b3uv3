@@ -49,7 +49,7 @@ export default function Hero() {
           className="flex flex-col sm:flex-row gap-4 justify-center"
         >
           <Link href="/podcast" className="btn-primary">Listen to The B3U Podcast</Link>
-          <Link href="/contact" className="btn-outline">📅 Book Bree to Speak</Link>
+          <Link href="/contact" className="btn-outline">Book Bree to Speak</Link>
         </motion.div>
       </div>
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/50 text-xs tracking-widest">SCROLL</div>

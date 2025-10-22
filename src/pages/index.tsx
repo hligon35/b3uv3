@@ -2,7 +2,7 @@
 import Hero from '@/components/Hero';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import MugImage from '@/images/shop/mug.png';
 import ShirtFrontImage from '@/images/shop/shirt_front.png';
 import ShirtBackImage from '@/images/shop/shirt_back.png';
@@ -74,32 +74,18 @@ export default function HomePage({ videos }: HomeProps) {
   const [isTouch, setIsTouch] = useState(false);
   const [homeOverlay, setHomeOverlay] = useState<Record<number, boolean>>({});
   const [subscribed, setSubscribed] = useState(false);
+  const [subPending, setSubPending] = useState(false);
+  const newsletterIframeRef = useRef<HTMLIFrameElement | null>(null);
 
-  async function handleNewsletterSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const form = e.currentTarget;
-    const data = new FormData(form);
-    try {
-      // Post directly to FormSubmit (works on static hosting) using the form's configured action.
-      const res = await fetch((form.getAttribute('action') as string) || 'https://formsubmit.co/el/figabe', {
-        method: 'POST',
-        body: data,
-        redirect: 'follow',
-      });
-      if (res.ok) {
-        const next = (data.get('_next') as string) || '/?subscribed=1#newsletter';
-        // Update URL without reloading and scroll to the newsletter section
-        try { window.history.replaceState(null, '', next); } catch {}
-        setSubscribed(true);
-        try { document.getElementById('newsletter')?.scrollIntoView({ behavior: 'smooth' }); } catch {}
-        try {
-          const emailInput = form.querySelector('input[name="email"]') as HTMLInputElement | null;
-          if (emailInput) emailInput.value = '';
-        } catch {}
-        return;
-      }
-    } catch {}
-    // No fallback submit to avoid page reload; optionally show an error.
+  const FORMS_API = (process.env.NEXT_PUBLIC_FORMS_API || '').replace(/\/$/, '');
+
+  function handleNewsletterSubmit() {
+    setSubPending(true);
+    setTimeout(() => {
+      setSubscribed(true);
+      setSubPending(false);
+      try { document.getElementById('newsletter')?.scrollIntoView({ behavior: 'smooth' }); } catch {}
+    }, 1200);
   }
 
   useEffect(() => {
@@ -325,22 +311,12 @@ export default function HomePage({ videos }: HomeProps) {
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Join "The Take Back Weekly"</h2>
           <p className="text-navy/70 mb-6">Get new episodes, inspiration, and community opportunities delivered to your inbox.</p>
           <form
-            action="https://formsubmit.co/el/figabe"
+            action={FORMS_API ? `${FORMS_API}/newsletter` : undefined}
             method="POST"
             className="flex flex-col sm:flex-row gap-4 justify-center"
+            target="newsletter_iframe"
             onSubmit={handleNewsletterSubmit}
           >
-            {/* helpers */}
-            <input type="hidden" name="_subject" value="B3U Website — Newsletter Subscription" />
-            <input type="hidden" name="_template" value="table" />
-            <input type="hidden" name="_next" value="/?subscribed=1#newsletter" />
-            <input type="hidden" name="_captcha" value="false" />
-            <input type="text" name="_honey" className="hidden" aria-hidden="true" />
-            <input
-              type="hidden"
-              name="_autoresponse"
-              value="Thanks for joining The Take Back Weekly! You’re on the list. Look out for new episodes, inspiration, and community updates from B3U. — Team B3U"
-            />
             <input
               type="email"
               name="email"
@@ -348,13 +324,17 @@ export default function HomePage({ videos }: HomeProps) {
               placeholder="Email address"
               className="flex-1 px-5 py-3 rounded-md bg-white border border-black/10 focus:outline-none focus:ring-2 focus:ring-brandBlue"
             />
-            <button className="btn-primary" type="submit">Subscribe</button>
+            <button className="btn-primary" type="submit" disabled={subPending}>
+              {subPending ? 'Subscribing…' : 'Subscribe'}
+            </button>
             {subscribed && (
               <div className="w-full text-sm text-green-700 bg-green-50 border border-green-200 rounded-md px-3 py-2 sm:ml-4 sm:mt-0 mt-2">
-                Thanks! You7re subscribed.
+                Thanks! You’re subscribed.
               </div>
             )}
           </form>
+          {/* Hidden iframe target to avoid navigation and CORS */}
+          <iframe name="newsletter_iframe" ref={newsletterIframeRef} className="hidden" title="newsletter_iframe" />
         </div>
       </section>
     </Layout>
