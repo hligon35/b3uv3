@@ -17,7 +17,8 @@
 //    - GET  {FORMS_API}/moderate   -> Approve/Deny links (from moderator email)
 
 const PROPS = PropertiesService.getScriptProperties();
-const SHEET_ID = PROPS.getProperty('SHEET_ID');
+// Prefer Script Properties; optionally hardcode as a fallback after the ||
+const SHEET_ID = PROPS.getProperty('SHEET_ID') || '1BBzALy7nIymfzUuQ2hvga6YKCiv55bLiws16aDqEN3A';
 const SHEET_NAME = 'Sheet1'; // Change if your stories sheet has a different tab name
 const MODERATOR_EMAIL = PROPS.getProperty('MODERATOR_EMAIL') || 'info@b3unstoppable.net';
 const SECRET = PROPS.getProperty('SECRET') || 'change-me';
