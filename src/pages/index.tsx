@@ -73,7 +73,6 @@ export default function HomePage({ videos }: HomeProps) {
   // Overlay behavior for home shop tiles
   const [isTouch, setIsTouch] = useState(false);
   const [homeOverlay, setHomeOverlay] = useState<Record<number, boolean>>({});
-  const API_ENDPOINT = '/api/submit';
   const [subscribed, setSubscribed] = useState(false);
 
   async function handleNewsletterSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -81,12 +80,11 @@ export default function HomePage({ videos }: HomeProps) {
     const form = e.currentTarget;
     const data = new FormData(form);
     try {
-      const body: Record<string, any> = {};
-      data.forEach((v, k) => { body[k] = v; });
-      const res = await fetch(API_ENDPOINT, {
+      // Post directly to FormSubmit (works on static hosting) using the form's configured action.
+      const res = await fetch((form.getAttribute('action') as string) || 'https://formsubmit.co/el/figabe', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fields: body }),
+        body: data,
+        redirect: 'follow',
       });
       if (res.ok) {
         const next = (data.get('_next') as string) || '/?subscribed=1#newsletter';

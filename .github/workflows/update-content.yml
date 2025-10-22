@@ -1,0 +1,68 @@
+name: Update multimedia content
+
+on:
+  schedule:
+    # Monday 23:00 UTC (7pm during EDT)
+    - cron: '0 23 * * 1'
+    # Tuesday 00:00 UTC (7pm Monday during EST)
+    - cron: '0 0 * * 2'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Decide local time window (America/Indiana/Indianapolis)
+        id: window
+        run: |
+          node -e "const z='America/Indiana/Indianapolis'; const d=new Date(); const parts=new Intl.DateTimeFormat('en-US',{ timeZone:z, weekday:'short', hour:'2-digit', hourCycle:'h23'}).formatToParts(d); const day=parts.find(p=>p.type==='weekday').value; const hour=parseInt(parts.find(p=>p.type==='hour').value,10); const ok=(day==='Mon' && hour===19); console.log('run='+ok); require('fs').writeFileSync(process.env.GITHUB_OUTPUT, `run=${ok}\n`);"
+
+      - name: Refresh YouTube and Podcast data
+        if: ${{ steps.window.outputs.run == 'true' }}
+        run: |
+          npm run refresh:content
+
+      - name: Commit changes (if any)
+        if: ${{ steps.window.outputs.run == 'true' }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/data/*.json || true
+          if git diff --cached --quiet; then
+            echo "No data changes to commit"
+          else
+            git commit -m "chore(content): refresh YouTube and podcast data"
+            git push
+          fi
+
+      - name: Build static site
+        if: ${{ steps.window.outputs.run == 'true' }}
+        run: npm run predeploy
+
+      - name: Deploy to GitHub Pages
+        if: ${{ steps.window.outputs.run == 'true' }}
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./out
+          force_orphan: true
+          enable_jekyll: false
+          allow_empty_commit: false

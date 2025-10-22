@@ -60,7 +60,17 @@ export default function AboutPage() {
               Bree's signature message, "The Big Take Back," is more than a phrase — it's a movement. It's a call to action for anyone ready to reclaim their voice, their strength, and their future.
             </p>
             <p className="text-lg leading-relaxed">
-              Whether she's speaking on stage, teaching a masterclass, or hosting her podcast, Bree's energy, authenticity, and faith ignite transformation. Her message reminds people that no matter what they've endured, they can rise, rebuild, and become unstoppable.
+              Whether she's speaking on stage, teaching a{' '}
+              <a
+                href="https://funnel.b3ucs.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Open Bree's masterclass in a new tab"
+                className="inline-block align-baseline px-2 py-0 rounded-md bg-navy text-white font-semibold whitespace-nowrap hover:bg-navy/90 focus:outline-none focus:ring-2 focus:ring-navy/60 focus:ring-offset-2 transition-colors"
+              >
+                masterclass
+              </a>
+              , or hosting her podcast, Bree's energy, authenticity, and faith ignite transformation. Her message reminds people that no matter what they've endured, they can rise, rebuild, and become unstoppable.
             </p>
           </div>
         </div>
