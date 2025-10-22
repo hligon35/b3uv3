@@ -1,4 +1,6 @@
 import Layout from '@/components/Layout';
+import Image from 'next/image';
+import BookImage from '@/images/content/book.png';
 
 export default function CommunityPage() {
   return (
@@ -6,15 +8,8 @@ export default function CommunityPage() {
   <section className="section-padding bg-white">
         <h1 className="text-4xl font-bold mb-6">Community Stories</h1>
     <p className="max-w-2xl text-navy/80 mb-12">Real impact from real people. Share your journey and help others find strength in theirs.</p>
-        <div className="grid md:grid-cols-3 gap-8 mb-16">
-          {[1,2,3,4,5,6].map(s => (
-            <div key={s} className="card">
-              <p className="text-sm italic mb-4">“This platform helped me reconnect with my purpose and give back in ways I never imagined.”</p>
-              <p className="text-xs text-white/60">Story Contributor {s}</p>
-            </div>
-          ))}
-        </div>
-        <form className="max-w-3xl">
+        {/* Share Your Story form moved directly under title and subtext */}
+        <form className="max-w-3xl mb-16">
           <div className="bg-white border border-black/10 rounded-xl shadow-sm p-6 md:p-8">
             <div className="mb-6">
               <h2 className="text-2xl font-semibold">Share Your Story</h2>
@@ -71,14 +66,28 @@ export default function CommunityPage() {
             </div>
           </div>
         </form>
+        <div className="grid md:grid-cols-3 gap-8 mb-16">
+          {[1,2,3,4,5,6].map(s => (
+            <div key={s} className="card">
+              <p className="text-sm italic mb-4">“This platform helped me reconnect with my purpose and give back in ways I never imagined.”</p>
+              <p className="text-xs text-white/60">Story Contributor {s}</p>
+            </div>
+          ))}
+        </div>
       </section>
   <section className="section-padding bg-[#F4F8FB]">
         <h2 className="text-3xl font-bold mb-8">Event Gallery</h2>
         <div className="grid md:grid-cols-2 gap-8">
           {/* Book Event Card */}
           <div className="card p-0 overflow-hidden">
-            <div className="relative h-56">
-              <div className="absolute inset-0 bg-[url('https://picsum.photos/600/400?book')] bg-cover bg-center" />
+            <div className="relative h-56 bg-white">
+              <Image
+                src={BookImage}
+                alt="The Big Take Back book cover"
+                fill
+                className="object-contain p-2"
+                sizes="(max-width: 768px) 100vw, 50vw"
+              />
               <div className="absolute inset-0 bg-black/20" />
               <span className="absolute top-3 left-3 bg-brandOrange text-white text-xs font-semibold px-3 py-1 rounded-full">Coming Soon</span>
             </div>
@@ -90,9 +99,8 @@ export default function CommunityPage() {
 
           {/* Speaking Engagement Event Card */}
           <div className="card p-0 overflow-hidden">
-            <div className="relative h-56">
-              <div className="absolute inset-0 bg-[url('https://picsum.photos/600/400?speaking')] bg-cover bg-center" />
-              <div className="absolute inset-0 bg-black/20" />
+            <div className="relative h-56 grid place-items-center bg-white">
+              <span className="text-5xl md:text-6xl font-extrabold tracking-wide text-navy">TBA</span>
               <span className="absolute top-3 left-3 bg-brandOrange text-white text-xs font-semibold px-3 py-1 rounded-full">Coming Soon</span>
             </div>
             <div className="p-6">

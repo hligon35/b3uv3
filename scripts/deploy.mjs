@@ -14,6 +14,9 @@ const defaultUser = {
   email: process.env.GIT_AUTHOR_EMAIL || 'github-actions[bot]@users.noreply.github.com',
 };
 
+// Optional: set CUSTOM_DOMAIN to automatically create a CNAME file on the gh-pages branch
+const customDomain = process.env.CUSTOM_DOMAIN;
+
 ghpages.publish(
   outDir,
   {
@@ -22,6 +25,7 @@ ghpages.publish(
     dotfiles: true, // include .nojekyll
     history: false,
     user: defaultUser,
+    ...(customDomain ? { cname: customDomain } : {}),
     // If running in GitHub Actions, set repo explicitly (auth comes from checkout credentials)
     ...(repoUrl ? { repo: repoUrl } : {}),
   },

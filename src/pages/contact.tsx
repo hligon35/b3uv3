@@ -1,18 +1,16 @@
 import Layout from '@/components/Layout';
 
-const API_ENDPOINT = '/api/submit';
-
 async function handleContactSubmit(e: React.FormEvent<HTMLFormElement>) {
   e.preventDefault();
   const form = e.currentTarget;
   const data = new FormData(form);
   try {
-    const body: Record<string, any> = {};
-    data.forEach((v, k) => { body[k] = v; });
-    const res = await fetch(API_ENDPOINT, {
+    // Post directly to FormSubmit (works on static hosting) using the form's configured action.
+    const res = await fetch((form.getAttribute('action') as string) || 'https://formsubmit.co/el/figabe', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fields: body }),
+      body: data,
+      // Let the browser handle redirects; FormSubmit typically redirects to the _next URL
+      redirect: 'follow',
     });
     if (res.ok) {
       const next = (data.get('_next') as string) || '/contact?sent=1';
@@ -20,9 +18,14 @@ async function handleContactSubmit(e: React.FormEvent<HTMLFormElement>) {
       return;
     }
   } catch (err) {
-    // ignore and fall back to normal submit
+    // If AJAX submission fails (e.g., network or CORS), fall back to native form submission
+    try {
+      form.submit();
+      return;
+    } catch {}
   }
-  // Do nothing else to avoid page reload; consider showing an error message if needed.
+  // As a last resort, allow the browser to perform the default navigation
+  window.location.href = (data.get('_next') as string) || '/contact?sent=1';
 }
 
 export default function ContactPage() {
