@@ -114,15 +114,12 @@ export default function ContactPage() {
                 <h3 className="text-xl font-bold mb-4 text-navy">Contact</h3>
                 <ul className="space-y-3 text-navy/80">
                   <li>
+                    <span className="mr-2 text-navy/60 font-semibold">Phone:</span>
                     <a href="tel:+18043852512" className="hover:text-brandOrange font-medium">(804) 385-2512</a>
                   </li>
                   <li>
-                    <a
-                      href="https://www.google.com/maps?q=9221+Forest+Hill+Ave+Suite+1+PMB+1021,+Richmond,+VA+23235"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:text-brandOrange"
-                    >
+                    <span className="mr-2 text-navy/60 font-semibold">Virtual Address:</span>
+                    <a href="https://www.google.com/maps?q=9221+Forest+Hill+Ave+Suite+1+PMB+1021,+Richmond,+VA+23235" target="_blank" rel="noopener noreferrer" className="hover:text-brandOrange">
                       9221 Forest Hill Ave Suite 1 PMB 1021, Richmond, VA 23235
                     </a>
                   </li>

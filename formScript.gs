@@ -22,6 +22,7 @@ const SHEET_ID = PROPS.getProperty('SHEET_ID') || '1BBzALy7nIymfzUuQ2hvga6YKCiv5
 const SHEET_NAME = 'Sheet1'; // Change if your stories sheet has a different tab name
 const MODERATOR_EMAIL = PROPS.getProperty('MODERATOR_EMAIL') || 'info@b3unstoppable.net';
 const SECRET = PROPS.getProperty('SECRET') || 'change-me';
+const MIN_FILL_MS = parseInt(PROPS.getProperty('MIN_FILL_MS') || '800', 10); // anti-bot: require ~0.8s between load and submit when t0 is present
 
 function sheet() {
   return SpreadsheetApp.openById(SHEET_ID).getSheetByName(SHEET_NAME);
@@ -86,12 +87,13 @@ function doGet(e) {
 function handleStorySubmit(e) {
   try {
     const p = e.parameter || {};
-    // Basic bot checks: honeypot and minimum fill time (~3s)
+    // Basic bot checks: honeypot and minimum fill time (configurable)
     const hp = (p.hp || '').toString();
     const t0 = Number(p.t0 || '0');
     const now = Date.now();
+    const delta = now - t0;
     if (hp) return htmlPage('Thanks', '<p>Thanks!</p>');
-    if (!t0 || now - t0 < 3000 || now - t0 > 86400000) return htmlPage('Thanks', '<p>Thanks!</p>');
+    if (t0 && (delta < MIN_FILL_MS || delta > 86400000)) return htmlPage('Thanks', '<p>Thanks!</p>');
     const name = (p.name || '').toString().trim();
     const email = (p.email || '').toString().trim();
     const story = (p.story || '').toString().trim();
@@ -148,8 +150,9 @@ function handleContact(e) {
     const hp = (p.hp || '').toString();
     const t0 = Number(p.t0 || '0');
     const now = Date.now();
+    const delta = now - t0;
     if (hp) return htmlPage('Message sent', '<p>Thanks! Your message was sent.</p>');
-    if (!t0 || now - t0 < 3000 || now - t0 > 86400000) return htmlPage('Message sent', '<p>Thanks! Your message was sent.</p>');
+    if (t0 && (delta < MIN_FILL_MS || delta > 86400000)) return htmlPage('Message sent', '<p>Thanks! Your message was sent.</p>');
     const name = (p.name || '').toString().trim();
     const email = (p.email || '').toString().trim();
     const subject = (p.subject || 'Contact Form').toString().trim();
@@ -193,8 +196,9 @@ function handleNewsletter(e) {
     const hp = (p.hp || '').toString();
     const t0 = Number(p.t0 || '0');
     const now = Date.now();
+    const delta = now - t0;
     if (hp) return htmlPage('Subscribed', '<p>Thanks! You’re subscribed.</p>');
-    if (!t0 || now - t0 < 3000 || now - t0 > 86400000) return htmlPage('Subscribed', '<p>Thanks! You’re subscribed.</p>');
+    if (t0 && (delta < MIN_FILL_MS || delta > 86400000)) return htmlPage('Subscribed', '<p>Thanks! You’re subscribed.</p>');
     const email = (p.email || '').toString().trim();
     if (!email) return htmlPage('Missing fields', '<p>Please provide an email.</p>');
 

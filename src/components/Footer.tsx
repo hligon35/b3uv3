@@ -52,17 +52,12 @@ export default function Footer() {
           <h4 className="font-semibold mb-3 text-brandOrange">Contact</h4>
           <ul className="space-y-2 text-sm">
             <li>
-              <a className="text-white/80 hover:text-brandOrange" href="tel:+18043852512">
-                (804) 385-2512
-              </a>
+              <span className="mr-2 text-white/60 font-semibold">Phone:</span>
+              <a className="text-white/80 hover:text-brandOrange" href="tel:+18043852512">(804) 385-2512</a>
             </li>
             <li>
-              <a
-                className="text-white/80 hover:text-brandOrange"
-                href="https://www.google.com/maps?q=9221+Forest+Hill+Ave+Suite+1+PMB+1021,+Richmond,+VA+23235"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <span className="mr-2 text-white/60 font-semibold">Virtual Address:</span>
+              <a className="text-white/80 hover:text-brandOrange" href="https://www.google.com/maps?q=9221+Forest+Hill+Ave+Suite+1+PMB+1021,+Richmond,+VA+23235" target="_blank" rel="noopener noreferrer">
                 9221 Forest Hill Ave Suite 1 PMB 1021, Richmond, VA 23235
               </a>
             </li>
