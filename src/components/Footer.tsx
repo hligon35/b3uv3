@@ -7,12 +7,21 @@ export default function Footer() {
   const FORMS_API = (process.env.NEXT_PUBLIC_FORMS_API || '').replace(/\/$/, '');
   const [footSubbed, setFootSubbed] = useState(false);
   const [footPending, setFootPending] = useState(false);
+  const [footError, setFootError] = useState<string | null>(null);
   const [t0, setT0] = useState('');
   const footIframeRef = useRef<HTMLIFrameElement | null>(null);
   const footFormRef = useRef<HTMLFormElement | null>(null);
   const hasSubmittedRef = useRef(false);
   const [debugEnabled, setDebugEnabled] = useState(false);
-  const onFootSubmit = () => {
+  const onFootSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
+    if (!FORMS_API) {
+      e.preventDefault();
+      setFootError('Subscriptions are temporarily unavailable. Please try again shortly.');
+      // eslint-disable-next-line no-console
+      console.warn('B3U Forms: NEXT_PUBLIC_FORMS_API is not configured; blocking footer newsletter submit.');
+      return;
+    }
+    setFootError(null);
     hasSubmittedRef.current = true;
     setFootPending(true);
   };
@@ -32,6 +41,7 @@ export default function Footer() {
       if (!hasSubmittedRef.current) return;
       setFootSubbed(true);
       setFootPending(false);
+      setFootError(null);
       try { footFormRef.current?.reset(); } catch {}
       try { setT0(String(Date.now())); } catch {}
       hasSubmittedRef.current = false;
@@ -125,6 +135,9 @@ export default function Footer() {
             </button>
             {footSubbed && (
               <div className="text-green-200 bg-green-900/30 border border-green-700/50 rounded-md px-3 py-2 text-xs">Thanks! You’re subscribed.</div>
+            )}
+            {footError && (
+              <div className="text-red-200 bg-red-900/30 border border-red-700/50 rounded-md px-3 py-2 text-xs">{footError}</div>
             )}
           </form>
           <iframe name="footer_news_iframe" ref={footIframeRef} className="hidden" title="footer_news_iframe" />

@@ -56,8 +56,14 @@ export default function CommunityPage() {
   const displayCount = 6; // number of cards to show at minimum
   const visibleStories = useMemo(() => stories.slice(0, displayCount), [stories]);
 
-  function onSubmit() {
-    if (!FORMS_API) return;
+  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    if (!FORMS_API) {
+      e.preventDefault();
+      setError('Submissions are temporarily unavailable. Please try again shortly.');
+      // eslint-disable-next-line no-console
+      console.warn('B3U Forms: NEXT_PUBLIC_FORMS_API is not configured; blocking story submit.');
+      return;
+    }
     setError(null);
     hasSubmittedRef.current = true;
     setSubmitting(true);

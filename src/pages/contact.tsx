@@ -12,7 +12,15 @@ export default function ContactPage() {
   const hasSubmittedRef = useRef(false);
   const [debugEnabled, setDebugEnabled] = useState(false);
 
-  const onSubmit = () => {
+  const onSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
+    if (!FORMS_API) {
+      e.preventDefault();
+      // eslint-disable-next-line no-console
+      console.warn('B3U Forms: NEXT_PUBLIC_FORMS_API is not configured; blocking submit to avoid 405.');
+      setPending(false);
+      setSent(false);
+      return;
+    }
     hasSubmittedRef.current = true;
     setPending(true);
   };

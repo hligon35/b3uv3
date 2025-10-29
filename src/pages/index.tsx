@@ -83,7 +83,16 @@ export default function HomePage({ videos }: HomeProps) {
 
   const FORMS_API = (process.env.NEXT_PUBLIC_FORMS_API || '').replace(/\/$/, '');
 
-  function handleNewsletterSubmit() {
+  const [subError, setSubError] = useState<string | null>(null);
+  function handleNewsletterSubmit(e: React.FormEvent<HTMLFormElement>) {
+    if (!FORMS_API) {
+      e.preventDefault();
+      setSubError('Subscriptions are temporarily unavailable. Please try again shortly.');
+      // eslint-disable-next-line no-console
+      console.warn('B3U Forms: NEXT_PUBLIC_FORMS_API is not configured; blocking newsletter submit.');
+      return;
+    }
+    setSubError(null);
     hasSubmittedRef.current = true;
     setSubPending(true);
   }
@@ -376,6 +385,11 @@ export default function HomePage({ videos }: HomeProps) {
             {subscribed && (
               <div className="w-full text-sm text-green-700 bg-green-50 border border-green-200 rounded-md px-3 py-2 sm:ml-4 sm:mt-0 mt-2">
                 Thanks! You’re subscribed.
+              </div>
+            )}
+            {subError && (
+              <div className="w-full text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2 sm:ml-4 sm:mt-0 mt-2">
+                {subError}
               </div>
             )}
           </form>
