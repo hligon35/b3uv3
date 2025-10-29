@@ -79,6 +79,7 @@ export default function HomePage({ videos }: HomeProps) {
   const newsletterFormRef = useRef<HTMLFormElement | null>(null);
   const hasSubmittedRef = useRef(false);
   const [t0, setT0] = useState('');
+  const [debugEnabled, setDebugEnabled] = useState(false);
 
   const FORMS_API = (process.env.NEXT_PUBLIC_FORMS_API || '').replace(/\/$/, '');
 
@@ -103,6 +104,13 @@ export default function HomePage({ videos }: HomeProps) {
   }, []);
 
   useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      setDebugEnabled(params.get('debug') === '1' || params.get('debug') === 'true');
+    } catch {}
+  }, []);
+
+  useEffect(() => {
     const iframe = newsletterIframeRef.current;
     if (!iframe) return;
     const onLoad = () => {
@@ -119,6 +127,18 @@ export default function HomePage({ videos }: HomeProps) {
       iframe.removeEventListener('load', onLoad);
     };
   }, []);
+
+  useEffect(() => {
+    if (!debugEnabled) return;
+    const onMsg = (ev: MessageEvent) => {
+      if (ev?.data?.source === 'b3u-forms') {
+        // eslint-disable-next-line no-console
+        console.log('B3U Forms Debug (newsletter home):', ev.data.debug);
+      }
+    };
+    window.addEventListener('message', onMsg);
+    return () => window.removeEventListener('message', onMsg);
+  }, [debugEnabled]);
 
   return (
     <Layout>
@@ -342,6 +362,7 @@ export default function HomePage({ videos }: HomeProps) {
             {/* bot protection: honeypot + timestamp */}
             <input type="text" name="hp" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
             <input type="hidden" name="t0" value={t0} />
+            {debugEnabled && <input type="hidden" name="debug" value="1" />}
             <input
               type="email"
               name="email"

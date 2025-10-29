@@ -11,12 +11,19 @@ export default function Footer() {
   const footIframeRef = useRef<HTMLIFrameElement | null>(null);
   const footFormRef = useRef<HTMLFormElement | null>(null);
   const hasSubmittedRef = useRef(false);
+  const [debugEnabled, setDebugEnabled] = useState(false);
   const onFootSubmit = () => {
     hasSubmittedRef.current = true;
     setFootPending(true);
   };
   useEffect(() => {
     try { setT0(String(Date.now())); } catch {}
+  }, []);
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      setDebugEnabled(params.get('debug') === '1' || params.get('debug') === 'true');
+    } catch {}
   }, []);
   useEffect(() => {
     const iframe = footIframeRef.current;
@@ -32,6 +39,17 @@ export default function Footer() {
     iframe.addEventListener('load', onLoad);
     return () => iframe.removeEventListener('load', onLoad);
   }, []);
+  useEffect(() => {
+    if (!debugEnabled) return;
+    const onMsg = (ev: MessageEvent) => {
+      if (ev?.data?.source === 'b3u-forms') {
+        // eslint-disable-next-line no-console
+        console.log('B3U Forms Debug (newsletter footer):', ev.data.debug);
+      }
+    };
+    window.addEventListener('message', onMsg);
+    return () => window.removeEventListener('message', onMsg);
+  }, [debugEnabled]);
   return (
     <footer className="bg-navy text-white border-t border-white/10 mt-32">
       <div className="section-padding grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 md:gap-12">
@@ -100,6 +118,7 @@ export default function Footer() {
             {/* bot protection: honeypot + timestamp */}
             <input type="text" name="hp" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
             <input type="hidden" name="t0" value={t0} />
+            {debugEnabled && <input type="hidden" name="debug" value="1" />}
             <input name="email" type="email" required placeholder="Email address" className="w-full px-4 py-2 rounded-md bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-brandBlue" />
             <button className="btn-primary w-full disabled:opacity-50" type="submit" disabled={footPending}>
               {footPending ? 'Subscribing…' : 'Subscribe'}

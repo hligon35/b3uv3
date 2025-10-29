@@ -22,6 +22,7 @@ export default function CommunityPage() {
   const hasSubmittedRef = useRef(false);
   const [error, setError] = useState<string | null>(null);
   const [t0, setT0] = useState('');
+  const [debugEnabled, setDebugEnabled] = useState(false);
 
   // Load approved stories from API if configured
   // Load approved stories via JSONP to avoid CORS issues
@@ -44,6 +45,12 @@ export default function CommunityPage() {
 
   useEffect(() => {
     try { setT0(String(Date.now())); } catch {}
+  }, []);
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      setDebugEnabled(params.get('debug') === '1' || params.get('debug') === 'true');
+    } catch {}
   }, []);
 
   const displayCount = 6; // number of cards to show at minimum
@@ -70,6 +77,17 @@ export default function CommunityPage() {
     iframe.addEventListener('load', onLoad);
     return () => iframe.removeEventListener('load', onLoad);
   }, []);
+  useEffect(() => {
+    if (!debugEnabled) return;
+    const onMsg = (ev: MessageEvent) => {
+      if (ev?.data?.source === 'b3u-forms') {
+        // eslint-disable-next-line no-console
+        console.log('B3U Forms Debug (story submit):', ev.data.debug);
+      }
+    };
+    window.addEventListener('message', onMsg);
+    return () => window.removeEventListener('message', onMsg);
+  }, [debugEnabled]);
   return (
     <Layout>
   <section className="section-padding bg-white">
@@ -87,6 +105,7 @@ export default function CommunityPage() {
           {/* bot protection: honeypot + timestamp */}
           <input type="text" name="hp" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
           <input type="hidden" name="t0" value={t0} />
+          {debugEnabled && <input type="hidden" name="debug" value="1" />}
           <div className="bg-white border border-black/10 rounded-xl shadow-sm p-6 md:p-8">
             <div className="mb-6">
               <h2 className="text-2xl font-semibold">Share Your Story</h2>

@@ -47,6 +47,29 @@ function htmlPage(title, bodyHtml) {
   );
 }
 
+function debugBlock(meta) {
+  try {
+    const json = JSON.stringify(meta || {}, null, 2)
+      .replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return `
+      <div style="margin-top:16px;padding:12px;border:1px dashed #999;background:#fafafa">
+        <div style="font-weight:bold;margin-bottom:6px">Debug</div>
+        <pre style="white-space:pre-wrap;font-size:12px;">${json}</pre>
+      </div>
+      <script>
+      try { window.top && window.top.postMessage({ source: 'b3u-forms', debug: ${JSON.stringify(meta || {})} }, '*'); } catch (e) {}
+      </script>
+    `;
+  } catch (e) {
+    return '';
+  }
+}
+
+function respond(title, messageHtml, meta, debug) {
+  const body = debug ? (messageHtml + debugBlock(meta)) : messageHtml;
+  return htmlPage(title, body);
+}
+
 function findRowById(id) {
   const s = sheet();
   const last = s.getLastRow();
@@ -65,11 +88,13 @@ function doPost(e) {
   const path = (String(e.pathInfo || '')).replace(/^\//, '').toLowerCase();
   const endpoint = (e.parameter && (e.parameter.endpoint || e.parameter.action || '')).toString().toLowerCase();
   const route = path || endpoint; // prefer pathInfo, fallback to ?endpoint=
+  const debug = String((e.parameter && e.parameter.debug) || '') === '1' || String((e.parameter && e.parameter.debug) || '').toLowerCase() === 'true';
   if (route === 'submit') return handleStorySubmit(e);
   if (route === 'contact') return handleContact(e);
   if (route === 'newsletter') return handleNewsletter(e);
   // default fallback
-  return htmlPage('B3U Forms', '<p>Unknown POST endpoint.</p>');
+  const meta = { method: 'POST', route, path, endpoint, note: 'Unknown POST endpoint' };
+  return respond('B3U Forms', '<p>Unknown POST endpoint.</p>', meta, debug);
 }
 
 // GET router: /stories (JSON / JSONP), /moderate (approve/deny), default info
@@ -82,26 +107,29 @@ function doGet(e) {
   if (path === 'moderate' || (e.parameter.endpoint || '').toLowerCase() === 'moderate') {
     return handleModerate(e);
   }
-  return htmlPage('B3U Forms API', '<p>Use /submit, /contact, /newsletter (POST), /stories (GET), or /moderate (GET).</p>');
+  const debug = String((e.parameter && e.parameter.debug) || '') === '1' || String((e.parameter && e.parameter.debug) || '').toLowerCase() === 'true';
+  const meta = { method: 'GET', path, info: 'root' };
+  return respond('B3U Forms API', '<p>Use /submit, /contact, /newsletter (POST), /stories (GET), or /moderate (GET).</p>', meta, debug);
 }
 
 // ---- Story Submission ----
 function handleStorySubmit(e) {
   try {
     const p = e.parameter || {};
+    const debug = String(p.debug || '') === '1' || String(p.debug || '').toLowerCase() === 'true';
     // Basic bot checks: honeypot and minimum fill time (configurable)
     const hp = (p.hp || '').toString();
     const t0 = Number(p.t0 || '0');
     const now = Date.now();
     const delta = now - t0;
-    if (hp) return htmlPage('Thanks', '<p>Thanks!</p>');
-    if (t0 && (delta < MIN_FILL_MS || delta > 86400000)) return htmlPage('Thanks', '<p>Thanks!</p>');
+    if (hp) return respond('Thanks', '<p>Thanks!</p>', { endpoint: 'submit', hp: !!hp, delta }, debug);
+    if (t0 && (delta < MIN_FILL_MS || delta > 86400000)) return respond('Thanks', '<p>Thanks!</p>', { endpoint: 'submit', hp: !!hp, delta, note: 'timing-guard' }, debug);
     const name = (p.name || '').toString().trim();
     const email = (p.email || '').toString().trim();
     const story = (p.story || '').toString().trim();
     const consent = p.consent ? 'on' : '';
     if (!name || !email || !story) {
-      return htmlPage('Missing fields', '<p>Please provide name, email, and story.</p>');
+      return respond('Missing fields', '<p>Please provide name, email, and story.</p>', { endpoint: 'submit', name: !!name, email: !!email, story: !!story }, debug);
     }
     const id = Utilities.getUuid();
     const createdAt = nowISO();
@@ -140,9 +168,9 @@ function handleStorySubmit(e) {
                  </p>`
     });
 
-    return htmlPage('Thanks!', '<p>Your story was received. Please check your email for confirmation.</p>');
+    return respond('Thanks!', '<p>Your story was received. Please check your email for confirmation.</p>', { endpoint: 'submit', ok: true, id, delta }, debug);
   } catch (err) {
-    return htmlPage('Error', `<p>${String(err)}</p>`);
+    return respond('Error', `<p>${String(err)}</p>`, { endpoint: 'submit', ok: false, error: String(err) }, (e && e.parameter && (String(e.parameter.debug||'')==='1' || String(e.parameter.debug||'').toLowerCase()==='true')));
   }
 }
 
@@ -150,18 +178,19 @@ function handleStorySubmit(e) {
 function handleContact(e) {
   try {
     const p = e.parameter || {};
+    const debug = String(p.debug || '') === '1' || String(p.debug || '').toLowerCase() === 'true';
     const hp = (p.hp || '').toString();
     const t0 = Number(p.t0 || '0');
     const now = Date.now();
     const delta = now - t0;
-    if (hp) return htmlPage('Message sent', '<p>Thanks! Your message was sent.</p>');
-    if (t0 && (delta < MIN_FILL_MS || delta > 86400000)) return htmlPage('Message sent', '<p>Thanks! Your message was sent.</p>');
+    if (hp) return respond('Message sent', '<p>Thanks! Your message was sent.</p>', { endpoint: 'contact', hp: !!hp, delta }, debug);
+    if (t0 && (delta < MIN_FILL_MS || delta > 86400000)) return respond('Message sent', '<p>Thanks! Your message was sent.</p>', { endpoint: 'contact', hp: !!hp, delta, note: 'timing-guard' }, debug);
     const name = (p.name || '').toString().trim();
     const email = (p.email || '').toString().trim();
     const subject = (p.subject || 'Contact Form').toString().trim();
     const message = (p.message || '').toString().trim();
     if (!name || !email || !message) {
-      return htmlPage('Missing fields', '<p>Please provide name, email, and message.</p>');
+      return respond('Missing fields', '<p>Please provide name, email, and message.</p>', { endpoint: 'contact', name: !!name, email: !!email, message: !!message }, debug);
     }
 
     // Email moderator inbox
@@ -187,9 +216,9 @@ function handleContact(e) {
                  <p>— Team B3U</p>`
     });
 
-    return htmlPage('Message sent', '<p>Thanks! Your message was sent. We’ll be in touch soon.</p>');
+    return respond('Message sent', '<p>Thanks! Your message was sent. We’ll be in touch soon.</p>', { endpoint: 'contact', ok: true, delta }, debug);
   } catch (err) {
-    return htmlPage('Error', `<p>${String(err)}</p>`);
+    return respond('Error', `<p>${String(err)}</p>`, { endpoint: 'contact', ok: false, error: String(err) }, (e && e.parameter && (String(e.parameter.debug||'')==='1' || String(e.parameter.debug||'').toLowerCase()==='true')));
   }
 }
 
@@ -197,14 +226,15 @@ function handleContact(e) {
 function handleNewsletter(e) {
   try {
     const p = e.parameter || {};
+    const debug = String(p.debug || '') === '1' || String(p.debug || '').toLowerCase() === 'true';
     const hp = (p.hp || '').toString();
     const t0 = Number(p.t0 || '0');
     const now = Date.now();
     const delta = now - t0;
-    if (hp) return htmlPage('Subscribed', '<p>Thanks! You’re subscribed.</p>');
-    if (t0 && (delta < MIN_FILL_MS || delta > 86400000)) return htmlPage('Subscribed', '<p>Thanks! You’re subscribed.</p>');
+    if (hp) return respond('Subscribed', '<p>Thanks! You’re subscribed.</p>', { endpoint: 'newsletter', hp: !!hp, delta }, debug);
+    if (t0 && (delta < MIN_FILL_MS || delta > 86400000)) return respond('Subscribed', '<p>Thanks! You’re subscribed.</p>', { endpoint: 'newsletter', hp: !!hp, delta, note: 'timing-guard' }, debug);
     const email = (p.email || '').toString().trim();
-    if (!email) return htmlPage('Missing fields', '<p>Please provide an email.</p>');
+    if (!email) return respond('Missing fields', '<p>Please provide an email.</p>', { endpoint: 'newsletter', email: !!email }, debug);
 
     // Optional: store to a separate sheet or a tab in same sheet
     // Append to the same sheet with a special status row for simplicity
@@ -231,9 +261,9 @@ function handleNewsletter(e) {
                  <p>— Team B3U</p>`
     });
 
-    return htmlPage('Subscribed', '<p>Thanks! You’re subscribed.</p>');
+    return respond('Subscribed', '<p>Thanks! You’re subscribed.</p>', { endpoint: 'newsletter', ok: true, delta }, debug);
   } catch (err) {
-    return htmlPage('Error', `<p>${String(err)}</p>`);
+    return respond('Error', `<p>${String(err)}</p>`, { endpoint: 'newsletter', ok: false, error: String(err) }, (e && e.parameter && (String(e.parameter.debug||'')==='1' || String(e.parameter.debug||'').toLowerCase()==='true')));
   }
 }
 
