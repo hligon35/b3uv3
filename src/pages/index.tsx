@@ -332,7 +332,7 @@ export default function HomePage({ videos }: HomeProps) {
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Join "The Take Back Weekly"</h2>
           <p className="text-navy/70 mb-6">Get new episodes, inspiration, and community opportunities delivered to your inbox.</p>
           <form
-            action={FORMS_API ? `${FORMS_API}/newsletter` : undefined}
+            action={FORMS_API ? `${FORMS_API}?endpoint=newsletter` : undefined}
             method="POST"
             className="flex flex-col sm:flex-row gap-4 justify-center"
             target="newsletter_iframe"

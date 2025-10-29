@@ -51,7 +51,7 @@ export default function ContactPage() {
             <div className="card bg-white shadow-2xl">
               <h2 className="text-2xl font-bold mb-6 text-navy">Send a Message</h2>
               <form
-                action={FORMS_API ? `${FORMS_API}/contact` : undefined}
+                action={FORMS_API ? `${FORMS_API}?endpoint=contact` : undefined}
                 method="POST"
                 className="space-y-6"
                 target="contact_iframe"

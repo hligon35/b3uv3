@@ -63,9 +63,11 @@ function findRowById(id) {
 function doPost(e) {
   e = e || { parameter: {}, pathInfo: '' };
   const path = (String(e.pathInfo || '')).replace(/^\//, '').toLowerCase();
-  if (path === 'submit') return handleStorySubmit(e);
-  if (path === 'contact') return handleContact(e);
-  if (path === 'newsletter') return handleNewsletter(e);
+  const endpoint = (e.parameter && (e.parameter.endpoint || e.parameter.action || '')).toString().toLowerCase();
+  const route = path || endpoint; // prefer pathInfo, fallback to ?endpoint=
+  if (route === 'submit') return handleStorySubmit(e);
+  if (route === 'contact') return handleContact(e);
+  if (route === 'newsletter') return handleNewsletter(e);
   // default fallback
   return htmlPage('B3U Forms', '<p>Unknown POST endpoint.</p>');
 }

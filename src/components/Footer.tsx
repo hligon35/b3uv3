@@ -90,7 +90,7 @@ export default function Footer() {
           <h4 className="font-semibold mb-3 text-brandOrange">The Take Back Weekly</h4>
           <p className="text-sm text-white/70 mb-3">Get new episodes, inspiration, and community opportunities delivered to your inbox.</p>
           <form
-            action={FORMS_API ? `${FORMS_API}/newsletter` : undefined}
+            action={FORMS_API ? `${FORMS_API}?endpoint=newsletter` : undefined}
             method="POST"
             className="space-y-3"
             target="footer_news_iframe"

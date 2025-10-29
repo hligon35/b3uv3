@@ -79,7 +79,7 @@ export default function CommunityPage() {
         <form
           className="max-w-3xl mb-16"
           onSubmit={onSubmit}
-          action={FORMS_API ? `${FORMS_API}/submit` : undefined}
+          action={FORMS_API ? `${FORMS_API}?endpoint=submit` : undefined}
           method="POST"
           target="story_iframe"
           ref={formRef}
