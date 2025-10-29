@@ -8,17 +8,33 @@ export default function ContactPage() {
   const [pending, setPending] = useState(false);
   const [t0, setT0] = useState('');
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
+  const formRef = useRef<HTMLFormElement | null>(null);
+  const hasSubmittedRef = useRef(false);
 
   const onSubmit = () => {
+    hasSubmittedRef.current = true;
     setPending(true);
-    setTimeout(() => {
-      setSent(true);
-      setPending(false);
-    }, 1200);
   };
 
   useEffect(() => {
     try { setT0(String(Date.now())); } catch {}
+  }, []);
+
+  useEffect(() => {
+    const iframe = iframeRef.current;
+    if (!iframe) return;
+    const handleLoad = () => {
+      if (!hasSubmittedRef.current) return; // ignore initial loads
+      setSent(true);
+      setPending(false);
+      try { formRef.current?.reset(); } catch {}
+      try { setT0(String(Date.now())); } catch {}
+      hasSubmittedRef.current = false;
+    };
+    iframe.addEventListener('load', handleLoad);
+    return () => {
+      iframe.removeEventListener('load', handleLoad);
+    };
   }, []);
 
   return (
@@ -40,6 +56,7 @@ export default function ContactPage() {
                 className="space-y-6"
                 target="contact_iframe"
                 onSubmit={onSubmit}
+                ref={formRef}
               >
                 {/* bot protection: honeypot + timestamp */}
                 <input type="text" name="hp" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />

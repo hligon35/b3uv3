@@ -18,6 +18,8 @@ export default function CommunityPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const storyIframeRef = useRef<HTMLIFrameElement | null>(null);
+  const formRef = useRef<HTMLFormElement | null>(null);
+  const hasSubmittedRef = useRef(false);
   const [error, setError] = useState<string | null>(null);
   const [t0, setT0] = useState('');
 
@@ -50,12 +52,24 @@ export default function CommunityPage() {
   function onSubmit() {
     if (!FORMS_API) return;
     setError(null);
+    hasSubmittedRef.current = true;
     setSubmitting(true);
-    setTimeout(() => {
+  }
+
+  useEffect(() => {
+    const iframe = storyIframeRef.current;
+    if (!iframe) return;
+    const onLoad = () => {
+      if (!hasSubmittedRef.current) return;
       setSubmitted(true);
       setSubmitting(false);
-    }, 1400);
-  }
+      try { formRef.current?.reset(); } catch {}
+      try { setT0(String(Date.now())); } catch {}
+      hasSubmittedRef.current = false;
+    };
+    iframe.addEventListener('load', onLoad);
+    return () => iframe.removeEventListener('load', onLoad);
+  }, []);
   return (
     <Layout>
   <section className="section-padding bg-white">
@@ -68,6 +82,7 @@ export default function CommunityPage() {
           action={FORMS_API ? `${FORMS_API}/submit` : undefined}
           method="POST"
           target="story_iframe"
+          ref={formRef}
         >
           {/* bot protection: honeypot + timestamp */}
           <input type="text" name="hp" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />

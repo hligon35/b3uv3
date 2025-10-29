@@ -9,15 +9,28 @@ export default function Footer() {
   const [footPending, setFootPending] = useState(false);
   const [t0, setT0] = useState('');
   const footIframeRef = useRef<HTMLIFrameElement | null>(null);
+  const footFormRef = useRef<HTMLFormElement | null>(null);
+  const hasSubmittedRef = useRef(false);
   const onFootSubmit = () => {
+    hasSubmittedRef.current = true;
     setFootPending(true);
-    setTimeout(() => {
-      setFootSubbed(true);
-      setFootPending(false);
-    }, 1200);
   };
   useEffect(() => {
     try { setT0(String(Date.now())); } catch {}
+  }, []);
+  useEffect(() => {
+    const iframe = footIframeRef.current;
+    if (!iframe) return;
+    const onLoad = () => {
+      if (!hasSubmittedRef.current) return;
+      setFootSubbed(true);
+      setFootPending(false);
+      try { footFormRef.current?.reset(); } catch {}
+      try { setT0(String(Date.now())); } catch {}
+      hasSubmittedRef.current = false;
+    };
+    iframe.addEventListener('load', onLoad);
+    return () => iframe.removeEventListener('load', onLoad);
   }, []);
   return (
     <footer className="bg-navy text-white border-t border-white/10 mt-32">
@@ -82,6 +95,7 @@ export default function Footer() {
             className="space-y-3"
             target="footer_news_iframe"
             onSubmit={onFootSubmit}
+            ref={footFormRef}
           >
             {/* bot protection: honeypot + timestamp */}
             <input type="text" name="hp" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />

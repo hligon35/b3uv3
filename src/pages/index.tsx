@@ -76,17 +76,15 @@ export default function HomePage({ videos }: HomeProps) {
   const [subscribed, setSubscribed] = useState(false);
   const [subPending, setSubPending] = useState(false);
   const newsletterIframeRef = useRef<HTMLIFrameElement | null>(null);
+  const newsletterFormRef = useRef<HTMLFormElement | null>(null);
+  const hasSubmittedRef = useRef(false);
   const [t0, setT0] = useState('');
 
   const FORMS_API = (process.env.NEXT_PUBLIC_FORMS_API || '').replace(/\/$/, '');
 
   function handleNewsletterSubmit() {
+    hasSubmittedRef.current = true;
     setSubPending(true);
-    setTimeout(() => {
-      setSubscribed(true);
-      setSubPending(false);
-      try { document.getElementById('newsletter')?.scrollIntoView({ behavior: 'smooth' }); } catch {}
-    }, 1200);
   }
 
   useEffect(() => {
@@ -102,6 +100,24 @@ export default function HomePage({ videos }: HomeProps) {
 
   useEffect(() => {
     try { setT0(String(Date.now())); } catch {}
+  }, []);
+
+  useEffect(() => {
+    const iframe = newsletterIframeRef.current;
+    if (!iframe) return;
+    const onLoad = () => {
+      if (!hasSubmittedRef.current) return;
+      setSubscribed(true);
+      setSubPending(false);
+      try { newsletterFormRef.current?.reset(); } catch {}
+      try { setT0(String(Date.now())); } catch {}
+      try { document.getElementById('newsletter')?.scrollIntoView({ behavior: 'smooth' }); } catch {}
+      hasSubmittedRef.current = false;
+    };
+    iframe.addEventListener('load', onLoad);
+    return () => {
+      iframe.removeEventListener('load', onLoad);
+    };
   }, []);
 
   return (
@@ -321,6 +337,7 @@ export default function HomePage({ videos }: HomeProps) {
             className="flex flex-col sm:flex-row gap-4 justify-center"
             target="newsletter_iframe"
             onSubmit={handleNewsletterSubmit}
+            ref={newsletterFormRef}
           >
             {/* bot protection: honeypot + timestamp */}
             <input type="text" name="hp" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
