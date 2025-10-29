@@ -105,10 +105,11 @@ function handleStorySubmit(e) {
     const createdAt = nowISO();
     sheet().appendRow([id, name, email, story, consent, 'pending', createdAt, '']);
 
-    // Confirm to sender
+    // Confirm to sender (no-reply)
     MailApp.sendEmail({
       to: email,
       name: 'B3U',
+      replyTo: 'no-reply@b3unstoppable.net',
       subject: 'We received your story — B3U',
       htmlBody: `<p>Hi ${name},</p>
                  <p>Thanks for sharing your story with B3U. Our team will review it shortly.</p>
@@ -173,10 +174,11 @@ function handleContact(e) {
                  <blockquote>${message.replace(/\n/g, '<br>')}</blockquote>`
     });
 
-    // Acknowledge sender
+    // Acknowledge sender (no-reply)
     MailApp.sendEmail({
       to: email,
       name: 'B3U',
+      replyTo: 'no-reply@b3unstoppable.net',
       subject: 'We received your message — B3U',
       htmlBody: `<p>Hi ${name},</p>
                  <p>Thanks for reaching out. We received your message and typically reply within 1–2 business days.</p>
@@ -216,10 +218,11 @@ function handleNewsletter(e) {
       htmlBody: `<p>New newsletter subscriber: <strong>${email}</strong></p>`
     });
 
-    // Autoresponse to subscriber
+    // Autoresponse to subscriber (no-reply)
     MailApp.sendEmail({
       to: email,
       name: 'B3U',
+      replyTo: 'no-reply@b3unstoppable.net',
       subject: 'You’re subscribed — B3U',
       htmlBody: `<p>Thanks for joining The Take Back Weekly! You’re on the list.</p>
                  <p>Look out for new episodes, inspiration, and community updates from B3U.</p>
@@ -299,7 +302,7 @@ function handleModerate(e) {
     const body = newStatus === 'approved'
       ? `<p>Hi ${name},</p><p>Your story was approved and is now visible in our community section. Thank you for sharing and inspiring others.</p><p>— Team B3U</p>`
       : `<p>Hi ${name},</p><p>Thank you for sharing your story. After review, we’re not able to publish this submission at this time. We appreciate your courage and support.</p><p>— Team B3U</p>`;
-    MailApp.sendEmail({ to: email, subject: subj, htmlBody: body, name: 'B3U' });
+  MailApp.sendEmail({ to: email, subject: subj, htmlBody: body, name: 'B3U', replyTo: 'no-reply@b3unstoppable.net' });
   } catch (err) {}
 
   const title = newStatus === 'approved' ? 'Approved' : 'Denied';
