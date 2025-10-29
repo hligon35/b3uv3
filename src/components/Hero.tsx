@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import BreeHero from '@/images/content/bree_hero.jpeg';
+import HeroBg from '@/images/content/about2.jpeg';
 import Image from 'next/image';
 
 export default function Hero() {
@@ -9,7 +9,7 @@ export default function Hero() {
       {/* Background image */}
       <div className="absolute inset-0">
         <Image
-          src={BreeHero}
+          src={HeroBg}
           alt="Bree Charles hero background"
           fill
           priority
