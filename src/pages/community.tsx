@@ -11,9 +11,11 @@ type Story = {
   createdAt?: string;
 };
 
-const FORMS_API = (process.env.NEXT_PUBLIC_FORMS_API || '').replace(/\/$/, '');
+// Forms API base; resolved at runtime with optional ?formsApi override
+const ENV_FORMS_API = (process.env.NEXT_PUBLIC_FORMS_API || '').replace(/\/$/, '');
 
 export default function CommunityPage() {
+  const [formsApi, setFormsApi] = useState<string>(ENV_FORMS_API);
   const [stories, setStories] = useState<Story[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -27,21 +29,21 @@ export default function CommunityPage() {
   // Load approved stories from API if configured
   // Load approved stories via JSONP to avoid CORS issues
   useEffect(() => {
-    if (!FORMS_API) return;
+    if (!formsApi) return;
     const cbName = `__b3uStories_${Math.random().toString(36).slice(2)}`;
     (window as any)[cbName] = (data: any) => {
       try { if (Array.isArray(data?.stories)) setStories(data.stories as Story[]); } catch {}
       try { delete (window as any)[cbName]; } catch {}
     };
     const s = document.createElement('script');
-    s.src = `${FORMS_API}/stories?callback=${cbName}`;
+    s.src = `${formsApi}/stories?callback=${cbName}`;
     s.async = true;
     document.body.appendChild(s);
     return () => {
       try { document.body.removeChild(s); } catch {}
       try { delete (window as any)[cbName]; } catch {}
     };
-  }, []);
+  }, [formsApi]);
 
   useEffect(() => {
     try { setT0(String(Date.now())); } catch {}
@@ -53,11 +55,43 @@ export default function CommunityPage() {
     } catch {}
   }, []);
 
+  useEffect(() => {
+    // Resolve formsApi from URL (?formsApi=...) at runtime, fallback to env
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const override = params.get('formsApi') || params.get('formsapi') || params.get('forms_api');
+      const envBase = ENV_FORMS_API;
+      let next = envBase;
+      try {
+        const saved = window.sessionStorage?.getItem('b3u.formsApi');
+        if (saved) next = saved;
+      } catch {}
+      if (override) {
+        const raw = override.trim();
+        if (/^(clear|env)$/i.test(raw)) {
+          try { window.sessionStorage?.removeItem('b3u.formsApi'); } catch {}
+          setFormsApi(envBase);
+          return;
+        }
+        let candidate = raw;
+        if (!/^https?:\/\//i.test(candidate)) candidate = 'https://' + candidate;
+        try {
+          const u = new URL(candidate);
+          if (u.protocol === 'https:' || u.protocol === 'http:') {
+            next = candidate.replace(/\/$/, '');
+            try { window.sessionStorage?.setItem('b3u.formsApi', next); } catch {}
+          }
+        } catch {}
+      }
+      setFormsApi(next);
+    } catch {}
+  }, []);
+
   const displayCount = 6; // number of cards to show at minimum
   const visibleStories = useMemo(() => stories.slice(0, displayCount), [stories]);
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-    if (!FORMS_API) {
+    if (!formsApi) {
       e.preventDefault();
       setError('Submissions are temporarily unavailable. Please try again shortly.');
       // eslint-disable-next-line no-console
@@ -103,7 +137,7 @@ export default function CommunityPage() {
         <form
           className="max-w-3xl mb-16"
           onSubmit={onSubmit}
-          action={FORMS_API ? `${FORMS_API}?endpoint=submit` : undefined}
+          action={formsApi ? `${formsApi}?endpoint=submit` : undefined}
           method="POST"
           target="story_iframe"
           ref={formRef}

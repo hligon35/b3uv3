@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import B3ULogo from '@/images/logos/B3U3D.png';
 
 export default function Footer() {
-  const FORMS_API = (process.env.NEXT_PUBLIC_FORMS_API || '').replace(/\/$/, '');
+  // Resolve Forms API at runtime with optional ?formsApi override
+  const [formsApi, setFormsApi] = useState<string>((process.env.NEXT_PUBLIC_FORMS_API || '').replace(/\/$/, ''));
   const [footSubbed, setFootSubbed] = useState(false);
   const [footPending, setFootPending] = useState(false);
   const [footError, setFootError] = useState<string | null>(null);
@@ -14,7 +15,7 @@ export default function Footer() {
   const hasSubmittedRef = useRef(false);
   const [debugEnabled, setDebugEnabled] = useState(false);
   const onFootSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
-    if (!FORMS_API) {
+    if (!formsApi) {
       e.preventDefault();
       setFootError('Subscriptions are temporarily unavailable. Please try again shortly.');
       // eslint-disable-next-line no-console
@@ -32,6 +33,37 @@ export default function Footer() {
     try {
       const params = new URLSearchParams(window.location.search);
       setDebugEnabled(params.get('debug') === '1' || params.get('debug') === 'true');
+    } catch {}
+  }, []);
+  useEffect(() => {
+    // Runtime forms API override via ?formsApi=
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const override = params.get('formsApi') || params.get('formsapi') || params.get('forms_api');
+      const envBase = (process.env.NEXT_PUBLIC_FORMS_API || '').replace(/\/$/, '');
+      let next = envBase;
+      try {
+        const saved = window.sessionStorage?.getItem('b3u.formsApi');
+        if (saved) next = saved;
+      } catch {}
+      if (override) {
+        const raw = override.trim();
+        if (/^(clear|env)$/i.test(raw)) {
+          try { window.sessionStorage?.removeItem('b3u.formsApi'); } catch {}
+          setFormsApi(envBase);
+          return;
+        }
+        let candidate = raw;
+        if (!/^https?:\/\//i.test(candidate)) candidate = 'https://' + candidate;
+        try {
+          const u = new URL(candidate);
+          if (u.protocol === 'https:' || u.protocol === 'http:') {
+            next = candidate.replace(/\/$/, '');
+            try { window.sessionStorage?.setItem('b3u.formsApi', next); } catch {}
+          }
+        } catch {}
+      }
+      setFormsApi(next);
     } catch {}
   }, []);
   useEffect(() => {
@@ -118,7 +150,7 @@ export default function Footer() {
           <h4 className="font-semibold mb-3 text-brandOrange">The Take Back Weekly</h4>
           <p className="text-sm text-white/70 mb-3">Get new episodes, inspiration, and community opportunities delivered to your inbox.</p>
           <form
-            action={FORMS_API ? `${FORMS_API}?endpoint=newsletter` : undefined}
+            action={formsApi ? `${formsApi}?endpoint=newsletter` : undefined}
             method="POST"
             className="space-y-3"
             target="footer_news_iframe"

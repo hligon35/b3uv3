@@ -1,9 +1,9 @@
 import Layout from '@/components/Layout';
 import { useEffect, useRef, useState } from 'react';
 
-const FORMS_API = (process.env.NEXT_PUBLIC_FORMS_API || '').replace(/\/$/, '');
-
 export default function ContactPage() {
+  // Resolve Forms API at runtime with optional ?formsApi= override
+  const [formsApi, setFormsApi] = useState<string>((process.env.NEXT_PUBLIC_FORMS_API || '').replace(/\/$/, ''));
   const [sent, setSent] = useState(false);
   const [pending, setPending] = useState(false);
   const [t0, setT0] = useState('');
@@ -13,7 +13,7 @@ export default function ContactPage() {
   const [debugEnabled, setDebugEnabled] = useState(false);
 
   const onSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
-    if (!FORMS_API) {
+    if (!formsApi) {
       e.preventDefault();
       // eslint-disable-next-line no-console
       console.warn('B3U Forms: NEXT_PUBLIC_FORMS_API is not configured; blocking submit to avoid 405.');
@@ -34,6 +34,42 @@ export default function ContactPage() {
     try {
       const params = new URLSearchParams(window.location.search);
       setDebugEnabled(params.get('debug') === '1' || params.get('debug') === 'true');
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    // Runtime override for Forms API via URL (?formsApi=...) with basic validation; falls back to env.
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const override = params.get('formsApi') || params.get('formsapi') || params.get('forms_api');
+      const envBase = (process.env.NEXT_PUBLIC_FORMS_API || '').replace(/\/$/, '');
+      let next = envBase;
+      try {
+        const saved = window.sessionStorage?.getItem('b3u.formsApi');
+        if (saved) next = saved;
+      } catch {}
+      if (override) {
+        const raw = override.trim();
+        if (/^(clear|env)$/i.test(raw)) {
+          try { window.sessionStorage?.removeItem('b3u.formsApi'); } catch {}
+          setFormsApi(envBase);
+          return;
+        }
+        let candidate = raw;
+        if (!/^https?:\/\//i.test(candidate)) {
+          candidate = 'https://' + candidate;
+        }
+        try {
+          const u = new URL(candidate);
+          if (u.protocol === 'https:' || u.protocol === 'http:') {
+            next = candidate.replace(/\/$/, '');
+            try { window.sessionStorage?.setItem('b3u.formsApi', next); } catch {}
+          }
+        } catch {
+          // ignore invalid override
+        }
+      }
+      setFormsApi(next);
     } catch {}
   }, []);
 
@@ -80,7 +116,7 @@ export default function ContactPage() {
             <div className="card bg-white shadow-2xl">
               <h2 className="text-2xl font-bold mb-6 text-navy">Send a Message</h2>
               <form
-                action={FORMS_API ? `${FORMS_API}?endpoint=contact` : undefined}
+                action={formsApi ? `${formsApi}?endpoint=contact` : undefined}
                 method="POST"
                 className="space-y-6"
                 target="contact_iframe"

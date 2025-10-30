@@ -80,12 +80,12 @@ export default function HomePage({ videos }: HomeProps) {
   const hasSubmittedRef = useRef(false);
   const [t0, setT0] = useState('');
   const [debugEnabled, setDebugEnabled] = useState(false);
-
-  const FORMS_API = (process.env.NEXT_PUBLIC_FORMS_API || '').replace(/\/$/, '');
+  // Resolve Forms API at runtime with optional ?formsApi override
+  const [formsApi, setFormsApi] = useState<string>((process.env.NEXT_PUBLIC_FORMS_API || '').replace(/\/$/, ''));
 
   const [subError, setSubError] = useState<string | null>(null);
   function handleNewsletterSubmit(e: React.FormEvent<HTMLFormElement>) {
-    if (!FORMS_API) {
+    if (!formsApi) {
       e.preventDefault();
       setSubError('Subscriptions are temporarily unavailable. Please try again shortly.');
       // eslint-disable-next-line no-console
@@ -116,6 +116,38 @@ export default function HomePage({ videos }: HomeProps) {
     try {
       const params = new URLSearchParams(window.location.search);
       setDebugEnabled(params.get('debug') === '1' || params.get('debug') === 'true');
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    // Runtime forms API override via ?formsApi=
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const override = params.get('formsApi') || params.get('formsapi') || params.get('forms_api');
+      const envBase = (process.env.NEXT_PUBLIC_FORMS_API || '').replace(/\/$/, '');
+      let next = envBase;
+      try {
+        const saved = window.sessionStorage?.getItem('b3u.formsApi');
+        if (saved) next = saved;
+      } catch {}
+      if (override) {
+        const raw = override.trim();
+        if (/^(clear|env)$/i.test(raw)) {
+          try { window.sessionStorage?.removeItem('b3u.formsApi'); } catch {}
+          setFormsApi(envBase);
+          return;
+        }
+        let candidate = raw;
+        if (!/^https?:\/\//i.test(candidate)) candidate = 'https://' + candidate;
+        try {
+          const u = new URL(candidate);
+          if (u.protocol === 'https:' || u.protocol === 'http:') {
+            next = candidate.replace(/\/$/, '');
+            try { window.sessionStorage?.setItem('b3u.formsApi', next); } catch {}
+          }
+        } catch {}
+      }
+      setFormsApi(next);
     } catch {}
   }, []);
 
@@ -361,7 +393,7 @@ export default function HomePage({ videos }: HomeProps) {
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Join "The Take Back Weekly"</h2>
           <p className="text-navy/70 mb-6">Get new episodes, inspiration, and community opportunities delivered to your inbox.</p>
           <form
-            action={FORMS_API ? `${FORMS_API}?endpoint=newsletter` : undefined}
+            action={formsApi ? `${formsApi}?endpoint=newsletter` : undefined}
             method="POST"
             className="flex flex-col sm:flex-row gap-4 justify-center"
             target="newsletter_iframe"
