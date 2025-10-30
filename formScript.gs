@@ -1,12 +1,20 @@
 // Google Apps Script for B3U forms (Stories, Contact, Newsletter)
 // How to use:
-// 1) In Google Drive, create a Google Sheet (e.g., "B3U Stories") with headers:
-//    A:id  B:name  C:email  D:story  E:consent  F:status  G:createdAt  H:decidedAt
-//    (You can change the sheet name below if needed.)
+// 1) In Google Drive, create a Google Sheet with three tabs:
+//    Tab "Stories" with headers:
+//      A:id  B:name  C:email  D:story  E:consent  F:status  G:createdAt  H:decidedAt
+//    Tab "ContactForm" with headers:
+//      A:id  B:name  C:email  D:subject  E:message  F:createdAt
+//    Tab "Subscribers" with headers:
+//      A:id  B:email  C:createdAt
 // 2) In the Apps Script editor, set Project Properties > Script properties:
-//    SHEET_ID       = <your Google Sheet ID>
-//    MODERATOR_EMAIL= info@b3unstoppable.net
-//    SECRET         = <long random string>
+//    SHEET_ID        = <your Google Sheet ID>
+//    MODERATOR_EMAIL = info@b3unstoppable.net
+//    SECRET          = <long random string>
+//    (Optional overrides)
+//    STORIES_SHEET   = Stories
+//    CONTACT_SHEET   = ContactForm
+//    SUBS_SHEET      = Subscribers
 // 3) Deploy as Web App: Execute as Me; Who has access: Anyone. Copy the Web App URL.
 // 4) In the Next.js site, set NEXT_PUBLIC_FORMS_API to the Web App URL (ending with /exec).
 // 5) Forms will POST to:
@@ -19,14 +27,40 @@
 const PROPS = PropertiesService.getScriptProperties();
 // Prefer Script Properties; optionally hardcode as a fallback after the ||
 const SHEET_ID = PROPS.getProperty('SHEET_ID') || '1BBzALy7nIymfzUuQ2hvga6YKCiv55bLiws16aDqEN3A';
-const SHEET_NAME = 'Sheet1'; // Change if your stories sheet has a different tab name
+// Individual sheet tabs for each form type (override via Script Properties if desired)
+const STORIES_SHEET = PROPS.getProperty('STORIES_SHEET') || 'Stories';
+const CONTACT_SHEET = PROPS.getProperty('CONTACT_SHEET') || 'ContactForm';
+const SUBS_SHEET = PROPS.getProperty('SUBS_SHEET') || 'Subscribers';
+
 const MODERATOR_EMAIL = PROPS.getProperty('MODERATOR_EMAIL') || 'info@b3unstoppable.net';
 const SECRET = PROPS.getProperty('SECRET') || 'change-me';
 const MIN_FILL_MS = parseInt(PROPS.getProperty('MIN_FILL_MS') || '800', 10); // anti-bot: require ~0.8s between load and submit when t0 is present
 
-function sheet() {
-  return SpreadsheetApp.openById(SHEET_ID).getSheetByName(SHEET_NAME);
+// Headers for each sheet tab (row 1)
+const STORIES_HEADERS = ['id','name','email','story','consent','status','createdAt','decidedAt'];
+const CONTACT_HEADERS = ['id','name','email','subject','message','createdAt'];
+const SUBS_HEADERS = ['id','email','createdAt'];
+
+function ensureSheet(name, headers) {
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  let sh = ss.getSheetByName(name);
+  if (!sh) {
+    sh = ss.insertSheet(name);
+    if (headers && headers.length) {
+      sh.getRange(1, 1, 1, headers.length).setValues([headers]);
+    }
+  } else {
+    // ensure headers present if empty
+    if (sh.getLastRow() === 0 && headers && headers.length) {
+      sh.getRange(1, 1, 1, headers.length).setValues([headers]);
+    }
+  }
+  return sh;
 }
+
+function storiesSheet() { return ensureSheet(STORIES_SHEET, STORIES_HEADERS); }
+function contactSheet() { return ensureSheet(CONTACT_SHEET, CONTACT_HEADERS); }
+function subsSheet() { return ensureSheet(SUBS_SHEET, SUBS_HEADERS); }
 function nowISO() { return new Date().toISOString(); }
 function toWebToken(s) { return Utilities.base64EncodeWebSafe(s); }
 function sign(payload) {
@@ -71,7 +105,7 @@ function respond(title, messageHtml, meta, debug) {
 }
 
 function findRowById(id) {
-  const s = sheet();
+  const s = storiesSheet();
   const last = s.getLastRow();
   if (last < 2) return null; // only headers
   const values = s.getRange(2, 1, last - 1, 8).getValues(); // A:H
@@ -131,9 +165,9 @@ function handleStorySubmit(e) {
     if (!name || !email || !story) {
       return respond('Missing fields', '<p>Please provide name, email, and story.</p>', { endpoint: 'submit', name: !!name, email: !!email, story: !!story }, debug);
     }
-    const id = Utilities.getUuid();
-    const createdAt = nowISO();
-    sheet().appendRow([id, name, email, story, consent, 'pending', createdAt, '']);
+  const id = Utilities.getUuid();
+  const createdAt = nowISO();
+  storiesSheet().appendRow([id, name, email, story, consent, 'pending', createdAt, '']);
 
     // Confirm to sender (no-reply)
     MailApp.sendEmail({
@@ -193,6 +227,11 @@ function handleContact(e) {
       return respond('Missing fields', '<p>Please provide name, email, and message.</p>', { endpoint: 'contact', name: !!name, email: !!email, message: !!message }, debug);
     }
 
+    // Persist to ContactForm sheet
+    const id = Utilities.getUuid();
+    const createdAt = nowISO();
+    contactSheet().appendRow([id, name, email, subject, message, createdAt]);
+
     // Email moderator inbox
     MailApp.sendEmail({
       to: MODERATOR_EMAIL,
@@ -236,11 +275,10 @@ function handleNewsletter(e) {
     const email = (p.email || '').toString().trim();
     if (!email) return respond('Missing fields', '<p>Please provide an email.</p>', { endpoint: 'newsletter', email: !!email }, debug);
 
-    // Optional: store to a separate sheet or a tab in same sheet
-    // Append to the same sheet with a special status row for simplicity
+    // Persist to Subscribers sheet
     const id = Utilities.getUuid();
     const createdAt = nowISO();
-    sheet().appendRow([id, 'Newsletter', email, '', '', 'newsletter', createdAt, '']);
+    subsSheet().appendRow([id, email, createdAt]);
 
     // Notify moderator (optional)
     MailApp.sendEmail({
@@ -270,7 +308,7 @@ function handleNewsletter(e) {
 // ---- Approved Stories list (JSON + JSONP) ----
 function handleStoriesList(e) {
   try {
-    const s = sheet();
+    const s = storiesSheet();
     const last = s.getLastRow();
     let out = { stories: [] };
     if (last >= 2) {
@@ -318,7 +356,7 @@ function handleModerate(e) {
   const found = findRowById(id);
   if (!found) return htmlPage('Not Found', '<p>Submission not found.</p>');
 
-  const s = sheet();
+  const s = storiesSheet();
   const rowIndex = found.rowIndex;
   const row = s.getRange(rowIndex, 1, 1, 8).getValues()[0];
   const name = row[1];
