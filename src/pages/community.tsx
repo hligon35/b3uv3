@@ -1,6 +1,6 @@
 import Layout from '@/components/Layout';
 import Image from 'next/image';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import BookImage from '@/images/content/book.png';
 import { useFormsApi } from '@/lib/useFormsApi';
 import { submitFormToEndpoint } from '@/lib/formsSubmit';
@@ -21,18 +21,19 @@ export default function CommunityPage() {
   const formRef = useRef<HTMLFormElement | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [t0, setT0] = useState('');
+  const [editorMode, setEditorMode] = useState(false);
+  const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
 
-  // Load approved stories from API if configured
-  // Load approved stories via JSONP to avoid CORS issues
-  useEffect(() => {
-    if (!formsApi) return;
+  // JSONP loader with cache-busting; returns a cleanup function
+  const loadStories = useCallback(() => {
+    if (!formsApi) return () => {};
     const cbName = `__b3uStories_${Math.random().toString(36).slice(2)}`;
     (window as any)[cbName] = (data: any) => {
       try { if (Array.isArray(data?.stories)) setStories(data.stories as Story[]); } catch {}
       try { delete (window as any)[cbName]; } catch {}
     };
     const s = document.createElement('script');
-    s.src = `${formsApi}/stories?callback=${cbName}`;
+    s.src = `${formsApi}/stories?callback=${cbName}&_ts=${Date.now()}`;
     s.async = true;
     document.body.appendChild(s);
     return () => {
@@ -41,13 +42,60 @@ export default function CommunityPage() {
     };
   }, [formsApi]);
 
+  // Load on mount and whenever formsApi changes
+  useEffect(() => {
+    const cleanup = loadStories();
+    return () => { try { cleanup && cleanup(); } catch {} };
+  }, [loadStories]);
+
+  // Refresh on tab visibility change (useful right after approving)
+  useEffect(() => {
+    const onVis = () => { if (document.visibilityState === 'visible') loadStories(); };
+    document.addEventListener('visibilitychange', onVis);
+    return () => document.removeEventListener('visibilitychange', onVis);
+  }, [loadStories]);
+
   useEffect(() => {
     try { setT0(String(Date.now())); } catch {}
+  }, []);
+  useEffect(() => {
+    // Editor mode and hidden ids from URL/localStorage for dev-only local deletions
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const ed = params.get('editor');
+      if (ed === '1' || ed === 'true') {
+        setEditorMode(true);
+        try { window.localStorage?.setItem('b3u.editor', '1'); } catch {}
+      } else {
+        try { if (window.localStorage?.getItem('b3u.editor') === '1') setEditorMode(true); } catch {}
+      }
+      try {
+        const raw = window.localStorage?.getItem('b3u.hiddenStories');
+        if (raw) {
+          const arr = JSON.parse(raw);
+          if (Array.isArray(arr)) setHiddenIds(new Set(arr.filter((x: any) => typeof x === 'string')));
+        }
+      } catch {}
+    } catch {}
   }, []);
   // debugEnabled now comes from useFormsApi; runtime override centralized
 
   const displayCount = 6; // number of cards to show at minimum
-  const visibleStories = useMemo(() => stories.slice(0, displayCount), [stories]);
+  const filteredStories = useMemo(() => stories.filter(st => !hiddenIds.has(st.id)), [stories, hiddenIds]);
+  const visibleStories = useMemo(() => filteredStories.slice(0, displayCount), [filteredStories]);
+
+  const hideStory = (id: string) => {
+    setHiddenIds(prev => {
+      const next = new Set(prev);
+      next.add(id);
+      try { window.localStorage?.setItem('b3u.hiddenStories', JSON.stringify(Array.from(next))); } catch {}
+      return next;
+    });
+  };
+  const unhideAll = () => {
+    setHiddenIds(new Set());
+    try { window.localStorage?.removeItem('b3u.hiddenStories'); } catch {}
+  };
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -79,6 +127,13 @@ export default function CommunityPage() {
         <h1 className="text-4xl font-bold mb-6">Community Stories</h1>
     <p className="max-w-2xl text-navy/80 mb-12">Real impact from real people. Share your journey and help others find strength in theirs.</p>
         {/* Share Your Story form moved directly under title and subtext */}
+        {editorMode && (
+          <div className="flex items-center gap-3 mb-6">
+            <button type="button" className="btn-outline" onClick={() => loadStories()}>Refresh stories</button>
+            <button type="button" className="btn-outline" onClick={unhideAll}>Clear local hides</button>
+            <span className="text-xs text-navy/60">Editor mode</span>
+          </div>
+        )}
         <form
           className="max-w-3xl mb-16"
           onSubmit={onSubmit}
@@ -165,6 +220,11 @@ export default function CommunityPage() {
             <div key={st.id} className="card">
               <p className="text-sm italic mb-4">“{st.story}”</p>
               <p className="text-xs text-white/60">{st.name}</p>
+              {editorMode && (
+                <div className="mt-3">
+                  <button type="button" className="text-xs text-red-200 underline" onClick={() => hideStory(st.id)}>Hide locally</button>
+                </div>
+              )}
             </div>
           ))}
           {visibleStories.length < displayCount &&
