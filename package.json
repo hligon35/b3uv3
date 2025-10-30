@@ -3,7 +3,9 @@
   "private": true,
   "version": "0.1.0",
   "scripts": {
+    "predev": "node -e \"try{require('fs').rmSync('src/pages/api',{recursive:true,force:true})}catch(e){}\"",
     "dev": "next dev",
+    "prebuild": "node -e \"try{require('fs').rmSync('src/pages/api',{recursive:true,force:true})}catch(e){}\"",
     "build": "next build",
     "build:static": "next build",
     "fetch:podcast": "node scripts/fetch-podcast.mjs 24",
