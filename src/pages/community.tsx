@@ -23,6 +23,7 @@ export default function CommunityPage() {
   const [t0, setT0] = useState('');
   const [editorMode, setEditorMode] = useState(false);
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
+  const [placeholdersOnly, setPlaceholdersOnly] = useState(false);
 
   // JSONP loader with cache-busting; returns a cleanup function
   const loadStories = useCallback(() => {
@@ -96,6 +97,13 @@ export default function CommunityPage() {
       } else {
         try { if (window.localStorage?.getItem('b3u.editor') === '1') setEditorMode(true); } catch {}
       }
+      const ph = params.get('placeholders');
+      if (ph === '1' || ph === 'true') {
+        setPlaceholdersOnly(true);
+        try { window.localStorage?.setItem('b3u.placeholdersOnly', '1'); } catch {}
+      } else {
+        try { setPlaceholdersOnly(window.localStorage?.getItem('b3u.placeholdersOnly') === '1'); } catch {}
+      }
       try {
         const raw = window.localStorage?.getItem('b3u.hiddenStories');
         if (raw) {
@@ -108,7 +116,10 @@ export default function CommunityPage() {
   // debugEnabled now comes from useFormsApi; runtime override centralized
 
   const displayCount = 6; // number of cards to show at minimum
-  const filteredStories = useMemo(() => stories.filter(st => !hiddenIds.has(st.id)), [stories, hiddenIds]);
+  const filteredStories = useMemo(() => {
+    if (placeholdersOnly) return [] as Story[];
+    return stories.filter(st => !hiddenIds.has(st.id));
+  }, [stories, hiddenIds, placeholdersOnly]);
   const visibleStories = useMemo(() => filteredStories.slice(0, displayCount), [filteredStories]);
 
   const hideStory = (id: string) => {
@@ -122,6 +133,24 @@ export default function CommunityPage() {
   const unhideAll = () => {
     setHiddenIds(new Set());
     try { window.localStorage?.removeItem('b3u.hiddenStories'); } catch {}
+  };
+  const hideAllFetched = () => {
+    setHiddenIds(prev => {
+      const next = new Set(prev);
+      for (const st of stories) next.add(st.id);
+      try { window.localStorage?.setItem('b3u.hiddenStories', JSON.stringify(Array.from(next))); } catch {}
+      return next;
+    });
+  };
+  const togglePlaceholdersOnly = () => {
+    setPlaceholdersOnly(prev => {
+      const val = !prev;
+      try {
+        if (val) window.localStorage?.setItem('b3u.placeholdersOnly', '1');
+        else window.localStorage?.removeItem('b3u.placeholdersOnly');
+      } catch {}
+      return val;
+    });
   };
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -155,9 +184,14 @@ export default function CommunityPage() {
     <p className="max-w-2xl text-navy/80 mb-12">Real impact from real people. Share your journey and help others find strength in theirs.</p>
         {/* Share Your Story form moved directly under title and subtext */}
         {editorMode && (
-          <div className="flex items-center gap-3 mb-6">
+          <div className="flex flex-wrap items-center gap-3 mb-6">
             <button type="button" className="btn-outline" onClick={() => loadStories()}>Refresh stories</button>
             <button type="button" className="btn-outline" onClick={unhideAll}>Clear local hides</button>
+            <button type="button" className="btn-outline" onClick={hideAllFetched}>Hide all fetched</button>
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={placeholdersOnly} onChange={togglePlaceholdersOnly} />
+              Show placeholders only
+            </label>
             <span className="text-xs text-navy/60">Editor mode</span>
           </div>
         )}
@@ -216,10 +250,20 @@ export default function CommunityPage() {
               <p className="mt-2 text-xs text-navy/60">Please avoid sharing sensitive personal details or names you don’t have permission to include.</p>
             </div>
 
-            <div className="mt-6 flex items-start gap-3">
-              <input id="consent" name="consent" type="checkbox" className="mt-1 h-4 w-4 rounded border-black/30 text-brandOrange focus:ring-brandOrange" />
-              <label htmlFor="consent" className="text-sm text-navy/80">I’m okay with my story (or an excerpt) being shared anonymously on the site and social channels.</label>
-            </div>
+            <fieldset className="mt-6">
+              <legend className="block text-sm font-medium text-navy mb-2">Authorize name usage</legend>
+              <p className="text-xs text-navy/60 mb-2">Choose whether we can display your name with your story.</p>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <label className="inline-flex items-center gap-2 text-sm text-navy/80">
+                  <input type="radio" name="useName" value="yes" required className="h-4 w-4 text-brandOrange focus:ring-brandOrange" />
+                  Yes — use my name in the story post
+                </label>
+                <label className="inline-flex items-center gap-2 text-sm text-navy/80">
+                  <input type="radio" name="useName" value="no" className="h-4 w-4 text-brandOrange focus:ring-brandOrange" />
+                  No — keep me anonymous
+                </label>
+              </div>
+            </fieldset>
 
             <div className="mt-6">
               <div className="flex flex-col sm:flex-row sm:items-center gap-3">
