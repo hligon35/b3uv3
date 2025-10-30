@@ -12,6 +12,8 @@ import about3 from '@/images/content/about3.jpeg';
 import about4 from '@/images/content/about4.jpeg';
 import B3ULogo from '@/images/logos/B3U3D.png';
 import { useMemo } from 'react';
+import { useFormsApi } from '@/lib/useFormsApi';
+import { submitFormToEndpoint } from '@/lib/formsSubmit';
 
 type YtVideo = { id: string; title: string; description: string; thumbnail: string; link?: string; publishedAt?: string; uploadDate?: string };
 
@@ -75,26 +77,32 @@ export default function HomePage({ videos }: HomeProps) {
   const [homeOverlay, setHomeOverlay] = useState<Record<number, boolean>>({});
   const [subscribed, setSubscribed] = useState(false);
   const [subPending, setSubPending] = useState(false);
-  const newsletterIframeRef = useRef<HTMLIFrameElement | null>(null);
   const newsletterFormRef = useRef<HTMLFormElement | null>(null);
-  const hasSubmittedRef = useRef(false);
   const [t0, setT0] = useState('');
-  const [debugEnabled, setDebugEnabled] = useState(false);
-  // Resolve Forms API at runtime with optional ?formsApi override
-  const [formsApi, setFormsApi] = useState<string>((process.env.NEXT_PUBLIC_FORMS_API || '').replace(/\/$/, ''));
+  const { formsApi, debugEnabled } = useFormsApi();
 
   const [subError, setSubError] = useState<string | null>(null);
-  function handleNewsletterSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleNewsletterSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
     if (!formsApi) {
-      e.preventDefault();
       setSubError('Subscriptions are temporarily unavailable. Please try again shortly.');
       // eslint-disable-next-line no-console
       console.warn('B3U Forms: NEXT_PUBLIC_FORMS_API is not configured; blocking newsletter submit.');
       return;
     }
     setSubError(null);
-    hasSubmittedRef.current = true;
     setSubPending(true);
+    try {
+      await submitFormToEndpoint(newsletterFormRef.current!, `${formsApi}?endpoint=newsletter`);
+      setSubscribed(true);
+      try { newsletterFormRef.current?.reset(); } catch {}
+      try { setT0(String(Date.now())); } catch {}
+      try { document.getElementById('newsletter')?.scrollIntoView({ behavior: 'smooth' }); } catch {}
+    } catch {
+      setSubError('Subscription failed. Please try again later.');
+    } finally {
+      setSubPending(false);
+    }
   }
 
   useEffect(() => {
@@ -112,74 +120,7 @@ export default function HomePage({ videos }: HomeProps) {
     try { setT0(String(Date.now())); } catch {}
   }, []);
 
-  useEffect(() => {
-    try {
-      const params = new URLSearchParams(window.location.search);
-      setDebugEnabled(params.get('debug') === '1' || params.get('debug') === 'true');
-    } catch {}
-  }, []);
-
-  useEffect(() => {
-    // Runtime forms API override via ?formsApi=
-    try {
-      const params = new URLSearchParams(window.location.search);
-      const override = params.get('formsApi') || params.get('formsapi') || params.get('forms_api');
-      const envBase = (process.env.NEXT_PUBLIC_FORMS_API || '').replace(/\/$/, '');
-      let next = envBase;
-      try {
-        const saved = window.sessionStorage?.getItem('b3u.formsApi');
-        if (saved) next = saved;
-      } catch {}
-      if (override) {
-        const raw = override.trim();
-        if (/^(clear|env)$/i.test(raw)) {
-          try { window.sessionStorage?.removeItem('b3u.formsApi'); } catch {}
-          setFormsApi(envBase);
-          return;
-        }
-        let candidate = raw;
-        if (!/^https?:\/\//i.test(candidate)) candidate = 'https://' + candidate;
-        try {
-          const u = new URL(candidate);
-          if (u.protocol === 'https:' || u.protocol === 'http:') {
-            next = candidate.replace(/\/$/, '');
-            try { window.sessionStorage?.setItem('b3u.formsApi', next); } catch {}
-          }
-        } catch {}
-      }
-      setFormsApi(next);
-    } catch {}
-  }, []);
-
-  useEffect(() => {
-    const iframe = newsletterIframeRef.current;
-    if (!iframe) return;
-    const onLoad = () => {
-      if (!hasSubmittedRef.current) return;
-      setSubscribed(true);
-      setSubPending(false);
-      try { newsletterFormRef.current?.reset(); } catch {}
-      try { setT0(String(Date.now())); } catch {}
-      try { document.getElementById('newsletter')?.scrollIntoView({ behavior: 'smooth' }); } catch {}
-      hasSubmittedRef.current = false;
-    };
-    iframe.addEventListener('load', onLoad);
-    return () => {
-      iframe.removeEventListener('load', onLoad);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!debugEnabled) return;
-    const onMsg = (ev: MessageEvent) => {
-      if (ev?.data?.source === 'b3u-forms') {
-        // eslint-disable-next-line no-console
-        console.log('B3U Forms Debug (newsletter home):', ev.data.debug);
-      }
-    };
-    window.addEventListener('message', onMsg);
-    return () => window.removeEventListener('message', onMsg);
-  }, [debugEnabled]);
+  // Debug postMessage via iframe removed.
 
   return (
     <Layout>
@@ -393,10 +334,7 @@ export default function HomePage({ videos }: HomeProps) {
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Join "The Take Back Weekly"</h2>
           <p className="text-navy/70 mb-6">Get new episodes, inspiration, and community opportunities delivered to your inbox.</p>
           <form
-            action={formsApi ? `${formsApi}?endpoint=newsletter` : undefined}
-            method="POST"
             className="flex flex-col sm:flex-row gap-4 justify-center"
-            target="newsletter_iframe"
             onSubmit={handleNewsletterSubmit}
             ref={newsletterFormRef}
           >
@@ -425,8 +363,7 @@ export default function HomePage({ videos }: HomeProps) {
               </div>
             )}
           </form>
-          {/* Hidden iframe target to avoid navigation and CORS */}
-          <iframe name="newsletter_iframe" ref={newsletterIframeRef} className="hidden" title="newsletter_iframe" />
+          {/* Iframe removed: switched to fetch-based submission with no-cors fallback */}
         </div>
       </section>
     </Layout>

@@ -2,96 +2,41 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 import B3ULogo from '@/images/logos/B3U3D.png';
+import { useFormsApi } from '@/lib/useFormsApi';
+import { submitFormToEndpoint } from '@/lib/formsSubmit';
 
 export default function Footer() {
-  // Resolve Forms API at runtime with optional ?formsApi override
-  const [formsApi, setFormsApi] = useState<string>((process.env.NEXT_PUBLIC_FORMS_API || '').replace(/\/$/, ''));
+  const { formsApi, debugEnabled } = useFormsApi();
   const [footSubbed, setFootSubbed] = useState(false);
   const [footPending, setFootPending] = useState(false);
   const [footError, setFootError] = useState<string | null>(null);
   const [t0, setT0] = useState('');
-  const footIframeRef = useRef<HTMLIFrameElement | null>(null);
   const footFormRef = useRef<HTMLFormElement | null>(null);
-  const hasSubmittedRef = useRef(false);
-  const [debugEnabled, setDebugEnabled] = useState(false);
-  const onFootSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
+  const onFootSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
+    e.preventDefault();
     if (!formsApi) {
-      e.preventDefault();
       setFootError('Subscriptions are temporarily unavailable. Please try again shortly.');
       // eslint-disable-next-line no-console
       console.warn('B3U Forms: NEXT_PUBLIC_FORMS_API is not configured; blocking footer newsletter submit.');
       return;
     }
     setFootError(null);
-    hasSubmittedRef.current = true;
     setFootPending(true);
+    try {
+      await submitFormToEndpoint(footFormRef.current!, `${formsApi}?endpoint=newsletter`);
+      setFootSubbed(true);
+      try { footFormRef.current?.reset(); } catch {}
+      try { setT0(String(Date.now())); } catch {}
+    } catch {
+      setFootError('Subscription failed. Please try again later.');
+    } finally {
+      setFootPending(false);
+    }
   };
   useEffect(() => {
     try { setT0(String(Date.now())); } catch {}
   }, []);
-  useEffect(() => {
-    try {
-      const params = new URLSearchParams(window.location.search);
-      setDebugEnabled(params.get('debug') === '1' || params.get('debug') === 'true');
-    } catch {}
-  }, []);
-  useEffect(() => {
-    // Runtime forms API override via ?formsApi=
-    try {
-      const params = new URLSearchParams(window.location.search);
-      const override = params.get('formsApi') || params.get('formsapi') || params.get('forms_api');
-      const envBase = (process.env.NEXT_PUBLIC_FORMS_API || '').replace(/\/$/, '');
-      let next = envBase;
-      try {
-        const saved = window.sessionStorage?.getItem('b3u.formsApi');
-        if (saved) next = saved;
-      } catch {}
-      if (override) {
-        const raw = override.trim();
-        if (/^(clear|env)$/i.test(raw)) {
-          try { window.sessionStorage?.removeItem('b3u.formsApi'); } catch {}
-          setFormsApi(envBase);
-          return;
-        }
-        let candidate = raw;
-        if (!/^https?:\/\//i.test(candidate)) candidate = 'https://' + candidate;
-        try {
-          const u = new URL(candidate);
-          if (u.protocol === 'https:' || u.protocol === 'http:') {
-            next = candidate.replace(/\/$/, '');
-            try { window.sessionStorage?.setItem('b3u.formsApi', next); } catch {}
-          }
-        } catch {}
-      }
-      setFormsApi(next);
-    } catch {}
-  }, []);
-  useEffect(() => {
-    const iframe = footIframeRef.current;
-    if (!iframe) return;
-    const onLoad = () => {
-      if (!hasSubmittedRef.current) return;
-      setFootSubbed(true);
-      setFootPending(false);
-      setFootError(null);
-      try { footFormRef.current?.reset(); } catch {}
-      try { setT0(String(Date.now())); } catch {}
-      hasSubmittedRef.current = false;
-    };
-    iframe.addEventListener('load', onLoad);
-    return () => iframe.removeEventListener('load', onLoad);
-  }, []);
-  useEffect(() => {
-    if (!debugEnabled) return;
-    const onMsg = (ev: MessageEvent) => {
-      if (ev?.data?.source === 'b3u-forms') {
-        // eslint-disable-next-line no-console
-        console.log('B3U Forms Debug (newsletter footer):', ev.data.debug);
-      }
-    };
-    window.addEventListener('message', onMsg);
-    return () => window.removeEventListener('message', onMsg);
-  }, [debugEnabled]);
+  // Debug postMessage via iframe removed.
   return (
     <footer className="bg-navy text-white border-t border-white/10 mt-32">
       <div className="section-padding grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 md:gap-12">
@@ -150,10 +95,7 @@ export default function Footer() {
           <h4 className="font-semibold mb-3 text-brandOrange">The Take Back Weekly</h4>
           <p className="text-sm text-white/70 mb-3">Get new episodes, inspiration, and community opportunities delivered to your inbox.</p>
           <form
-            action={formsApi ? `${formsApi}?endpoint=newsletter` : undefined}
-            method="POST"
             className="space-y-3"
-            target="footer_news_iframe"
             onSubmit={onFootSubmit}
             ref={footFormRef}
           >
@@ -172,7 +114,7 @@ export default function Footer() {
               <div className="text-red-200 bg-red-900/30 border border-red-700/50 rounded-md px-3 py-2 text-xs">{footError}</div>
             )}
           </form>
-          <iframe name="footer_news_iframe" ref={footIframeRef} className="hidden" title="footer_news_iframe" />
+          {/* Iframe removed: switched to fetch-based submission with no-cors fallback */}
         </div>
       </div>
       <div className="text-center py-6 text-xs text-white/50">© {new Date().getFullYear()} B3U. All rights reserved.</div>

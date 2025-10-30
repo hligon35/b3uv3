@@ -2,6 +2,8 @@ import Layout from '@/components/Layout';
 import Image from 'next/image';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import BookImage from '@/images/content/book.png';
+import { useFormsApi } from '@/lib/useFormsApi';
+import { submitFormToEndpoint } from '@/lib/formsSubmit';
 
 type Story = {
   id: string;
@@ -11,20 +13,14 @@ type Story = {
   createdAt?: string;
 };
 
-// Forms API base; resolved at runtime with optional ?formsApi override
-const ENV_FORMS_API = (process.env.NEXT_PUBLIC_FORMS_API || '').replace(/\/$/, '');
-
 export default function CommunityPage() {
-  const [formsApi, setFormsApi] = useState<string>(ENV_FORMS_API);
+  const { formsApi, debugEnabled } = useFormsApi();
   const [stories, setStories] = useState<Story[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const storyIframeRef = useRef<HTMLIFrameElement | null>(null);
   const formRef = useRef<HTMLFormElement | null>(null);
-  const hasSubmittedRef = useRef(false);
   const [error, setError] = useState<string | null>(null);
   const [t0, setT0] = useState('');
-  const [debugEnabled, setDebugEnabled] = useState(false);
 
   // Load approved stories from API if configured
   // Load approved stories via JSONP to avoid CORS issues
@@ -48,86 +44,34 @@ export default function CommunityPage() {
   useEffect(() => {
     try { setT0(String(Date.now())); } catch {}
   }, []);
-  useEffect(() => {
-    try {
-      const params = new URLSearchParams(window.location.search);
-      setDebugEnabled(params.get('debug') === '1' || params.get('debug') === 'true');
-    } catch {}
-  }, []);
-
-  useEffect(() => {
-    // Resolve formsApi from URL (?formsApi=...) at runtime, fallback to env
-    try {
-      const params = new URLSearchParams(window.location.search);
-      const override = params.get('formsApi') || params.get('formsapi') || params.get('forms_api');
-      const envBase = ENV_FORMS_API;
-      let next = envBase;
-      try {
-        const saved = window.sessionStorage?.getItem('b3u.formsApi');
-        if (saved) next = saved;
-      } catch {}
-      if (override) {
-        const raw = override.trim();
-        if (/^(clear|env)$/i.test(raw)) {
-          try { window.sessionStorage?.removeItem('b3u.formsApi'); } catch {}
-          setFormsApi(envBase);
-          return;
-        }
-        let candidate = raw;
-        if (!/^https?:\/\//i.test(candidate)) candidate = 'https://' + candidate;
-        try {
-          const u = new URL(candidate);
-          if (u.protocol === 'https:' || u.protocol === 'http:') {
-            next = candidate.replace(/\/$/, '');
-            try { window.sessionStorage?.setItem('b3u.formsApi', next); } catch {}
-          }
-        } catch {}
-      }
-      setFormsApi(next);
-    } catch {}
-  }, []);
+  // debugEnabled now comes from useFormsApi; runtime override centralized
 
   const displayCount = 6; // number of cards to show at minimum
   const visibleStories = useMemo(() => stories.slice(0, displayCount), [stories]);
 
-  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
     if (!formsApi) {
-      e.preventDefault();
       setError('Submissions are temporarily unavailable. Please try again shortly.');
       // eslint-disable-next-line no-console
       console.warn('B3U Forms: NEXT_PUBLIC_FORMS_API is not configured; blocking story submit.');
       return;
     }
     setError(null);
-    hasSubmittedRef.current = true;
     setSubmitting(true);
-  }
-
-  useEffect(() => {
-    const iframe = storyIframeRef.current;
-    if (!iframe) return;
-    const onLoad = () => {
-      if (!hasSubmittedRef.current) return;
+    try {
+      await submitFormToEndpoint(formRef.current!, `${formsApi}?endpoint=submit`);
       setSubmitted(true);
-      setSubmitting(false);
       try { formRef.current?.reset(); } catch {}
       try { setT0(String(Date.now())); } catch {}
-      hasSubmittedRef.current = false;
-    };
-    iframe.addEventListener('load', onLoad);
-    return () => iframe.removeEventListener('load', onLoad);
-  }, []);
-  useEffect(() => {
-    if (!debugEnabled) return;
-    const onMsg = (ev: MessageEvent) => {
-      if (ev?.data?.source === 'b3u-forms') {
-        // eslint-disable-next-line no-console
-        console.log('B3U Forms Debug (story submit):', ev.data.debug);
-      }
-    };
-    window.addEventListener('message', onMsg);
-    return () => window.removeEventListener('message', onMsg);
-  }, [debugEnabled]);
+    } catch {
+      setError('Submission failed. Please try again later.');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  // Iframe postMessage debug removed.
   return (
     <Layout>
   <section className="section-padding bg-white">
@@ -137,9 +81,6 @@ export default function CommunityPage() {
         <form
           className="max-w-3xl mb-16"
           onSubmit={onSubmit}
-          action={formsApi ? `${formsApi}?endpoint=submit` : undefined}
-          method="POST"
-          target="story_iframe"
           ref={formRef}
         >
           {/* bot protection: honeypot + timestamp */}
@@ -216,8 +157,7 @@ export default function CommunityPage() {
             </div>
           </div>
         </form>
-        {/* Hidden iframe target to avoid navigation and CORS */}
-        <iframe name="story_iframe" ref={storyIframeRef} className="hidden" title="story_iframe" />
+  {/* Iframe removed: switched to fetch-based submission with no-cors fallback */}
         <div className="grid md:grid-cols-3 gap-8 mb-16">
           {/* Render approved stories if available; otherwise show placeholders. If fewer than placeholders, fill remaining with placeholders. */}
           {visibleStories.map((st) => (
