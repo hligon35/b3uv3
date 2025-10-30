@@ -13,6 +13,7 @@ export default function ContactPage() {
 
   const onSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
+    if (pending) return; // guard against double-clicks
     if (!formsApi) {
       // eslint-disable-next-line no-console
       console.warn('B3U Forms: NEXT_PUBLIC_FORMS_API is not configured; blocking submit to avoid 405.');
@@ -110,7 +111,7 @@ export default function ContactPage() {
                     className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-brandOrange focus:outline-none transition-colors bg-gray-50 focus:bg-white resize-none" 
                   />
                 </div>
-                <button className="btn-primary w-full py-3 text-lg font-semibold" type="submit">
+                <button className="btn-primary w-full py-3 text-lg font-semibold disabled:opacity-50" type="submit" disabled={pending}>
                   {pending ? 'Sending…' : 'Send Message'}
                 </button>
                 {sent && (

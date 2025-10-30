@@ -51,6 +51,7 @@ export default function CommunityPage() {
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (submitting) return; // guard against double submissions
     if (!formsApi) {
       setError('Submissions are temporarily unavailable. Please try again shortly.');
       // eslint-disable-next-line no-console

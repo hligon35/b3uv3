@@ -14,6 +14,7 @@ export default function Footer() {
   const footFormRef = useRef<HTMLFormElement | null>(null);
   const onFootSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
+    if (footPending) return; // guard against double submissions
     if (!formsApi) {
       setFootError('Subscriptions are temporarily unavailable. Please try again shortly.');
       // eslint-disable-next-line no-console

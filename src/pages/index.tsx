@@ -84,6 +84,7 @@ export default function HomePage({ videos }: HomeProps) {
   const [subError, setSubError] = useState<string | null>(null);
   async function handleNewsletterSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (subPending) return; // guard against double submissions
     if (!formsApi) {
       setSubError('Subscriptions are temporarily unavailable. Please try again shortly.');
       // eslint-disable-next-line no-console
