@@ -27,18 +27,45 @@ export default function CommunityPage() {
   // JSONP loader with cache-busting; returns a cleanup function
   const loadStories = useCallback(() => {
     if (!formsApi) return () => {};
-    const cbName = `__b3uStories_${Math.random().toString(36).slice(2)}`;
-    (window as any)[cbName] = (data: any) => {
-      try { if (Array.isArray(data?.stories)) setStories(data.stories as Story[]); } catch {}
-      try { delete (window as any)[cbName]; } catch {}
+    let cleaned = false;
+    let loaded = false;
+    const cleanupFns: Array<() => void> = [];
+
+    const attachJsonp = (url: string) => {
+      const cbName = `__b3uStories_${Math.random().toString(36).slice(2)}`;
+      (window as any)[cbName] = (data: any) => {
+        try {
+          if (Array.isArray(data?.stories)) {
+            loaded = true;
+            setStories(data.stories as Story[]);
+          }
+        } catch {}
+        try { delete (window as any)[cbName]; } catch {}
+      };
+      const s = document.createElement('script');
+      s.src = `${url}${url.includes('?') ? '&' : '?'}callback=${cbName}&_ts=${Date.now()}`;
+      s.async = true;
+      document.body.appendChild(s);
+      const c = () => {
+        try { document.body.removeChild(s); } catch {}
+        try { delete (window as any)[cbName]; } catch {}
+      };
+      cleanupFns.push(c);
     };
-    const s = document.createElement('script');
-    s.src = `${formsApi}/stories?callback=${cbName}&_ts=${Date.now()}`;
-    s.async = true;
-    document.body.appendChild(s);
+
+    // Primary: query-string endpoint routing (more reliable in Apps Script)
+    attachJsonp(`${formsApi}?endpoint=stories`);
+
+    // Fallback shortly after if the first didn’t load
+    const timer = window.setTimeout(() => {
+      if (!loaded) attachJsonp(`${formsApi}/stories`);
+    }, 700);
+
     return () => {
-      try { document.body.removeChild(s); } catch {}
-      try { delete (window as any)[cbName]; } catch {}
+      if (cleaned) return;
+      cleaned = true;
+      try { window.clearTimeout(timer); } catch {}
+      cleanupFns.forEach(fn => { try { fn(); } catch {} });
     };
   }, [formsApi]);
 
