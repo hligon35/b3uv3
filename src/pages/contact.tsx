@@ -11,6 +11,7 @@ export default function ContactPage() {
   const formRef = useRef<HTMLFormElement | null>(null);
   const hasSubmittedRef = useRef(false);
   const [debugEnabled, setDebugEnabled] = useState(false);
+  const [overrideInput, setOverrideInput] = useState('');
 
   const onSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
     if (!formsApi) {
@@ -110,6 +111,41 @@ export default function ContactPage() {
             <h1 className="text-4xl md:text-5xl font-bold mb-6 text-navy">Get in Touch</h1>
             <p className="text-xl text-navy/80 max-w-2xl mx-auto">Questions, collaboration ideas, partnership inquiries, or just want to share your story? We'd love to hear from you.</p>
           </div>
+          {!formsApi && (
+            <div className="mb-8 rounded-lg border-2 border-yellow-300 bg-yellow-50 p-4 text-sm text-yellow-900">
+              <p className="font-semibold mb-2">Forms backend isn’t configured for this build.</p>
+              <p className="mb-3">For a quick test in production, paste your Apps Script Web App URL (…/exec) below and click Set. This stores a temporary override in your browser session and enables the form without a rebuild.</p>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input
+                  className="flex-1 rounded-md border border-yellow-300 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brandOrange"
+                  placeholder="https://script.google.com/macros/s/…/exec"
+                  value={overrideInput}
+                  onChange={(e) => setOverrideInput(e.target.value)}
+                />
+                <button
+                  type="button"
+                  className="btn-primary"
+                  onClick={() => {
+                    let cand = overrideInput.trim();
+                    if (!cand) return;
+                    if (!/^https?:\/\//i.test(cand)) cand = 'https://' + cand;
+                    try {
+                      const u = new URL(cand);
+                      if (u.protocol === 'https:' || u.protocol === 'http:') {
+                        const val = cand.replace(/\/$/, '');
+                        try { window.sessionStorage?.setItem('b3u.formsApi', val); } catch {}
+                        setFormsApi(val);
+                        setOverrideInput('');
+                      }
+                    } catch {}
+                  }}
+                >
+                  Set Forms API
+                </button>
+              </div>
+              <p className="mt-2">Long-term fix: set <code className="font-mono">NEXT_PUBLIC_FORMS_API</code> in GitHub → Settings → Secrets and variables → Actions → Variables, then redeploy.</p>
+            </div>
+          )}
           
           <div className="grid md:grid-cols-2 gap-12 items-start">
             {/* Contact Form */}
