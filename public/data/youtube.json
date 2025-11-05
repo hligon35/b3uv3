@@ -1,9 +1,25 @@
 {
   "source": "https://www.youtube.com/feeds/videos.xml?channel_id=UCSrtA1gGlgo4cQUzoSlzZ5w",
   "channelId": "UCSrtA1gGlgo4cQUzoSlzZ5w",
-  "fetchedAt": "2025-10-22T16:50:21.793Z",
+  "fetchedAt": "2025-11-05T20:49:12.980Z",
   "count": 6,
   "videos": [
+    {
+      "id": "0wVgPjk5p3I",
+      "title": "Justice For Jaden w/ Naoki Hisey part 2",
+      "description": "",
+      "thumbnail": "https://img.youtube.com/vi/0wVgPjk5p3I/hqdefault.jpg",
+      "publishedAt": "November 3, 2025",
+      "link": "https://www.youtube.com/watch?v=0wVgPjk5p3I"
+    },
+    {
+      "id": "3_kHfApUhmo",
+      "title": "Justice for Jaden w/ Naoki Hisey Part 1",
+      "description": "",
+      "thumbnail": "https://img.youtube.com/vi/3_kHfApUhmo/hqdefault.jpg",
+      "publishedAt": "October 27, 2025",
+      "link": "https://www.youtube.com/watch?v=3_kHfApUhmo"
+    },
     {
       "id": "6ftUmpAkQXk",
       "title": "Addiction & How to Fight It w/ Bree Charles",
@@ -29,28 +45,12 @@
       "link": "https://www.youtube.com/watch?v=BiL6SWnquUI"
     },
     {
-      "id": "8f0zkRp3VUc",
-      "title": "The Altar Experience w/ Prophetess Moina Tucker",
+      "id": "L6GFWdo3VYI",
+      "title": "Reclaim Session w/ Ashley Brown",
       "description": "",
-      "thumbnail": "https://img.youtube.com/vi/8f0zkRp3VUc/hqdefault.jpg",
-      "publishedAt": "September 26, 2025",
-      "link": "https://www.youtube.com/watch?v=8f0zkRp3VUc"
-    },
-    {
-      "id": "KxyISQUoBWk",
-      "title": "The Altar Experience w/ Chenia Hughes",
-      "description": "",
-      "thumbnail": "https://img.youtube.com/vi/KxyISQUoBWk/hqdefault.jpg",
-      "publishedAt": "September 22, 2025",
-      "link": "https://www.youtube.com/watch?v=KxyISQUoBWk"
-    },
-    {
-      "id": "LUu8ltxQuLk",
-      "title": "Altar Experience w/ Dr Teresa Hegwood",
-      "description": "",
-      "thumbnail": "https://img.youtube.com/vi/LUu8ltxQuLk/hqdefault.jpg",
-      "publishedAt": "September 19, 2025",
-      "link": "https://www.youtube.com/watch?v=LUu8ltxQuLk"
+      "thumbnail": "https://img.youtube.com/vi/L6GFWdo3VYI/hqdefault.jpg",
+      "publishedAt": "October 22, 2025",
+      "link": "https://www.youtube.com/watch?v=L6GFWdo3VYI"
     }
   ]
 }
