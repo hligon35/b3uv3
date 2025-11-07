@@ -13,7 +13,7 @@ export default function Hero() {
           alt="Bree Charles hero background"
           fill
           priority
-          className="object-cover object-center opacity-30"
+          className="object-cover object-[center_10%] opacity-30"
           sizes="100vw"
         />
       </div>

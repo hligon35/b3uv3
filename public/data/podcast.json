@@ -1,8 +1,30 @@
 {
   "source": "https://feeds.buzzsprout.com/2467135.rss",
-  "fetchedAt": "2025-10-22T16:50:20.333Z",
-  "count": 21,
+  "fetchedAt": "2025-11-05T20:43:04.756Z",
+  "count": 23,
   "episodes": [
+    {
+      "id": "Buzzsprout-18113008",
+      "title": "Justice For Jaden w/ Naoki Hisey part 2",
+      "category": "General",
+      "duration": "2414",
+      "date": "November 3, 2025",
+      "description": "Send us a text Picking up in the second half of this two-part episode, we follow a mother’s fight to protect her autistic son, Jaden, from relentless bullying while exposing how schools often replace prevention with paperwork and silence. We explore the difference between punitive labels and proactive supports, the misuse of IEPs and 504 plans, and the hidden costs of outsourced mental health, sub-clinics, and digital spaces that fuel cruelty. The conversation widens to culture and identity as medicine, Afro-Indigenous roots, and the small miracles that sustain families when institutions fail. With clear stances on modern debates, we separate real care from social-media theatrics, urge caution around irreversible medical choices for minors, and call for accountability that doesn’t scapegoat kids with differences. Beyond critique, we propose solutions—from classroom aides and independent oversight to lending lockers, coat drives, and even five-dollar donations that help families escape violence—showing how empathy and boundaries can coexist to build safer schools and stronger communities. https://www.facebook.com/bree.b3u https://www.instagram.com/burnbreakbecomeunstoppable",
+      "link": "",
+      "audioUrl": "https://www.buzzsprout.com/2467135/episodes/18113008-justice-for-jaden-w-naoki-hisey-part-2.mp3",
+      "imageUrl": "https://storage.buzzsprout.com/crzlrv7bfcx1ouz2c4o5qlm1a645?.jpg"
+    },
+    {
+      "id": "Buzzsprout-18083861",
+      "title": "Justice for Jaden w/ Naoki Hisey",
+      "category": "General",
+      "duration": "2245",
+      "date": "October 27, 2025",
+      "description": "Send us a text This episode, Naoki tells the story of her son, a Black autistic teen whose survival hinged on jujitsu and a stranger’s kindness after years of ignored harassment escalated to an attempted murder. Through her voice, we trace systemic failures—from misreading autism as defiance, to racial stereotyping, to privacy violations by educators—that compounded his vulnerability. The conversation isn’t about shock; it’s a blueprint for prevention, outlining real fixes like mandatory mental health evaluations, forensic assessments, enforceable safety plans, in-school clinicians, and leadership stability. At its core, it’s a call for schools and communities to replace neglect with accountability so kids like Jaden can live as students, not survivors. https://www.facebook.com/bree.b3u https://www.instagram.com/burnbreakbecomeunstoppable",
+      "link": "",
+      "audioUrl": "https://www.buzzsprout.com/2467135/episodes/18083861-justice-for-jaden-w-naoki-hisey.mp3",
+      "imageUrl": "https://storage.buzzsprout.com/crzlrv7bfcx1ouz2c4o5qlm1a645?.jpg"
+    },
     {
       "id": "Buzzsprout-18045119",
       "title": "Addiction & How to Fight It!",

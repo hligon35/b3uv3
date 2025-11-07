@@ -3,10 +3,10 @@ name: Refresh Content and Deploy
 on:
   workflow_dispatch: {}
   schedule:
-    # Mondays at 6:00 PM America/Indiana/Indianapolis
-    # GitHub cron uses UTC. To cover DST changes, run at 22:00 UTC (EDT, UTC-4) and 23:00 UTC (EST, UTC-5)
-    - cron: '0 22 * * 1'
-    - cron: '0 23 * * 1'
+    # Mondays at 6:15 PM America/Indiana/Indianapolis
+    # GitHub cron uses UTC. To cover DST changes, run at 22:15 UTC (EDT, UTC-4) and 23:15 UTC (EST, UTC-5)
+    - cron: '15 22 * * 1'
+    - cron: '15 23 * * 1'
 
 env:
   TZ: America/Indiana/Indianapolis

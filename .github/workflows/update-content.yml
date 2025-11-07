@@ -2,10 +2,9 @@ name: Update multimedia content
 
 on:
   schedule:
-    # Monday 23:00 UTC (7pm during EDT)
-    - cron: '0 23 * * 1'
-    # Tuesday 00:00 UTC (7pm Monday during EST)
-    - cron: '0 0 * * 2'
+    # Mondays at 22:15 UTC (6:15pm during EDT) and 23:15 UTC (6:15pm during EST)
+    - cron: '15 22 * * 1'
+    - cron: '15 23 * * 1'
   workflow_dispatch: {}
 
 permissions:
@@ -32,7 +31,7 @@ jobs:
       - name: Decide local time window (America/Indiana/Indianapolis)
         id: window
         run: |
-          node -e "const z='America/Indiana/Indianapolis'; const d=new Date(); const parts=new Intl.DateTimeFormat('en-US',{ timeZone:z, weekday:'short', hour:'2-digit', hourCycle:'h23'}).formatToParts(d); const day=parts.find(p=>p.type==='weekday').value; const hour=parseInt(parts.find(p=>p.type==='hour').value,10); const ok=(day==='Mon' && hour===19); console.log('run='+ok); require('fs').writeFileSync(process.env.GITHUB_OUTPUT, `run=${ok}\n`);"
+          node -e "const z='America/Indiana/Indianapolis'; const d=new Date(); const parts=new Intl.DateTimeFormat('en-US',{ timeZone:z, weekday:'short', hour:'2-digit', minute:'2-digit', hourCycle:'h23'}).formatToParts(d); const day=parts.find(p=>p.type==='weekday').value; const hour=parseInt(parts.find(p=>p.type==='hour').value,10); const minute=parseInt(parts.find(p=>p.type==='minute').value,10); const ok=(day==='Mon' && hour===18 && minute===15); console.log('run='+ok); if(process.env.GITHUB_OUTPUT){ require('fs').appendFileSync(process.env.GITHUB_OUTPUT, 'run='+ok+'\n'); }"
 
       - name: Refresh YouTube and Podcast data
         if: ${{ steps.window.outputs.run == 'true' }}
