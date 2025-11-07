@@ -2,6 +2,7 @@ import Layout from '@/components/Layout';
 import Image from 'next/image';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import BookImage from '@/images/content/book.png';
+import SpeakEngag from '@/images/content/speakEngag.png';
 import { useFormsApi } from '@/lib/useFormsApi';
 import { submitFormToEndpoint } from '@/lib/formsSubmit';
 
@@ -331,13 +332,19 @@ export default function CommunityPage() {
 
           {/* Speaking Engagement Event Card */}
           <div className="card p-0 overflow-hidden">
-            <div className="relative h-56 grid place-items-center bg-white">
-              <span className="text-5xl md:text-6xl font-extrabold tracking-wide text-navy">TBA</span>
-              <span className="absolute top-3 left-3 bg-brandOrange text-white text-xs font-semibold px-3 py-1 rounded-full">Coming Soon</span>
+            <div className="relative h-56 bg-white">
+              <Image
+                src={SpeakEngag}
+                alt="Hanover NAACP Honors Our Veterans event flyer"
+                fill
+                className="object-contain p-2"
+                sizes="(max-width: 768px) 100vw, 50vw"
+              />
+              <span className="absolute top-3 left-3 bg-brandOrange text-white text-xs font-semibold px-3 py-1 rounded-full">Speaking Engagement</span>
             </div>
             <div className="p-6">
-              <h3 className="text-xl font-bold mb-2">Speaking Engagement</h3>
-              <p className="text-navy/70 text-sm">Dates and locations will be announced here soon.</p>
+              <h3 className="text-xl font-bold mb-2">Veterans Dinner — Nov 11 @ 6:30 PM</h3>
+              <p className="text-navy/70 text-sm">Kitchen 33 • 13155 Mountain Rd, Glen Allen, VA 23059 • Veterans eat free</p>
             </div>
           </div>
         </div>
