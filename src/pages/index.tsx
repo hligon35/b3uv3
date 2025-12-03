@@ -294,7 +294,7 @@ export default function HomePage({ videos }: HomeProps) {
                 />
               </div>
               <div>
-                <p className="font-semibold text-sm">UNKNOWN</p>
+                <p className="font-semibold text-sm">Brenda Johnson</p>
               </div>
             </div>
           </div>
