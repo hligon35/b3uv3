@@ -11,6 +11,8 @@ import about2 from '@/images/content/about2.jpeg';
 import about3 from '@/images/content/about3.jpeg';
 import about4 from '@/images/content/about4.jpeg';
 import B3ULogo from '@/images/logos/B3U3D.png';
+import Test1 from '@/images/content/test1.JPG';
+import Test2 from '@/images/content/test2.JPEG';
 import { useMemo } from 'react';
 import { useFormsApi } from '@/lib/useFormsApi';
 import { submitFormToEndpoint } from '@/lib/formsSubmit';
@@ -250,44 +252,54 @@ export default function HomePage({ videos }: HomeProps) {
           ))}
         </div>
       </section>
-      {/* <section id="community" className="section-padding alt-band">
+      <section id="community" className="section-padding alt-band">
         <div className="text-center mb-12 max-w-3xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">The Take Back Community</h2>
           <p className="text-white/90">Stories from listeners who have found the courage to burn away fear, break cycles, and become unstoppable.</p>
         </div>
-        <div className="grid md:grid-cols-3 gap-8">
-          <div className="card">
-            <p className="italic text-sm mb-4">"Bree's story gave me permission to heal. The B3U podcast reminded me that my pain could become my purpose."</p>
-            <div className="flex items-center gap-3">
-              <span className="h-10 w-10 rounded-full bg-[url('https://picsum.photos/100/100?portrait=1')] bg-cover bg-center" />
+        <div className="grid md:grid-cols-2 gap-15 justify-items-center">
+          <div className="card w-auto max-w-xl text-center">
+            <p className="italic text-sm mb-4">"Bree is a woman whose strength speaks louder than any obstacle she has faced. She has walked through storms that would have broken the ordinary woman, yet she stands today not just surviving, but shining. Her resilience is not accidental; it is built from battles fought quietly, tears wiped privately, and faith held firmly even when the path made no sense.</p>
+
+            <p className="italic text-sm mb-4">What makes Bree remarkable isn’t just what she has overcome, but the grace with which she continues to rise. She has carried burdens that many will never see, but she refuses to let those burdens define her. Instead, she uses her story as fuel to grow, to inspire, and to demonstrate what true courage looks like.</p>
+
+            <p className="italic text-sm mb-4">Bree is proof that you can be tried, stretched, and tested, yet still emerge stronger, wiser, and more determined. Her journey is a testament to perseverance, heart, and the unshakeable spirit of a woman who simply refuses to be defeated. Anyone who knows Bree knows they are witnessing the kind of strength that changes lives and the kind of resilience that leaves a lasting mark.</p>
+
+            <p className="italic text-sm mb-4">She is extraordinary, not because life has been easy, but because she has risen beautifully above everything meant to break her."</p>
+            <div className="flex flex-col items-center gap-3 text-center">
+              <div className="rounded-full overflow-hidden h-[120px] w-[120px]">
+                <Image
+                  src={Test2}
+                  alt="Dr. Monica R. Smith"
+                  width={120}
+                  height={120}
+                  className="object-cover object-center"
+                />
+              </div>
               <div>
-                <p className="font-semibold text-sm">Sarah M.</p>
-                <p className="text-xs text-white/50">Survivor & Advocate</p>
+                <p className="font-semibold text-sm">Dr. Monica R. Smith</p>
               </div>
             </div>
           </div>
-          <div className="card">
-            <p className="italic text-sm mb-4">"Every episode is a masterclass in resilience. Bree's authenticity and faith inspire me to keep pushing forward."</p>
-            <div className="flex items-center gap-3">
-              <span className="h-10 w-10 rounded-full bg-[url('https://picsum.photos/100/100?portrait=2')] bg-cover bg-center" />
-              <div>
-                <p className="font-semibold text-sm">Marcus J.</p>
-                <p className="text-xs text-white/50">Veteran & Entrepreneur</p>
+          <div className="card w-auto max-w-xl text-center">
+            <p className="italic text-sm mb-4">"B3U has truly been a blessing in my life. Watching the show and following each episode has inspired me in ways I didn’t expect. Every story, every message, and every moment has encouraged me to keep pushing forward, stay true to my purpose, and continue sharing my own testimony with others. The transparency and strength shown on B3U remind me that growth is possible, healing is real, and God can use our stories to uplift someone else. I’m grateful for how this show pours into its viewers, including me, and I look forward to every episode that reminds us we are becoming better, braver, and bolder—one step at a time. "</p>
+            <div className="flex flex-col items-center gap-3 text-center">
+              <div className="rounded-full overflow-hidden h-[120px] w-[120px]">
+                <Image
+                  src={Test1}
+                  alt="UNKNOWN"
+                  width={120}
+                  height={120}
+                  className="object-cover object-center"
+                />
               </div>
-            </div>
-          </div>
-          <div className="card">
-            <p className="italic text-sm mb-4">"The Big Take Back isn't just a message, it's a movement. Bree helped me reclaim my voice and my future."</p>
-            <div className="flex items-center gap-3">
-              <span className="h-10 w-10 rounded-full bg-[url('https://picsum.photos/100/100?portrait=3')] bg-cover bg-center" />
               <div>
-                <p className="font-semibold text-sm">Angela R.</p>
-                <p className="text-xs text-white/50">Community Leader</p>
+                <p className="font-semibold text-sm">UNKNOWN</p>
               </div>
             </div>
           </div>
         </div>
-      </section> */}
+      </section>
       <section id="shop" className="section-padding bg-[#FFF5EE]">
         <div className="flex flex-col md:flex-row items-center gap-12">
           <div className="flex-1">

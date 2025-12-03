@@ -1,12 +1,11 @@
 import Layout from '@/components/Layout';
 import Image from 'next/image';
-import Script from 'next/script';
+// Stripe payment will be handled via a hosted Payment Link (set as NEXT_PUBLIC_STRIPE_PAYMENT_LINK)
 import { useEffect, useRef, useState } from 'react';
 import MugImage from '@/images/shop/mug.png';
 import ShirtFrontImage from '@/images/shop/shirt_front.png';
 import ShirtBackImage from '@/images/shop/shirt_back.png';
-import QRCode from '@/images/shop/qrcode.png';
-import ZelleQR from '@/images/shop/Zelle qr.png';
+// QR code payment options removed; using Stripe Payment Link instead
 
 interface Product { 
   id: number; 
@@ -50,11 +49,9 @@ export default function ShopPage() {
   const [selectedSize, setSelectedSize] = useState<Record<number, string | ''>>({});
   const [sizeError, setSizeError] = useState<Record<number, boolean>>({});
 
-  // PayPal UI state
-  const [paypalReady, setPaypalReady] = useState(false);
-  const [paypalError, setPaypalError] = useState<string | null>(null);
-  const [showCheckout, setShowCheckout] = useState(false);
-  const paypalRef = useRef<HTMLDivElement | null>(null);
+  // Checkout UI state
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [stripeError, setStripeError] = useState<string | null>(null);
 
   // Detect touch / non-hover devices to adjust overlay behavior
   useEffect(() => {
@@ -68,9 +65,7 @@ export default function ShopPage() {
     setIsTouch(checkTouch());
   }, []);
 
-  // Optional external destinations for QR codes
-  const QR_LINK = process.env.NEXT_PUBLIC_QR_LINK || 'https://www.paypal.com/us/digital-wallet/mobile-apps';
-  const ZELLE_LINK = process.env.NEXT_PUBLIC_ZELLE_LINK || 'https://enroll.zellepay.com/qr-codes?data=eyJuYW1lIjoiQjNVIEwuTC5DLiIsImFjdGlvbiI6InBheW1lbnQiLCJ0b2tlbiI6IjgwNDM4NTI1MTIifQ==';
+
 
   const addToCart = (p: Product) => {
     if (p.sizes && !selectedSize[p.id]) {
@@ -99,93 +94,27 @@ export default function ShopPage() {
 
   const total = cart.reduce((sum,p) => sum + p.price, 0);
 
-  // PayPal setup
-  const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '';
-  const isPaypalConfigured = PAYPAL_CLIENT_ID.length > 0;
+  // Stripe Payment Link (hosted checkout)
+  const STRIPE_PAYMENT_LINK = process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK || '';
+  const isStripeConfigured = STRIPE_PAYMENT_LINK.length > 0;
 
-  useEffect(() => {
-    // Render PayPal buttons when SDK is ready, checkout is open, and there are items
-  if (!paypalReady || !showCheckout || cart.length === 0) return;
-  if (!isPaypalConfigured) return;
-    const container = paypalRef.current;
-    if (!container) return;
-
-    const w = window as any;
-    if (!w.paypal || typeof w.paypal.Buttons !== 'function') {
-      setPaypalError('PayPal SDK failed to load. Please refresh and try again.');
+  const handleStripeCheckout = () => {
+    setStripeError(null);
+    if (!isStripeConfigured) {
+      setStripeError('Stripe is not configured. Add NEXT_PUBLIC_STRIPE_PAYMENT_LINK to enable card checkout.');
       return;
     }
-
-    // Clear any previous render
-    container.replaceChildren();
-
-    const items = cart.map((item) => ({
-      name: item.size ? `${item.name} (${item.size})` : item.name,
-      sku: item.size ? `${item.id}-${item.size}` : `${item.id}`,
-      description: item.size ? `Size: ${item.size}` : undefined,
-      category: 'PHYSICAL_GOODS',
-      quantity: '1',
-      unit_amount: { currency_code: 'USD', value: item.price.toFixed(2) },
-    }));
-
-    const amount = total.toFixed(2);
-
-    const buttons = w.paypal.Buttons({
-      style: { layout: 'vertical', color: 'gold', shape: 'pill', label: 'pay' },
-      createOrder: (_data: any, actions: any) => {
-        return actions.order.create({
-          purchase_units: [
-            {
-              description: 'B3U Shop Order',
-              amount: {
-                currency_code: 'USD',
-                value: amount,
-                breakdown: {
-                  item_total: { currency_code: 'USD', value: amount },
-                },
-              },
-              items,
-            },
-          ],
-        });
-      },
-      onApprove: async (_data: any, actions: any) => {
-        try {
-          await actions.order.capture();
-          setCart([]);
-          setShowCheckout(false);
-          alert('Thank you! Your payment was processed.');
-        } catch (err) {
-          console.error(err);
-          alert('Payment capture failed.');
-        }
-      },
-      onError: (err: any) => {
-        console.error('PayPal error', err);
-        setPaypalError('Payment could not be completed.');
-      },
-    });
-
-    buttons.render(container);
-
-    return () => {
-      try {
-        container.replaceChildren();
-      } catch {}
-    };
-  }, [paypalReady, showCheckout, cart, total, isPaypalConfigured]);
+    // Redirect to the hosted Stripe Payment Link
+    try {
+      window.location.href = STRIPE_PAYMENT_LINK;
+    } catch (err) {
+      setStripeError('Unable to redirect to Stripe. Please try again.');
+    }
+  };
 
   return (
     <Layout>
-      {/* PayPal SDK (only load when configured) */}
-      {isPaypalConfigured && (
-        <Script
-          src={`https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&currency=USD`}
-          strategy="afterInteractive"
-          onLoad={() => setPaypalReady(true)}
-          onError={() => setPaypalError('Failed to load PayPal SDK.')}
-        />
-      )}
+      {/* Stripe checkout (hosted Payment Link) */}
   <section className="section-padding bg-white">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-10 mb-12">
           <div>
@@ -215,29 +144,32 @@ export default function ShopPage() {
               <span>Total:</span>
               <span>${total.toFixed(2)}</span>
             </div>
-            {!showCheckout ? (
+            {!checkoutOpen ? (
               <button
                 disabled={!cart.length}
-                onClick={() => setShowCheckout(true)}
+                onClick={() => setCheckoutOpen(true)}
                 className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Checkout with PayPal
+                Checkout
               </button>
             ) : (
               <div className="space-y-3">
-                {!isPaypalConfigured && (
-                  <div className="text-yellow-200 text-sm">PayPal is not configured. Add NEXT_PUBLIC_PAYPAL_CLIENT_ID and rebuild to enable checkout.</div>
+                {!isStripeConfigured && (
+                  <div className="text-yellow-200 text-sm">Stripe is not configured. Add NEXT_PUBLIC_STRIPE_PAYMENT_LINK and rebuild to enable card checkout.</div>
                 )}
-                {isPaypalConfigured && !paypalReady && (
-                  <div className="text-white/80 text-sm">Loading PayPal…</div>
+                {stripeError && (
+                  <div className="text-red-300 text-sm">{stripeError}</div>
                 )}
-                {paypalError && (
-                  <div className="text-red-300 text-sm">{paypalError}</div>
-                )}
-                <div ref={paypalRef} />
                 <button
                   type="button"
-                  onClick={() => setShowCheckout(false)}
+                  onClick={handleStripeCheckout}
+                  className="btn-primary w-full"
+                >
+                  Pay with Card
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCheckoutOpen(false)}
                   className="text-white/70 hover:text-white text-xs underline"
                 >
                   Cancel
@@ -245,40 +177,7 @@ export default function ShopPage() {
               </div>
             )}
 
-            {/* QR Codes */}
-            <div className="mt-5 border-t border-black/10 pt-4">
-              <h4 className="font-semibold text-sm mb-2">Quick Pay via QR</h4>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="text-center">
-                  <a
-                    href={QR_LINK || (QRCode as any).src}
-                    target="_blank"
-                    rel="noopener"
-                    className="block"
-                    aria-label="Open QR code destination"
-                  >
-                    <div className="relative w-28 h-28 mx-auto rounded-md overflow-hidden bg-white">
-                      <Image src={QRCode} alt="QR code" fill className="object-contain p-1" />
-                    </div>
-                  </a>
-                  <div className="text-xs text-navy/60 mt-1">QR Code</div>
-                </div>
-                <div className="text-center">
-                  <a
-                    href={ZELLE_LINK || (ZelleQR as any).src}
-                    target="_blank"
-                    rel="noopener"
-                    className="block"
-                    aria-label="Open Zelle QR destination"
-                  >
-                    <div className="relative w-28 h-28 mx-auto rounded-md overflow-hidden bg-white">
-                      <Image src={ZelleQR} alt="Zelle QR code" fill className="object-contain p-1" />
-                    </div>
-                  </a>
-                  <div className="text-xs text-navy/60 mt-1">Zelle</div>
-                </div>
-              </div>
-            </div>
+            {/* QR code payment options removed; Stripe Payment Link is primary checkout. */}
           </div>
         </div>
         <div className="grid md:grid-cols-2 gap-8">
