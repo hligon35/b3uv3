@@ -8,7 +8,19 @@ const ghpages = require('gh-pages');
 
 const outDir = join(process.cwd(), 'out');
 const repoEnv = process.env.GITHUB_REPOSITORY; // e.g. "owner/repo" in GitHub Actions
-const repoUrl = repoEnv ? `https://github.com/${repoEnv}.git` : undefined;
+// Support token-based auth in non-interactive CI (GH_TOKEN or GITHUB_TOKEN)
+const token = process.env.GH_TOKEN || process.env.GITHUB_TOKEN || undefined;
+let repoUrl;
+if (repoEnv) {
+  if (token) {
+    // Use x-access-token form so git can authenticate over HTTPS in CI
+    repoUrl = `https://x-access-token:${token}@github.com/${repoEnv}.git`;
+  } else {
+    repoUrl = `https://github.com/${repoEnv}.git`;
+  }
+} else {
+  repoUrl = undefined;
+}
 
 // Default author to satisfy git identity on CI runners
 const defaultUser = {
