@@ -174,17 +174,49 @@ export default function Admin() {
           <div className="bg-white p-6 rounded shadow">
             <h2 className="text-2xl mb-4">Cloudflare Analytics</h2>
             <div className="text-sm text-gray-600">
-              <p>Enhanced analytics are available in your Cloudflare dashboard:</p>
-              <ul className="mt-2 space-y-1">
-                <li>• Real-time visitor data</li>
-                <li>• Geographic insights</li>
-                <li>• Session duration</li>
-                <li>• Bounce rates</li>
-                <li>• Top pages & referrers</li>
-              </ul>
-              <p className="mt-2 text-xs">
-                Set <code>CLOUDFLARE_ANALYTICS_TOKEN</code> in production for automatic tracking.
-              </p>
+              <p className="mb-3">Comprehensive analytics available in your Cloudflare dashboard:</p>
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <h4 className="font-medium mb-2">Real-time Data</h4>
+                  <ul className="text-xs space-y-1">
+                    <li>• Live visitor count</li>
+                    <li>• Current page views</li>
+                    <li>• Active sessions</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Geographic</h4>
+                  <ul className="text-xs space-y-1">
+                    <li>• Countries & cities</li>
+                    <li>• Regional breakdown</li>
+                    <li>• Time zone data</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Technical</h4>
+                  <ul className="text-xs space-y-1">
+                    <li>• Device types</li>
+                    <li>• Browser versions</li>
+                    <li>• Operating systems</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Behavior</h4>
+                  <ul className="text-xs space-y-1">
+                    <li>• Session duration</li>
+                    <li>• Bounce rates</li>
+                    <li>• Page depth</li>
+                  </ul>
+                </div>
+              </div>
+              <a
+                href="https://dash.cloudflare.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block bg-blue-500 text-white px-4 py-2 rounded text-sm hover:bg-blue-600 transition-colors"
+              >
+                View in Cloudflare Dashboard →
+              </a>
             </div>
           </div>
         </div>
