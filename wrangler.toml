@@ -1,0 +1,7 @@
+name = "b3u-backend"
+compatibility_date = "2024-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "b3u-db"
+database_id = "a3bbe810-c354-41a6-98b2-2de0d93778e3"

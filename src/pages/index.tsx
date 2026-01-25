@@ -96,7 +96,20 @@ export default function HomePage({ videos }: HomeProps) {
     setSubError(null);
     setSubPending(true);
     try {
+      // Submit to Google Apps Script
       await submitFormToEndpoint(newsletterFormRef.current!, `${formsApi}?endpoint=newsletter`);
+      
+      // Also submit to our backend
+      const formData = new FormData(newsletterFormRef.current!);
+      const email = formData.get('email') as string;
+      if (email) {
+        await fetch('/api/subscribers', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+      }
+      
       setSubscribed(true);
       try { newsletterFormRef.current?.reset(); } catch {}
       try { setT0(String(Date.now())); } catch {}

@@ -7,8 +7,8 @@ const isGithubPages = process.env.GITHUB_PAGES === 'true';
 
 const nextConfig = {
   reactStrictMode: true,
-  // Export a fully static site (no Node.js server required)
-  output: 'export',
+  // Export a fully static site only for GitHub Pages
+  ...(isProd && isGithubPages ? { output: 'export' } : {}),
   // If serving under https://<user>.github.io/b3uv3 (no custom domain), use basePath.
   // If using a custom domain, ensure GITHUB_PAGES is not set so these are empty.
   basePath: isProd && isGithubPages ? '/b3uv3' : '',
