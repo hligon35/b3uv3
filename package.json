@@ -7,7 +7,7 @@
     "dev": "next dev",
     "prebuild": "node -e \"try{require('fs').rmSync('src/pages/api/submit',{recursive:true,force:true})}catch(e){}\"",
     "build": "next build",
-    "pages:build": "next-on-pages build",
+    "pages:build": "@cloudflare/next-on-pages build",
     "build:static": "next build",
     "fetch:podcast": "node scripts/fetch-podcast.mjs 24",
     "fetch:youtube": "node scripts/fetch-youtube.mjs 6",
