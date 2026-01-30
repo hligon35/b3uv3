@@ -18,9 +18,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       res.status(500).json({ error: 'Failed to track' });
     }
   } else if (req.method === 'GET') {
-    // Get analytics data
-    const auth = req.headers.authorization;
-    if (auth !== `Bearer ${process.env.ADMIN_TOKEN || 'admin123'}`) {
+    // Secure with httpOnly cookie
+    const { parse } = await import('cookie');
+    const cookies = req.headers.cookie ? parse(req.headers.cookie) : {};
+    if (cookies.admin_auth !== 'true') {
       return res.status(401).json({ error: 'Unauthorized' });
     }
     try {

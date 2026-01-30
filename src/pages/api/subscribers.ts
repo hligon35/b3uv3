@@ -1,5 +1,7 @@
+
 import { NextApiRequest, NextApiResponse } from 'next';
 import { insertSubscriber, getSubscribers } from '../../lib/db';
+import { parse } from 'cookie';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
@@ -14,9 +16,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       res.status(500).json({ error: 'Failed to subscribe' });
     }
   } else if (req.method === 'GET') {
-    // Simple auth for admin
-    const auth = req.headers.authorization;
-    if (auth !== `Bearer ${process.env.ADMIN_TOKEN || 'admin123'}`) {
+    // Secure with httpOnly cookie
+    const cookies = req.headers.cookie ? parse(req.headers.cookie) : {};
+    if (cookies.admin_auth !== 'true') {
       return res.status(401).json({ error: 'Unauthorized' });
     }
     try {

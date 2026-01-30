@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 
 interface Subscriber {
   id: number;
@@ -21,9 +22,10 @@ interface DetailedAnalytics {
   deviceTypes: { device: string; count: number }[];
 }
 
+
+
+
 export default function Admin() {
-  const [password, setPassword] = useState('');
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [analytics, setAnalytics] = useState<AnalyticsItem[]>([]);
   const [totalViews, setTotalViews] = useState(0);
@@ -32,27 +34,27 @@ export default function Admin() {
   const [deviceTypes, setDeviceTypes] = useState<{ device: string; count: number }[]>([]);
   const [loading, setLoading] = useState(false);
 
+  const router = useRouter();
   useEffect(() => {
-    const token = localStorage.getItem('adminToken');
-    if (token) {
-      setIsAuthenticated(true);
-      fetchData(token);
+    // Check authentication via cookie
+    async function checkAuthAndFetch() {
+      const res = await fetch('/api/subscribers');
+      if (res.status === 401) {
+        router.replace('/login');
+        return;
+      }
+      const subs = await res.json();
+      setSubscribers(subs);
+      fetchAnalytics();
     }
+    checkAuthAndFetch();
+    // eslint-disable-next-line
   }, []);
 
-  const fetchData = async (token: string) => {
+  const fetchAnalytics = async () => {
     setLoading(true);
     try {
-      const [subsRes, analyticsRes] = await Promise.all([
-        fetch('/api/subscribers', { headers: { Authorization: `Bearer ${token}` } }),
-        fetch('/api/analytics', { headers: { Authorization: `Bearer ${token}` } }),
-      ]);
-
-      if (subsRes.ok) {
-        const subs = await subsRes.json();
-        setSubscribers(subs);
-      }
-
+      const analyticsRes = await fetch('/api/analytics');
       if (analyticsRes.ok) {
         const data = await analyticsRes.json();
         setAnalytics(data.analytics);
@@ -62,46 +64,11 @@ export default function Admin() {
         setDeviceTypes(data.deviceTypes || []);
       }
     } catch (error) {
-      console.error('Failed to fetch data:', error);
+      console.error('Failed to fetch analytics:', error);
     } finally {
       setLoading(false);
     }
   };
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const res = await fetch('/api/subscribers', {
-      headers: { Authorization: `Bearer ${password}` },
-    });
-    if (res.ok) {
-      localStorage.setItem('adminToken', password);
-      setIsAuthenticated(true);
-      fetchData(password);
-    } else {
-      alert('Invalid password');
-    }
-  };
-
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <form onSubmit={handleLogin} className="bg-white p-8 rounded shadow-md">
-          <h1 className="text-2xl mb-4">Admin Login</h1>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter admin password"
-            className="w-full p-2 border rounded mb-4"
-            required
-          />
-          <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded">
-            Login
-          </button>
-        </form>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
