@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { insertPageView, getAnalytics, getTotalViews, getTopReferrers, getTopBrowsers, getDeviceTypes } from '../../lib/db';
+import { insertPageView, getAnalytics, getTopReferrers, getTopBrowsers, getDeviceTypes } from '../../lib/db';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
@@ -25,17 +25,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ error: 'Unauthorized' });
     }
     try {
-      const [analytics, totalResult, topReferrers, topBrowsers, deviceTypes] = await Promise.all([
+      const [analytics, topReferrers, topBrowsers, deviceTypes] = await Promise.all([
         getAnalytics(),
-        getTotalViews(),
         getTopReferrers(),
         getTopBrowsers(),
         getDeviceTypes()
       ]);
 
+      // Calculate total views from analytics
+      const total = Array.isArray(analytics)
+        ? analytics.reduce((sum, row) => sum + (row.views || 0), 0)
+        : 0;
+
       res.status(200).json({
         analytics,
-        total: totalResult.total,
+        total,
         topReferrers,
         topBrowsers,
         deviceTypes

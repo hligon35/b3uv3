@@ -36,7 +36,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   res.setHeader('Set-Cookie', serialize('admin_auth', 'true', {
     httpOnly: true,
     secure: true,
-    sameSite: 'Strict',
+    sameSite: 'strict',
     path: '/',
     maxAge: 60 * 60 * 2 // 2 hours
   }));

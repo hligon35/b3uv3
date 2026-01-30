@@ -13,12 +13,15 @@ export default function Login() {
     e.preventDefault();
     setError('');
     const csrfToken = process.env.NEXT_PUBLIC_CSRF_TOKEN;
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+    if (csrfToken) {
+      headers['x-csrf-token'] = csrfToken;
+    }
     const res = await fetch('/api/login', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-csrf-token': csrfToken,
-      },
+      headers,
       body: JSON.stringify({ username, password }),
     });
     if (res.ok) {
