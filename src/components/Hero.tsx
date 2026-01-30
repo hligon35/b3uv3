@@ -49,7 +49,15 @@ export default function Hero() {
           className="flex flex-col sm:flex-row gap-4 justify-center"
         >
           <Link href="/podcast" className="btn-primary">Listen to The B3U Podcast</Link>
-          <Link href="/contact" className="btn-outline">Book Bree to Speak</Link>
+          <Link href="/contact" className="btn-outline">Book Bree for Your Event</Link>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.8 }}
+          className="mt-6 text-lg text-white/90 font-semibold"
+        >
+          Bree Charles is now available for speaking engagements, workshops, and events. <Link href="/contact" className="underline text-brandOrange">Inquire about booking</Link> today!
         </motion.div>
       </div>
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/50 text-xs tracking-widest">SCROLL</div>

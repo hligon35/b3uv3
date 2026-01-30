@@ -35,8 +35,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   // Set httpOnly cookie for session
   res.setHeader('Set-Cookie', serialize('admin_auth', 'true', {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    secure: true,
+    sameSite: 'Strict',
     path: '/',
     maxAge: 60 * 60 * 2 // 2 hours
   }));

@@ -1,3 +1,5 @@
+import dynamic from 'next/dynamic';
+const CloudflareAnalyticsPanel = dynamic(() => import('../components/CloudflareAnalyticsPanel'), { ssr: false });
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 
@@ -184,6 +186,10 @@ export default function Admin() {
               >
                 View in Cloudflare Dashboard →
               </a>
+              <div className="mt-8">
+                {/* Live Cloudflare Analytics UI */}
+                <CloudflareAnalyticsPanel />
+              </div>
             </div>
           </div>
         </div>
