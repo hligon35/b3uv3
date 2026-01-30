@@ -11,7 +11,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           zones(filter: {zoneTag: $zoneTag}) {
             httpRequests1dGroups(limit: 7, filter: {date_geq: $start, date_leq: $end}) {
               dimensions { date }
-              sum { requests, uniqueVisitors }
+              sum {
+                requests
+                uniqueVisitors
+                bytes
+                threats
+                edgeResponseStatusMap { edgeResponseStatus, requests }
+              }
+            }
+            topRequests: httpRequests1dGroups(limit: 1, filter: {date_geq: $start, date_leq: $end}) {
+              sum {
+                topUrls: topN(field: "requestHost", limit: 10) { count, value }
+              }
             }
           }
         }
@@ -23,6 +34,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const data = await fetchCloudflareAnalytics(query, { start, end });
     res.status(200).json(data);
   } catch (e: any) {
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: e.message, stack: e.stack });
   }
 }
