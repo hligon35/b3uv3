@@ -4,8 +4,9 @@ const nextConfig = {
   reactStrictMode: true,
   // If serving under https://<user>.github.io/b3uv3 (no custom domain), use basePath.
   // If using a custom domain, ensure GITHUB_PAGES is not set so these are empty.
-  basePath: '/b3uv3',
-  assetPrefix: '/b3uv3/',
+  // basePath and assetPrefix are not needed for custom domain
+  basePath: '',
+  assetPrefix: '',
   // Ensure /about/ maps to about/index.html for static hosting
   trailingSlash: true,
   images: {
