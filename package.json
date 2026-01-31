@@ -7,6 +7,8 @@
     "dev": "next dev",
     "prebuild": "node -e \"try{require('fs').rmSync('src/pages/api/submit',{recursive:true,force:true})}catch(e){}\"",
     "build": "next build",
+    "opennext:build": "opennext build",
+    "opennext:deploy": "opennext deploy cloudflare",
     "pages:build": "@cloudflare/next-on-pages build",
     "build:static": "next build",
     "fetch:podcast": "node scripts/fetch-podcast.mjs 24",
@@ -16,10 +18,10 @@
     "deploy": "node scripts/deploy.mjs",
     "start": "next start",
     "lint": "next lint",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "export": "next export"
   },
   "dependencies": {
-    "@cloudflare/next-on-pages": "^1.13.16",
     "@cloudflare/workers-types": "^4.20260124.0",
     "@headlessui/react": "^1.7.18",
     "@heroicons/react": "^2.1.5",
