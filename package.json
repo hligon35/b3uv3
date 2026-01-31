@@ -16,6 +16,7 @@
     "refresh:content": "npm run fetch:podcast && npm run fetch:youtube",
     "predeploy": "npm run build:static && node scripts/prepare-pages.mjs",
     "deploy": "node scripts/deploy.mjs",
+    "deploy:gh": "gh-pages -d out",
     "start": "next start",
     "lint": "next lint",
     "format": "prettier --write .",
