@@ -148,7 +148,10 @@ export default function PodcastPage({ episodes }: PodcastProps) {
   };
 
   return (
-    <Layout>
+    <Layout
+      title="The B3U Podcast | Richmond, VA | Burn, Break, Become Unstoppable"
+      description="Listen to the B3U Podcast with Bree Charles — stories of resilience, healing, and purpose from Richmond, VA and beyond, serving the Richmond area and surrounding Central Virginia communities."
+    >
       <section className="section-padding">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-8 mb-12">
           <div>

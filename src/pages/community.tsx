@@ -179,7 +179,10 @@ export default function CommunityPage() {
 
   // Iframe postMessage debug removed.
   return (
-    <Layout>
+      <Layout
+        title="Community | Richmond, VA & Surrounding Areas | B3U"
+        description="Share your story, find encouragement, and connect with the B3U community in Richmond, VA and surrounding Central Virginia areas."
+      >
   <section className="section-padding bg-white">
         <h1 className="text-4xl font-bold mb-6">Community Stories</h1>
     <p className="max-w-2xl text-navy/80 mb-12">Real impact from real people. Share your journey and help others find strength in theirs.</p>

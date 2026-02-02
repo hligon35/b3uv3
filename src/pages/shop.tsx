@@ -113,7 +113,10 @@ export default function ShopPage() {
   };
 
   return (
-    <Layout>
+    <Layout
+      title="Shop | B3U Merch | Richmond, VA"
+      description="Shop B3U merch and support the mission. Based in Richmond, VA and serving surrounding Central Virginia communities."
+    >
       {/* Stripe checkout (hosted Payment Link) */}
   <section className="section-padding bg-white">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-10 mb-12">

@@ -75,7 +75,10 @@ export default function HomePage() {
   // Debug postMessage via iframe removed.
 
   return (
-    <Layout>
+    <Layout
+      title="B3U — Burn, Break, Become Unstoppable | Richmond, VA"
+      description="Empowerment, speaking, and community with Bree Charles. B3U (Burn, Break, Become Unstoppable) is based in Richmond, VA and serves surrounding areas across Central Virginia."
+    >
       <Hero />
       <section id="about" className="section-padding bg-white">
         <div className="grid md:grid-cols-2 gap-12 items-center">

@@ -6,7 +6,10 @@ import aboutBree from '@/images/content/aboutBree.jpeg';
 
 export default function AboutPage() {
   return (
-    <Layout>
+    <Layout
+      title="About Bree Charles | Richmond, VA Speaker & Community Builder"
+      description="Meet Bree Charles — transformational speaker, author, and creator of B3U. Based in Richmond, VA and serving surrounding Central Virginia communities."
+    >
       {/* Meet Bree Charles Section */}
       <section className="section-padding bg-white">
         <div className="max-w-4xl mx-auto">

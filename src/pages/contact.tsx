@@ -44,7 +44,10 @@ export default function ContactPage() {
   // Note: debugEnabled still read from URL via hook; iframe debug postMessage removed.
 
   return (
-    <Layout>
+    <Layout
+      title="Contact | Richmond, VA & Surrounding Areas | B3U"
+      description="Contact B3U and Bree Charles for speaking, collaboration, and community opportunities in Richmond, VA and surrounding Central Virginia areas."
+    >
       <section className="section-padding bg-gradient-to-br from-brandBlue-light to-white">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
