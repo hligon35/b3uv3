@@ -13,63 +13,10 @@ import about4 from '@/images/content/about4.jpeg';
 import B3ULogo from '@/images/logos/B3U3D.png';
 import Test1 from '@/images/content/test1.JPG';
 import Test2 from '@/images/content/test2.JPEG';
-import { useMemo } from 'react';
 import { useFormsApi } from '@/lib/useFormsApi';
 import { submitFormToEndpoint } from '@/lib/formsSubmit';
 
-type YtVideo = { id: string; title: string; description: string; thumbnail: string; link?: string; publishedAt?: string; uploadDate?: string };
-
-type HomeProps = {
-  videos: YtVideo[];
-};
-
-export default function HomePage({ videos }: HomeProps) {
-  // Most recent B3U Podcast episodes from YouTube (sorted by upload date)
-  const fallbackVideos: YtVideo[] = [
-    {
-      id: 'fCsbrjfzLBc',
-      title: 'Fireside Chat w/ Mrs Rochelle Tucker',
-      description: 'An inspiring conversation about resilience, faith, and life\'s journey with Mrs Rochelle Tucker. (1h 27m)',
-      thumbnail: `https://img.youtube.com/vi/fCsbrjfzLBc/hqdefault.jpg`,
-      uploadDate: '2 days ago'
-    },
-    {
-      id: 'BiL6SWnquUI',
-      title: 'Reclaim Session w/ Ashley Brown',
-      description: 'Ashley Brown shares her powerful story of reclaiming her voice and stepping into her purpose. (35m)',
-      thumbnail: `https://img.youtube.com/vi/BiL6SWnquUI/hqdefault.jpg`,
-      uploadDate: '9 days ago'
-    },
-    {
-      id: '8f0zkRp3VUc',
-      title: 'The Altar Experience w/ Prophetess Moina Tucker',
-      description: 'A transformative altar experience exploring faith, healing, and spiritual breakthrough. (23m)',
-      thumbnail: `https://img.youtube.com/vi/8f0zkRp3VUc/hqdefault.jpg`,
-      uploadDate: '12 days ago'
-    },
-    {
-      id: 'KxyISQUoBWk',
-      title: 'The Altar Experience w/ Chenia Hughes',
-      description: 'Chenia Hughes shares her journey of transformation and spiritual awakening at the altar. (33m)',
-      thumbnail: `https://img.youtube.com/vi/KxyISQUoBWk/hqdefault.jpg`,
-      uploadDate: '2 weeks ago'
-    },
-    {
-      id: 'LUu8ltxQuLk',
-      title: 'Altar Experience w/ Dr Teresa Hegwood',
-      description: 'Dr Teresa Hegwood delivers a powerful message about healing and restoration. (9m 9s)',
-      thumbnail: `https://img.youtube.com/vi/LUu8ltxQuLk/hqdefault.jpg`,
-      uploadDate: '2 weeks ago'
-    },
-    {
-      id: 'MXpm9L2yOSQ',
-      title: 'Altar Experience w/ Pastor Kristie Anderson',
-      description: 'Pastor Kristie Anderson shares insights on faith, perseverance, and divine purpose. (24m)',
-      thumbnail: `https://img.youtube.com/vi/MXpm9L2yOSQ/hqdefault.jpg`,
-      uploadDate: '3 weeks ago'
-    }
-  ];
-  const podcastEpisodes: YtVideo[] = useMemo(() => (videos && videos.length ? videos : fallbackVideos), [videos]);
+export default function HomePage() {
 
   // Shop products for homepage preview
   const shopProducts = [ShirtFrontImage, MugImage];
@@ -98,18 +45,7 @@ export default function HomePage({ videos }: HomeProps) {
     try {
       // Submit to Google Apps Script
       await submitFormToEndpoint(newsletterFormRef.current!, `${formsApi}?endpoint=newsletter`);
-      
-      // Also submit to our backend
-      const formData = new FormData(newsletterFormRef.current!);
-      const email = formData.get('email') as string;
-      if (email) {
-        await fetch('/api/subscribers', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email }),
-        });
-      }
-      
+
       setSubscribed(true);
       try { newsletterFormRef.current?.reset(); } catch {}
       try { setT0(String(Date.now())); } catch {}
@@ -223,91 +159,54 @@ export default function HomePage({ videos }: HomeProps) {
             </a>
           </div>
         </div>
-        <div className="grid md:grid-cols-3 gap-8">
-          {podcastEpisodes.map(episode => (
-            <div key={episode.id} className="card">
-              <div className="relative h-40 rounded-md overflow-hidden mb-4 group">
-                <img 
-                  src={episode.thumbnail} 
-                  alt={episode.title}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
-                  <a 
-                    href={`https://www.youtube.com/watch?v=${episode.id}`}
-                    target="_blank"
-                    rel="noopener"
-                    className="text-white text-2xl hover:scale-110 transition-transform"
-                  >
-                    ▶
-                  </a>
-                </div>
-                {(() => {
-                  const dateLabel = episode.publishedAt || episode.uploadDate;
-                  return dateLabel ? (
-                    <div className="absolute bottom-2 right-2 bg-black/70 text-white text-[10px] px-2 py-1 rounded">
-                      {dateLabel}
-                    </div>
-                  ) : null;
-                })()}
-              </div>
-              <h3 className="font-semibold mb-2 line-clamp-2">{episode.title}</h3>
-              <p className="text-sm text-navy/70 mb-4 line-clamp-3">{episode.description}</p>
-              <a 
-                href={`https://www.youtube.com/watch?v=${episode.id}`}
-                target="_blank"
-                rel="noopener"
-                className="text-brandOrange hover:underline text-sm font-medium"
-              >
-                Watch Episode
-              </a>
-            </div>
-          ))}
-        </div>
       </section>
       <section id="community" className="section-padding alt-band">
         <div className="text-center mb-12 max-w-3xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">The Take Back Community</h2>
-          <p className="text-white/90">Stories from listeners who have found the courage to burn away fear, break cycles, and become unstoppable.</p>
+          <p className="text-black">Stories from listeners who have found the courage to burn away fear, break cycles, and become unstoppable.</p>
         </div>
-        <div className="grid md:grid-cols-2 gap-15 justify-items-center">
-          <div className="card w-auto max-w-xl text-center">
-            <p className="italic text-sm mb-4">"Bree is a woman whose strength speaks louder than any obstacle she has faced. She has walked through storms that would have broken the ordinary woman, yet she stands today not just surviving, but shining. Her resilience is not accidental; it is built from battles fought quietly, tears wiped privately, and faith held firmly even when the path made no sense.</p>
-
-            <p className="italic text-sm mb-4">What makes Bree remarkable isn’t just what she has overcome, but the grace with which she continues to rise. She has carried burdens that many will never see, but she refuses to let those burdens define her. Instead, she uses her story as fuel to grow, to inspire, and to demonstrate what true courage looks like.</p>
-
-            <p className="italic text-sm mb-4">Bree is proof that you can be tried, stretched, and tested, yet still emerge stronger, wiser, and more determined. Her journey is a testament to perseverance, heart, and the unshakeable spirit of a woman who simply refuses to be defeated. Anyone who knows Bree knows they are witnessing the kind of strength that changes lives and the kind of resilience that leaves a lasting mark.</p>
-
-            <p className="italic text-sm mb-4">She is extraordinary, not because life has been easy, but because she has risen beautifully above everything meant to break her."</p>
-            <div className="flex flex-col items-center gap-3 text-center">
-              <div className="rounded-full overflow-hidden h-[120px] w-[120px]">
-                <Image
-                  src={Test2}
-                  alt="Dr. Monica R. Smith"
-                  width={120}
-                  height={120}
-                  className="object-cover object-center"
-                />
+        <div className="flex flex-col gap-10 items-center">
+          <div className="card w-full max-w-4xl">
+            <div className="flex flex-col md:flex-row gap-6 items-start">
+              <div className="flex-shrink-0 w-full md:w-auto flex flex-col items-center">
+                <div className="rounded-full overflow-hidden h-[120px] w-[120px]">
+                  <Image
+                    src={Test2}
+                    alt="Dr. Monica R. Smith"
+                    width={120}
+                    height={120}
+                    className="object-cover object-center"
+                  />
+                </div>
+                <p className="font-semibold text-sm mt-3 text-center">Dr. Monica R. Smith</p>
               </div>
-              <div>
-                <p className="font-semibold text-sm">Dr. Monica R. Smith</p>
+              <div className="flex-1">
+                <p className="italic text-sm mb-4">"Bree is a woman whose strength speaks louder than any obstacle she has faced. She has walked through storms that would have broken the ordinary woman, yet she stands today not just surviving, but shining. Her resilience is not accidental; it is built from battles fought quietly, tears wiped privately, and faith held firmly even when the path made no sense.</p>
+
+                <p className="italic text-sm mb-4">What makes Bree remarkable isn’t just what she has overcome, but the grace with which she continues to rise. She has carried burdens that many will never see, but she refuses to let those burdens define her. Instead, she uses her story as fuel to grow, to inspire, and to demonstrate what true courage looks like.</p>
+
+                <p className="italic text-sm mb-4">Bree is proof that you can be tried, stretched, and tested, yet still emerge stronger, wiser, and more determined. Her journey is a testament to perseverance, heart, and the unshakeable spirit of a woman who simply refuses to be defeated. Anyone who knows Bree knows they are witnessing the kind of strength that changes lives and the kind of resilience that leaves a lasting mark.</p>
+
+                <p className="italic text-sm mb-4">She is extraordinary, not because life has been easy, but because she has risen beautifully above everything meant to break her."</p>
               </div>
             </div>
           </div>
-          <div className="card w-auto max-w-xl text-center">
-            <p className="italic text-sm mb-4">"B3U has truly been a blessing in my life. Watching the show and following each episode has inspired me in ways I didn’t expect. Every story, every message, and every moment has encouraged me to keep pushing forward, stay true to my purpose, and continue sharing my own testimony with others. The transparency and strength shown on B3U remind me that growth is possible, healing is real, and God can use our stories to uplift someone else. I’m grateful for how this show pours into its viewers, including me, and I look forward to every episode that reminds us we are becoming better, braver, and bolder—one step at a time. "</p>
-            <div className="flex flex-col items-center gap-3 text-center">
-              <div className="rounded-full overflow-hidden h-[120px] w-[120px]">
-                <Image
-                  src={Test1}
-                  alt="UNKNOWN"
-                  width={120}
-                  height={120}
-                  className="object-cover object-center"
-                />
+          <div className="card w-full max-w-4xl">
+            <div className="flex flex-col md:flex-row gap-6 items-start">
+              <div className="flex-shrink-0 w-full md:w-auto flex flex-col items-center">
+                <div className="rounded-full overflow-hidden h-[120px] w-[120px]">
+                  <Image
+                    src={Test1}
+                    alt="Brenda Johnson"
+                    width={120}
+                    height={120}
+                    className="object-cover object-center"
+                  />
+                </div>
+                <p className="font-semibold text-sm mt-3 text-center">Brenda Johnson</p>
               </div>
-              <div>
-                <p className="font-semibold text-sm">Brenda Johnson</p>
+              <div className="flex-1">
+                <p className="italic text-sm mb-4">"B3U has truly been a blessing in my life. Watching the show and following each episode has inspired me in ways I didn’t expect. Every story, every message, and every moment has encouraged me to keep pushing forward, stay true to my purpose, and continue sharing my own testimony with others. The transparency and strength shown on B3U remind me that growth is possible, healing is real, and God can use our stories to uplift someone else. I’m grateful for how this show pours into its viewers, including me, and I look forward to every episode that reminds us we are becoming better, braver, and bolder—one step at a time. "</p>
               </div>
             </div>
           </div>
@@ -397,14 +296,5 @@ export default function HomePage({ videos }: HomeProps) {
 }
 
 export async function getStaticProps() {
-  try {
-    const path = await import('node:path');
-    const fs = await import('node:fs');
-    const file = path.join(process.cwd(), 'public', 'data', 'youtube.json');
-    const raw = fs.readFileSync(file, 'utf-8');
-    const data = JSON.parse(raw);
-    return { props: { videos: data.videos || [] } };
-  } catch (e) {
-    return { props: { videos: [] } };
-  }
+  return { props: {} };
 }

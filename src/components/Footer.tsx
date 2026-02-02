@@ -26,18 +26,7 @@ export default function Footer() {
     try {
       // Submit to Google Apps Script
       await submitFormToEndpoint(footFormRef.current!, `${formsApi}?endpoint=newsletter`);
-      
-      // Also submit to our backend
-      const formData = new FormData(footFormRef.current!);
-      const email = formData.get('email') as string;
-      if (email) {
-        await fetch('/api/subscribers', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email }),
-        });
-      }
-      
+
       setFootSubbed(true);
       try { footFormRef.current?.reset(); } catch {}
       try { setT0(String(Date.now())); } catch {}
