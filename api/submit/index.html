@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>410 Gone — B3U API</title>
+    <script>
+      setTimeout(function(){ try { window.location.href = '/contact'; } catch(e){} }, 8000);
+    </script>
+    <style>
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; background:#0b1a2a; color:#fff; margin:0; padding:2rem; display:grid; place-items:center; min-height:100vh; }
+      .card{ max-width:820px; background:#12253c; border:1px solid rgba(255,255,255,0.1); border-radius:16px; padding:24px; box-shadow: 0 10px 30px rgba(0,0,0,0.35); }
+      h1{ margin:0 0 0.5rem; font-size:1.5rem; color:#ff8a3c; }
+      code, pre{ background:#0e2035; border:1px solid rgba(255,255,255,0.08); padding:10px 12px; border-radius:8px; color:#cfe6ff; font-size:0.9rem; display:block; overflow:auto }
+      a{ color:#ffb27a }
+      .muted{ color: rgba(255,255,255,0.7) }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>410 Gone — This endpoint is deprecated</h1>
+      <p class="muted">This site no longer uses Next.js API routes. If you reached this URL from an old integration, please update your integration to post directly to our public forms backend.</p>
+      <p>Recommended endpoints:</p>
+      <ul>
+        <li>Contact form: <code>GET/POST {FORMS_API}?endpoint=contact</code></li>
+        <li>Share a story: <code>GET/POST {FORMS_API}?endpoint=submit</code></li>
+        <li>Newsletter: <code>GET/POST {FORMS_API}?endpoint=newsletter</code></li>
+      </ul>
+      <p class="muted">You will be redirected to <a href="/contact">/contact</a> shortly.</p>
+      <pre>{
+  "ok": false,
+  "error": "This endpoint is deprecated. Please use the public forms powered by Google Apps Script."
+}</pre>
+    </div>
+  </body>
+</html>
