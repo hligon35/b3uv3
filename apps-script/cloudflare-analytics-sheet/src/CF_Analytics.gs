@@ -532,61 +532,155 @@ var CF_ANALYTICS = (function () {
       }
     }
 
-    var fieldCandidates = [
-      // High-level Web Analytics
-      { sum: 'visits pageViews', uniq: 'uniques' },
-      { sum: 'visits pageViews', uniq: null },
-      // RUM-style fields sometimes differ
-      { sum: 'pageViews visits', uniq: 'uniques' },
-      { sum: 'pageViews visits', uniq: null }
+    var dimCandidates = ['datetimeFiveMinutes', 'datetimeMinute', 'datetime', 'datetimeHour'];
+    var sumCandidates = [
+      // common
+      'visits',
+      // page view variants
+      'pageViews', 'pageviews', 'page_views', 'views',
+      // other possible names
+      'pageLoadCount', 'pageLoads', 'pageViewCount'
     ];
+    var uniqCandidates = ['uniques', 'uniqueVisitors', 'uniq'];
+
+    function probe(dataset, dimField, sumField) {
+      var q =
+        'query {' +
+        ' viewer {' +
+        '  accounts(filter:{accountTag:"' + escapeGqlString(accountTag) + '"}) {' +
+        '   ' + dataset + '(' +
+        '    limit: 1,' +
+        '    filter: { siteTag: "' + escapeGqlString(siteTag) + '",' +
+        '              datetime_geq: "' + iso(startDate) + '",' +
+        '              datetime_lt: "' + iso(endDate) + '" }' +
+        '   ) {' +
+        '    dimensions { ' + dimField + ' }' +
+        '    sum { ' + sumField + ' }' +
+        '   }' +
+        '  }' +
+        ' }' +
+        '}';
+      graphql(q);
+      return true;
+    }
+
+    function probeUniq(dataset, dimField, uniqField) {
+      var q =
+        'query {' +
+        ' viewer {' +
+        '  accounts(filter:{accountTag:"' + escapeGqlString(accountTag) + '"}) {' +
+        '   ' + dataset + '(' +
+        '    limit: 1,' +
+        '    filter: { siteTag: "' + escapeGqlString(siteTag) + '",' +
+        '              datetime_geq: "' + iso(startDate) + '",' +
+        '              datetime_lt: "' + iso(endDate) + '" }' +
+        '   ) {' +
+        '    dimensions { ' + dimField + ' }' +
+        '    uniq { ' + uniqField + ' }' +
+        '   }' +
+        '  }' +
+        ' }' +
+        '}';
+      graphql(q);
+      return true;
+    }
+
+    function buildQuery(dataset, dimField, sumFields, uniqField) {
+      var uniqBlock = uniqField ? (' uniq { ' + uniqField + ' }') : '';
+      return (
+        'query {' +
+        ' viewer {' +
+        '  accounts(filter:{accountTag:"' + escapeGqlString(accountTag) + '"}) {' +
+        '   ' + dataset + '(' +
+        '    limit: 10000,' +
+        '    filter: { siteTag: "' + escapeGqlString(siteTag) + '",' +
+        '              datetime_geq: "' + iso(startDate) + '",' +
+        '              datetime_lt: "' + iso(endDate) + '" }' +
+        '   ) {' +
+        '    dimensions { ' + dimField + ' }' +
+        '    sum { ' + sumFields.join(' ') + ' }' +
+             uniqBlock +
+        '   }' +
+        '  }' +
+        ' }' +
+        '}'
+      );
+    }
 
     var lastErr;
-
     for (var d = 0; d < datasetCandidates.length; d++) {
-      for (var f = 0; f < fieldCandidates.length; f++) {
-        var dataset = datasetCandidates[d];
-        var fields = fieldCandidates[f];
+      var dataset = datasetCandidates[d];
+      var ck = cacheKeyForAccount(accountTag, 'web:' + dataset + ':metrics');
+      var cached = cacheGetJson(ck);
 
-        var uniqBlock = fields.uniq ? (' uniq { ' + fields.uniq + ' }') : '';
+      var combo = cached && cached.dimField && cached.sumFields ? cached : null;
 
-        // Many account-scoped datasets accept a generic `filter` input.
-        // We include siteTag in the filter; if a given dataset doesn’t accept it,
-        // this attempt will fail and we’ll try another dataset.
-        var q =
-          'query {' +
-          ' viewer {' +
-          '  accounts(filter:{accountTag:"' + escapeGqlString(accountTag) + '"}) {' +
-          '   ' + dataset + '(' +
-          '    limit: 10000,' +
-          '    filter: { siteTag: "' + escapeGqlString(siteTag) + '",' +
-          '              datetime_geq: "' + iso(startDate) + '",' +
-          '              datetime_lt: "' + iso(endDate) + '" },' +
-          '    orderBy: [datetimeFiveMinutes_ASC]' +
-          '   ) {' +
-          '    dimensions { datetimeFiveMinutes }' +
-          '    sum { ' + fields.sum + ' }' +
-               uniqBlock +
-          '   }' +
-          '  }' +
-          ' }' +
-          '}';
+      if (!combo) {
+        var dimField = null;
+        var sumFields = [];
+        var uniqField = null;
 
-        try {
-          var res = graphql(q);
-          var acct = res.data.viewer.accounts[0];
-          var groups = acct[dataset] || [];
-          return { dataset: dataset, groups: groups };
-        } catch (e) {
-          lastErr = e;
+        // First: find a working dimField by probing visits (or any sum field) across dims.
+        var found = false;
+        for (var di = 0; di < dimCandidates.length && !found; di++) {
+          for (var si = 0; si < sumCandidates.length && !found; si++) {
+            try {
+              if (probe(dataset, dimCandidates[di], sumCandidates[si])) {
+                dimField = dimCandidates[di];
+                found = true;
+                break;
+              }
+            } catch (e1) {
+              lastErr = e1;
+            }
+          }
         }
+        if (!dimField) continue;
+
+        // Second: collect all supported sum fields.
+        for (var s2 = 0; s2 < sumCandidates.length; s2++) {
+          try {
+            if (probe(dataset, dimField, sumCandidates[s2])) sumFields.push(sumCandidates[s2]);
+          } catch (e2) {
+            lastErr = e2;
+          }
+        }
+        if (!sumFields.length) continue;
+
+        // Third: uniq is optional.
+        for (var u = 0; u < uniqCandidates.length; u++) {
+          try {
+            if (probeUniq(dataset, dimField, uniqCandidates[u])) {
+              uniqField = uniqCandidates[u];
+              break;
+            }
+          } catch (e3) {
+            // ignore
+          }
+        }
+
+        combo = { dimField: dimField, sumFields: sumFields, uniqField: uniqField };
+        cachePutJson(ck, combo);
+      }
+
+      try {
+        var res = graphql(buildQuery(dataset, combo.dimField, combo.sumFields, combo.uniqField));
+        var acct = res.data.viewer.accounts[0];
+        var groups = acct[dataset] || [];
+        return {
+          dataset: dataset + ':' + combo.dimField + ':' + combo.sumFields.join(',') + (combo.uniqField ? (':uniq=' + combo.uniqField) : ''),
+          groups: groups
+        };
+      } catch (eFinal) {
+        lastErr = eFinal;
       }
     }
 
     throw new Error(
       'Failed to query Web Analytics via GraphQL. ' +
-      'Most common causes: wrong siteTag, Web Analytics not enabled/available on plan, token lacks required permissions, or schema differs. ' +
-      'Last error: ' + (lastErr && lastErr.message ? lastErr.message : String(lastErr))
+      'Last error: ' + (lastErr && lastErr.message ? lastErr.message : String(lastErr)) + '. ' +
+      'If Web Analytics works in the Cloudflare UI but not here, the GraphQL dataset/fields may differ on your plan. ' +
+      'Try setting CF_WEB_DATASET_OVERRIDE, or disable with CF_DISABLE_WEB_ANALYTICS=true.'
     );
   }
 

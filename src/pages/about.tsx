@@ -1,5 +1,6 @@
 import Layout from '@/components/Layout';
 import Image from 'next/image';
+import Link from 'next/link';
 import MelaLogo from '@/images/logos/Melalogo.png';
 import THOHLogo from '@/images/logos/THOHlogo.png';
 import aboutBree from '@/images/content/aboutBree.jpeg';
@@ -64,15 +65,13 @@ export default function AboutPage() {
             </p>
             <p className="text-lg leading-relaxed">
               Whether she's speaking on stage, teaching a{' '}
-              <a
-                href="https://funnel.b3ucs.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Open Bree's masterclass in a new tab"
+              <Link
+                href="/masterclass"
+                aria-label="Open Bree's masterclass page"
                 className="inline-block align-baseline px-2 py-0 rounded-md bg-navy text-white font-semibold whitespace-nowrap hover:bg-navy/90 focus:outline-none focus:ring-2 focus:ring-navy/60 focus:ring-offset-2 transition-colors"
               >
                 masterclass
-              </a>
+              </Link>
               , or hosting her podcast, Bree's energy, authenticity, and faith ignite transformation. Her message reminds people that no matter what they've endured, they can rise, rebuild, and become unstoppable.
             </p>
           </div>

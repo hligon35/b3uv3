@@ -384,7 +384,7 @@ var CF_SHEETS = (function () {
     var out = [];
     for (var i = 0; i < groups.length; i++) {
       var dim = groups[i].dimensions || {};
-      var ts = dim.datetimeFiveMinutes;
+      var ts = dim.datetimeFiveMinutes || dim.datetimeMinute || dim.datetime || dim.datetimeHour;
       if (!ts) continue;
       var d = new Date(ts);
       var b = sixHourBlockStart(d);
@@ -392,9 +392,17 @@ var CF_SHEETS = (function () {
       var sum = groups[i].sum || {};
       var uniq = groups[i].uniq || {};
 
-      var visits = sum.visits || sum.Visits || sum.visit || 0;
-      var pageViews = sum.pageViews || sum.pageviews || sum.page_views || 0;
-      var uniques = uniq.uniques || uniq.uniq || 0;
+      var visits = sum.visits || sum.Visits || sum.visit || sum.sessions || sum.sessionCount || 0;
+      var pageViews =
+        sum.pageViews ||
+        sum.pageviews ||
+        sum.page_views ||
+        sum.views ||
+        sum.pageViewCount ||
+        sum.pageLoadCount ||
+        sum.pageLoads ||
+        0;
+      var uniques = uniq.uniques || uniq.uniqueVisitors || uniq.uniq || 0;
 
       out.push([
         ts,
