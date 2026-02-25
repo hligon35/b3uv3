@@ -139,7 +139,7 @@ export default function ContactPage() {
                 <ul className="space-y-3 text-navy/80">
                   <li>
                     <span className="mr-2 text-navy/60 font-semibold">Phone:</span>
-                    <a href="tel:+18043852512" className="hover:text-brandOrange font-medium">(804) 385-2512</a>
+                    <a href="tel:+15408721873" className="hover:text-brandOrange font-medium">(540) 872-1873</a>
                   </li>
                   <li>
                     <span className="mr-2 text-navy/60 font-semibold">Virtual Address:</span>

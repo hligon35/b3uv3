@@ -10,7 +10,11 @@ import about1 from '@/images/content/about1.jpeg';
 import about2 from '@/images/content/about2.jpeg';
 import about3 from '@/images/content/about3.jpeg';
 import about4 from '@/images/content/about4.jpeg';
+import RokuLogo from '@/images/logos/rokuLogo.png';
+import FireTvLogo from '@/images/logos/firetv.png';
 import B3ULogo from '@/images/logos/B3U3D.png';
+import MogulChannelLogo from '@/images/logos/MTVG.png';
+import SoleExperienceLogo from '@/images/logos/soleexp.png';
 import Test1 from '@/images/content/test1.JPG';
 import Test2 from '@/images/content/test2.JPEG';
 import { useFormsApi } from '@/lib/useFormsApi';
@@ -158,6 +162,62 @@ export default function HomePage() {
                 <span className="rounded-md bg-black/50 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur">
                   Watch now
                 </span>
+              </div>
+            </a>
+          </div>
+        </div>
+        <div className="mt-10">
+          <div className="text-center mb-8 max-w-3xl mx-auto">
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">Watch B3U</h2>
+            <div className="flex flex-col items-center gap-3 text-navy/70">
+              <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
+                <span>Watch new content online, or through</span>
+                <span className="inline-flex items-center gap-3" aria-label="Available on Roku and Fire TV">
+                  <span className="relative h-8 w-[86px]">
+                    <Image src={RokuLogo} alt="Roku" fill className="object-contain" sizes="86px" />
+                  </span>
+                  <span>&</span>
+                  <span className="relative h-12 w-[86px]">
+                    <Image src={FireTvLogo} alt="Fire TV" fill className="object-contain" sizes="86px" />
+                  </span>
+                </span>
+                <span>on these networks.</span>
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+            <a
+              href="https://themogulchannel.com/watch-now"
+              target="_blank"
+              rel="noopener"
+              aria-label="Watch B3U on The Mogul Channel"
+              className="inline-flex"
+            >
+              <div className="relative h-32 w-[280px] overflow-hidden rounded-2xl">
+                <Image
+                  src={MogulChannelLogo}
+                  alt="The Mogul Channel"
+                  fill
+                  className="object-contain rounded-2xl"
+                  sizes="280px"
+                />
+              </div>
+            </a>
+            <a
+              href="https://thesoleexperience.com/watch-now"
+              target="_blank"
+              rel="noopener"
+              aria-label="Watch B3U on The Sole Experience"
+              className="inline-flex"
+            >
+              <div className="relative h-32 w-[280px] overflow-hidden rounded-2xl">
+                <Image
+                  src={SoleExperienceLogo}
+                  alt="The Sole Experience"
+                  fill
+                  className="object-contain rounded-2xl"
+                  sizes="280px"
+                />
               </div>
             </a>
           </div>

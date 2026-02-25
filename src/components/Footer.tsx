@@ -74,7 +74,7 @@ export default function Footer() {
           <ul className="space-y-2 text-sm">
             <li>
               <span className="mr-2 text-white/60 font-semibold">Phone:</span>
-              <a className="text-white/80 hover:text-brandOrange" href="tel:+18043852512">(804) 385-2512</a>
+              <a className="text-white/80 hover:text-brandOrange" href="tel:+15408721873">(540) 872-1873</a>
             </li>
             <li>
               <span className="mr-2 text-white/60 font-semibold">Virtual Address:</span>
