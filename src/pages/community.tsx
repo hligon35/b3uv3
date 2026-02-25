@@ -2,7 +2,7 @@ import Layout from '@/components/Layout';
 import Image from 'next/image';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import BookImage from '@/images/content/book.png';
-import SpeakEngag from '@/images/content/speakEngag.png';
+import EventFlyer from '@/images/content/flyer.png';
 import { useFormsApi } from '@/lib/useFormsApi';
 import { submitFormToEndpoint } from '@/lib/formsSubmit';
 
@@ -19,12 +19,28 @@ export default function CommunityPage() {
   const [stories, setStories] = useState<Story[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [flyerOpen, setFlyerOpen] = useState(false);
   const formRef = useRef<HTMLFormElement | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [t0, setT0] = useState('');
   const [editorMode, setEditorMode] = useState(false);
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
   const [placeholdersOnly, setPlaceholdersOnly] = useState(false);
+
+  useEffect(() => {
+    if (!flyerOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setFlyerOpen(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [flyerOpen]);
 
   // JSONP loader with cache-busting; returns a cleanup function
   const loadStories = useCallback(() => {
@@ -329,29 +345,58 @@ export default function CommunityPage() {
             </div>
             <div className="p-6">
               <h3 className="text-xl font-bold mb-2">The Big Take Back</h3>
-              <p className="text-navy/70 text-sm">Stay tuned for details on Bree's upcoming book release.</p>
+              <p className="text-navy/70 text-sm">“The Big Take Back” is Bree’s bold guide to reclaiming the parts of yourself life tried to quiet — your voice, your confidence, and your power. It reveals the subtle ways we give ourselves away and shows how to rise back into ownership with intention. It’s still in the works, but it’s coming — and it’s needed.</p>
             </div>
           </div>
 
-          {/* Speaking Engagement Event Card */}
+          {/* Event Flyer Card */}
           <div className="card p-0 overflow-hidden">
-            <div className="relative h-56 bg-white">
+            <button
+              type="button"
+              className="relative h-56 bg-white w-full cursor-zoom-in focus:outline-none focus-visible:ring-4 focus-visible:ring-brandOrange/30"
+              onClick={() => setFlyerOpen(true)}
+              aria-label="Enlarge event flyer"
+            >
               <Image
-                src={SpeakEngag}
-                alt="Hanover NAACP Honors Our Veterans event flyer"
+                src={EventFlyer}
+                alt="Event flyer"
                 fill
                 className="object-contain p-2"
                 sizes="(max-width: 768px) 100vw, 50vw"
               />
-              <span className="absolute top-3 left-3 bg-brandOrange text-white text-xs font-semibold px-3 py-1 rounded-full">Speaking Engagement</span>
-            </div>
+              <span className="absolute top-3 left-3 bg-brandOrange text-white text-xs font-semibold px-3 py-1 rounded-full">Conference</span>
+            </button>
             <div className="p-6">
-              <h3 className="text-xl font-bold mb-2">Veterans Dinner — Nov 11 @ 6:30 PM</h3>
-              <p className="text-navy/70 text-sm">Kitchen 33 • 13155 Mountain Rd, Glen Allen, VA 23059 • Veterans eat free</p>
+              <h3 className="text-xl font-bold mb-2">Upcoming Brunch Conference</h3>
+              <p className="text-navy/70 text-sm">Join us for a curated business brunch featuring expert insights, meaningful networking, and recognition of leaders making an impact. This is where purpose meets opportunity.</p>
             </div>
           </div>
         </div>
       </section>
+
+      {flyerOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/80 p-4 flex items-center justify-center cursor-zoom-out"
+          onClick={() => setFlyerOpen(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Event flyer enlarged"
+        >
+          <div
+            className="relative w-full max-w-3xl h-[85vh] bg-white rounded-2xl overflow-hidden cursor-default"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Image
+              src={EventFlyer}
+              alt="Event flyer"
+              fill
+              className="object-contain p-4"
+              sizes="100vw"
+              priority
+            />
+          </div>
+        </div>
+      )}
     </Layout>
   );
 }
