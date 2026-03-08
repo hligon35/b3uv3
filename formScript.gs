@@ -95,20 +95,29 @@ function nl2brSafe(value) {
 }
 
 function brandButton(url, label, background) {
-  return `<a href="${url}" style="display:inline-block;margin-right:10px;margin-bottom:10px;padding:12px 18px;border-radius:999px;background:${background};color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;">${label}</a>`;
+  return `<a href="${esc(url || '#')}" style="display:inline-block;margin-right:10px;margin-bottom:10px;padding:12px 18px;border-radius:999px;background:${background || '#0A1A2A'};color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;">${esc(label || 'Open')}</a>`;
 }
 
 function brandDetailList(rows) {
+  rows = Array.isArray(rows) ? rows : [];
+  if (!rows.length) return '';
   return `<div style="border:1px solid #d7e5f0;border-radius:18px;background:#f8fbfe;padding:18px 20px;margin:0 0 18px;">${rows.map(function(row) {
-    return `<div style="margin:0 0 10px;"><strong style="display:block;color:#0A1A2A;margin-bottom:2px;">${esc(row[0])}</strong><span style="color:#36516a;">${row[1]}</span></div>`;
+    row = Array.isArray(row) ? row : [];
+    return `<div style="margin:0 0 10px;"><strong style="display:block;color:#0A1A2A;margin-bottom:2px;">${esc(row[0])}</strong><span style="color:#36516a;">${esc(row[1])}</span></div>`;
   }).join('')}</div>`;
 }
 
 function brandContentCard(title, content) {
-  return `<div style="border-left:4px solid #CC5500;background:#fff8f3;border-radius:16px;padding:18px 20px;margin:0 0 16px;"><div style="font-size:12px;letter-spacing:1.4px;text-transform:uppercase;color:#CC5500;font-weight:700;margin-bottom:8px;">${esc(title)}</div><div style="color:#102437;">${content}</div></div>`;
+  return `<div style="border-left:4px solid #CC5500;background:#fff8f3;border-radius:16px;padding:18px 20px;margin:0 0 16px;"><div style="font-size:12px;letter-spacing:1.4px;text-transform:uppercase;color:#CC5500;font-weight:700;margin-bottom:8px;">${esc(title)}</div><div style="color:#102437;">${content || ''}</div></div>`;
 }
 
 function brandEmailTemplate(params) {
+  params = params || {};
+  const eyebrow = esc(params.eyebrow || 'B3U Update');
+  const title = params.title || 'B3U';
+  const lead = params.lead || '';
+  const body = params.body || '';
+  const ctaHtml = params.ctaHtml || '';
   return `<!doctype html>
 <html>
   <body style="margin:0;padding:0;background:#f4f8fb;color:#102437;font-family:Arial,Helvetica,sans-serif;">
@@ -120,11 +129,11 @@ function brandEmailTemplate(params) {
           <div style="font-size:14px;line-height:1.6;color:#d7e5f0;">Breaking Cycles. Building Legacies.</div>
         </div>
         <div style="padding:32px;">
-          <div style="font-size:12px;letter-spacing:1.8px;text-transform:uppercase;color:#CC5500;font-weight:700;margin-bottom:10px;">${esc(params.eyebrow)}</div>
-          <h1 style="margin:0 0 12px;font-size:30px;line-height:1.15;color:#0A1A2A;">${params.title}</h1>
-          <p style="margin:0 0 24px;font-size:16px;line-height:1.7;color:#36516a;">${params.lead}</p>
-          <div style="font-size:15px;line-height:1.7;color:#102437;">${params.body}</div>
-          ${params.ctaHtml ? `<div style="margin-top:24px;">${params.ctaHtml}</div>` : ''}
+          <div style="font-size:12px;letter-spacing:1.8px;text-transform:uppercase;color:#CC5500;font-weight:700;margin-bottom:10px;">${eyebrow}</div>
+          <h1 style="margin:0 0 12px;font-size:30px;line-height:1.15;color:#0A1A2A;">${title}</h1>
+          <p style="margin:0 0 24px;font-size:16px;line-height:1.7;color:#36516a;">${lead}</p>
+          <div style="font-size:15px;line-height:1.7;color:#102437;">${body}</div>
+          ${ctaHtml ? `<div style="margin-top:24px;">${ctaHtml}</div>` : ''}
         </div>
         <div style="padding:20px 32px 28px;border-top:1px solid #e4edf4;background:#fbfdff;color:#5a7389;font-size:13px;line-height:1.7;">
           You are receiving this email because of activity on B3U.<br>

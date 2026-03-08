@@ -302,6 +302,12 @@ async function sendViaSendGrid(route: Extract<Route, 'contact' | 'newsletter' | 
   }
 
   if (route === 'newsletter') {
+    await upsertSendGridMarketingContact({
+      email: payload.email,
+      firstName: payload.name || undefined,
+      createdAt: payload.createdAt,
+    });
+
     await sendGridEmail({
       to: moderatorEmail,
       fromEmail,
@@ -365,6 +371,31 @@ async function sendViaSendGrid(route: Extract<Route, 'contact' | 'newsletter' | 
       ctaHtml: moderateUrl ? `${buttonLink(moderateUrl.approve, 'Approve Story', '#0A8F5A')} ${buttonLink(moderateUrl.deny, 'Deny Story', '#B42318')}` : '',
     }),
   });
+}
+
+async function upsertSendGridMarketingContact(params: { email: string; firstName?: string; createdAt?: string }): Promise<void> {
+  const listIds = parseSendGridListIds(process.env.SENDGRID_MARKETING_LIST_IDS);
+  const response = await fetch('https://api.sendgrid.com/v3/marketing/contacts', {
+    method: 'PUT',
+    headers: {
+      authorization: `Bearer ${process.env.SENDGRID_API_KEY}`,
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      ...(listIds.length > 0 ? { list_ids: listIds } : {}),
+      contacts: [
+        {
+          email: params.email,
+          ...(params.firstName ? { first_name: params.firstName } : {}),
+        },
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(`sendgrid-marketing-${response.status}:${detail}`);
+  }
 }
 
 async function buildModerationUrl(id: string): Promise<{ approve: string; deny: string } | null> {
@@ -455,6 +486,13 @@ function buttonLink(url: string, label: string, background: string): string {
 
 function normalizeUrl(value?: string): string {
   return String(value || '').trim().replace(/\/$/, '');
+}
+
+function parseSendGridListIds(value?: string): string[] {
+  return String(value || '')
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
 }
 
 function isTruthy(value: unknown): boolean {
