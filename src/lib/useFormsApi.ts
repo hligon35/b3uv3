@@ -4,8 +4,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 // Priority: URL ?formsApi -> sessionStorage -> NEXT_PUBLIC_FORMS_API
 // Also exposes a setter that persists to sessionStorage and notifies listeners.
 
-// Built-in fallback so production builds work even if env is missing.
-const DEFAULT_FORMS_API = "https://script.google.com/macros/s/AKfycbycR-0Ya1-xnU2-zlTl8MQXjwA0TT0-6b7BO1C4WcRqB0tAfjXAd3ue6YS1wwVR6_cd/exec";
+// Default to the first-party forms endpoint so SendGrid can run server-side.
+// Static-only deployments can still override this with NEXT_PUBLIC_FORMS_API.
+const DEFAULT_FORMS_API = '/api/forms';
 const ENV_BASE = ((process.env.NEXT_PUBLIC_FORMS_API as string) || DEFAULT_FORMS_API).replace(/\/$/, '');
 const STORAGE_KEY = 'b3u.formsApi';
 const EVENT_NAME = 'b3u:formsApiChange';

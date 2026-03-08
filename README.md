@@ -3,13 +3,13 @@
 Modern rebuild of the B3U podcast & community platform inspired by the section flow of ericthomas.com but fully rebranded.
 
 ## Tech Stack
-- Next.js 14 (Pages Router for simplicity)
+- Next.js 15 (Pages Router)
 - TypeScript
 - Tailwind CSS (custom brand palette)
 - Framer Motion (hero animations)
 - GSAP (planned: scroll-driven reveals / parallax)
-- Stripe or Snipcart (planned: commerce)
-- Mailchimp / Formspree (planned: newsletter + forms)
+- Vercel Analytics
+- SendGrid + Google Apps Script for forms delivery
 
 ## Brand Tokens
 ```
@@ -49,15 +49,32 @@ npm run dev
 ```
 Visit http://localhost:3000
 
-## Environment Variables (planned)
+## Environment Variables
 Create `.env.local`:
 ```
 STRIPE_PUBLIC_KEY=pk_test_...
 STRIPE_SECRET_KEY=sk_test_...
-MAILCHIMP_API_KEY=
-MAILCHIMP_AUDIENCE_ID=
-FORM_ENDPOINT=https://formspree.io/f/xxxxx
+NEXT_PUBLIC_FORMS_API=/api/forms
+FORMS_BACKUP_URL=https://script.google.com/macros/s/your-script-id/exec
+FORMS_SIGNING_SECRET=<same SECRET value configured in Apps Script>
+SENDGRID_API_KEY=SG...
+SENDGRID_FROM_EMAIL=info@b3unstoppable.net
+SENDGRID_FROM_NAME=B3U
+SENDGRID_REPLY_TO=info@b3unstoppable.net
+SENDGRID_TO_EMAIL=info@b3unstoppable.net
 ```
+
+## Vercel Deployment
+- Deploy this repo to Vercel as a standard Next.js project.
+- The site now uses the Next API route at `src/pages/api/forms/[[...path]].ts` for SendGrid-first form handling.
+- Google Apps Script remains the persistence layer and fallback mailer. Story submissions still rely on it for moderation links and the approved-story feed.
+- Vercel Analytics is enabled in `src/pages/_app.tsx` through `@vercel/analytics/react`.
+- Required Vercel env vars: `NEXT_PUBLIC_FORMS_API`, `FORMS_BACKUP_URL`, `FORMS_SIGNING_SECRET`, `SENDGRID_API_KEY`, `SENDGRID_FROM_EMAIL`, `SENDGRID_FROM_NAME`, `SENDGRID_REPLY_TO`, `SENDGRID_TO_EMAIL`.
+
+## Forms Delivery
+- Primary mail delivery runs through SendGrid via the Vercel API route.
+- Apps Script remains the backup mailer and persistence layer.
+- If SendGrid fails, the API route falls back to Apps Script mail delivery.
 
 ## Code Organization
 ```
