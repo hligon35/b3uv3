@@ -14,6 +14,13 @@ type Story = {
   createdAt?: string;
 };
 
+const NAME_FIELD_MIN = 2;
+const NAME_FIELD_MAX = 128;
+const EMAIL_FIELD_MIN = 6;
+const EMAIL_FIELD_MAX = 254;
+const LONG_FIELD_MIN = 10;
+const LONG_FIELD_MAX = 300;
+
 export default function CommunityPage() {
   const { formsApi, debugEnabled } = useFormsApi();
   const [stories, setStories] = useState<Story[]>([]);
@@ -26,6 +33,7 @@ export default function CommunityPage() {
   const [editorMode, setEditorMode] = useState(false);
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
   const [placeholdersOnly, setPlaceholdersOnly] = useState(false);
+  const [storyValue, setStoryValue] = useState('');
 
   useEffect(() => {
     if (!flyerOpen) return;
@@ -185,6 +193,7 @@ export default function CommunityPage() {
       await submitFormToEndpoint(formRef.current!, `${formsApi}?endpoint=submit`);
       setSubmitted(true);
       try { formRef.current?.reset(); } catch {}
+      setStoryValue('');
       try { setT0(String(Date.now())); } catch {}
     } catch {
       setError('Submission failed. Please try again later.');
@@ -239,6 +248,8 @@ export default function CommunityPage() {
                   type="text"
                   autoComplete="name"
                   required
+                  minLength={NAME_FIELD_MIN}
+                  maxLength={NAME_FIELD_MAX}
                   className="w-full rounded-md border border-black/10 bg-white px-4 py-2 text-navy placeholder:text-navy/40 shadow-sm focus:outline-none focus:ring-2 focus:ring-brandBlue focus:border-brandBlue"
                   placeholder="Your name"
                 />
@@ -251,6 +262,8 @@ export default function CommunityPage() {
                   type="email"
                   autoComplete="email"
                   required
+                  minLength={EMAIL_FIELD_MIN}
+                  maxLength={EMAIL_FIELD_MAX}
                   className="w-full rounded-md border border-black/10 bg-white px-4 py-2 text-navy placeholder:text-navy/40 shadow-sm focus:outline-none focus:ring-2 focus:ring-brandBlue focus:border-brandBlue"
                   placeholder="you@example.com"
                 />
@@ -259,14 +272,23 @@ export default function CommunityPage() {
 
             <div className="mt-5">
               <label htmlFor="story" className="block text-sm font-medium text-navy mb-1">Your story <span className="text-red-600">*</span></label>
-              <textarea
-                id="story"
-                name="story"
-                rows={7}
-                required
-                className="w-full rounded-md border border-black/10 bg-white px-4 py-3 text-navy placeholder:text-navy/40 shadow-sm focus:outline-none focus:ring-2 focus:ring-brandBlue focus:border-brandBlue"
-                placeholder="Share what you’ve overcome, what you learned, or a message for others."
-              />
+              <div className="relative">
+                <textarea
+                  id="story"
+                  name="story"
+                  rows={7}
+                  required
+                  minLength={LONG_FIELD_MIN}
+                  maxLength={LONG_FIELD_MAX}
+                  value={storyValue}
+                  onChange={(e) => setStoryValue(e.target.value)}
+                  className="w-full rounded-md border border-black/10 bg-white px-4 py-3 pb-8 text-navy placeholder:text-navy/40 shadow-sm focus:outline-none focus:ring-2 focus:ring-brandBlue focus:border-brandBlue"
+                  placeholder="Share what you’ve overcome, what you learned, or a message for others."
+                />
+                <span className="pointer-events-none absolute bottom-3 right-4 text-xs text-navy/60">
+                  {storyValue.length}/{LONG_FIELD_MAX}
+                </span>
+              </div>
               <p className="mt-2 text-xs text-navy/60">Please avoid sharing sensitive personal details or names you don’t have permission to include.</p>
             </div>
 

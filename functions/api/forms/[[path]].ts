@@ -3,6 +3,7 @@ type Route = 'contact' | 'newsletter' | 'submit' | 'stories' | 'moderate' | '';
 type Env = {
   FORMS_BACKUP_URL?: string;
   FORMS_SIGNING_SECRET?: string;
+  NEXT_PUBLIC_SITE_URL?: string;
   SENDGRID_API_KEY?: string;
   SENDGRID_FROM_EMAIL?: string;
   SENDGRID_FROM_NAME?: string;
@@ -27,6 +28,15 @@ type SubmissionPayload = {
   consent: boolean;
   debug: boolean;
 };
+
+const NAME_FIELD_MIN = 2;
+const NAME_FIELD_MAX = 128;
+const EMAIL_FIELD_MIN = 6;
+const EMAIL_FIELD_MAX = 254;
+const SUBJECT_FIELD_MIN = 12;
+const SUBJECT_FIELD_MAX = 128;
+const LONG_FIELD_MIN = 30;
+const LONG_FIELD_MAX = 240;
 
 const JSON_HEADERS = {
   'content-type': 'application/json; charset=utf-8',
@@ -102,6 +112,16 @@ async function handlePost(route: Route, request: Request, env: Env): Promise<Res
   const missing = validatePayload(route, payload);
   if (missing.length > 0) {
     return json({ ok: false, error: 'missing-fields', fields: missing }, 400);
+  }
+
+  const tooLong = validateFieldLengths(route, payload);
+  if (tooLong.length > 0) {
+    return json({ ok: false, error: 'field-too-long', fields: tooLong }, 400);
+  }
+
+  const tooShort = validateFieldMinimums(route, payload);
+  if (tooShort.length > 0) {
+    return json({ ok: false, error: 'field-too-short', fields: tooShort }, 400);
   }
 
   if (route === 'submit' && !backupUrl) {
@@ -195,6 +215,68 @@ function validatePayload(route: Route, payload: SubmissionPayload): string[] {
     return ['name', 'email', 'story'].filter((key) => !payload[key as keyof SubmissionPayload]);
   }
   return ['route'];
+}
+
+function validateFieldLengths(route: Route, payload: SubmissionPayload): string[] {
+  const tooLong: string[] = [];
+
+  const check = (field: keyof SubmissionPayload, max: number) => {
+    if (String(payload[field] || '').length > max) {
+      tooLong.push(String(field));
+    }
+  };
+
+  if (route === 'contact') {
+    check('name', NAME_FIELD_MAX);
+    check('email', EMAIL_FIELD_MAX);
+    check('subject', SUBJECT_FIELD_MAX);
+    check('message', LONG_FIELD_MAX);
+  }
+
+  if (route === 'newsletter') {
+    check('email', EMAIL_FIELD_MAX);
+  }
+
+  if (route === 'submit') {
+    check('name', NAME_FIELD_MAX);
+    check('email', EMAIL_FIELD_MAX);
+    check('story', LONG_FIELD_MAX);
+  }
+
+  return tooLong;
+}
+
+function validateFieldMinimums(route: Route, payload: SubmissionPayload): string[] {
+  const tooShort: string[] = [];
+
+  const check = (field: keyof SubmissionPayload, min: number, required = true) => {
+    const value = String(payload[field] || '').trim();
+    if (!value && !required) {
+      return;
+    }
+    if (value.length < min) {
+      tooShort.push(String(field));
+    }
+  };
+
+  if (route === 'contact') {
+    check('name', NAME_FIELD_MIN);
+    check('email', EMAIL_FIELD_MIN);
+    check('subject', SUBJECT_FIELD_MIN, false);
+    check('message', LONG_FIELD_MIN);
+  }
+
+  if (route === 'newsletter') {
+    check('email', EMAIL_FIELD_MIN);
+  }
+
+  if (route === 'submit') {
+    check('name', NAME_FIELD_MIN);
+    check('email', EMAIL_FIELD_MIN);
+    check('story', LONG_FIELD_MIN);
+  }
+
+  return tooShort;
 }
 
 async function proxyGetToBackup(route: Extract<Route, 'stories' | 'moderate'>, url: URL, env: Env): Promise<Response> {
@@ -479,13 +561,16 @@ function brandedEmailTemplate(params: {
   body: string;
   ctaHtml?: string;
 }): string {
+  const logoUrl = getEmailLogoUrl();
   return `<!doctype html>
 <html>
   <body style="margin:0;padding:0;background:#f4f8fb;color:#102437;font-family:Arial,Helvetica,sans-serif;">
     <div style="padding:32px 16px;">
       <div style="max-width:680px;margin:0 auto;background:#ffffff;border:1px solid #d7e5f0;border-radius:24px;overflow:hidden;box-shadow:0 18px 48px rgba(10,26,42,0.12);">
         <div style="background:linear-gradient(135deg,#0A1A2A 0%,#173a58 100%);padding:28px 32px 24px;color:#ffffff;">
-          <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#7BAFD4;font-weight:700;margin-bottom:10px;">B3U</div>
+          <div style="margin:0 0 16px;">
+            <img src="${logoUrl}" alt="B3U" width="84" height="84" style="display:block;width:84px;height:auto;border:0;outline:none;text-decoration:none;" />
+          </div>
           <div style="font-size:30px;line-height:1.1;font-weight:700;margin:0 0 8px;">Burn, Break, Become Unstoppable</div>
           <div style="font-size:14px;line-height:1.6;color:#d7e5f0;">Breaking Cycles. Building Legacies.</div>
         </div>
@@ -522,6 +607,16 @@ function buttonLink(url: string, label: string, background: string): string {
 
 function normalizeUrl(value?: string): string {
   return String(value || '').trim().replace(/\/$/, '');
+}
+
+function getEmailLogoUrl(): string {
+  const siteUrl = normalizeUrl('');
+  if (siteUrl) {
+    const baseUrl = siteUrl.startsWith('http') ? siteUrl : `https://${siteUrl}`;
+    return `${baseUrl}/images/logos/B3U3D.png`;
+  }
+
+  return 'https://b3uv3.vercel.app/images/logos/B3U3D.png';
 }
 
 function parseSendGridListIds(value?: string): string[] {

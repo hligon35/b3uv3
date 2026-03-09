@@ -20,6 +20,9 @@ import Test2 from '@/images/content/test2.JPEG';
 import { useFormsApi } from '@/lib/useFormsApi';
 import { submitFormToEndpoint } from '@/lib/formsSubmit';
 
+const EMAIL_FIELD_MIN = 6;
+const EMAIL_FIELD_MAX = 254;
+
 export default function HomePage() {
 
   // Shop products for homepage preview
@@ -334,6 +337,8 @@ export default function HomePage() {
               type="email"
               name="email"
               required
+              minLength={EMAIL_FIELD_MIN}
+              maxLength={EMAIL_FIELD_MAX}
               placeholder="Email address"
               className="flex-1 px-5 py-3 rounded-md bg-white border border-black/10 focus:outline-none focus:ring-2 focus:ring-brandBlue"
             />

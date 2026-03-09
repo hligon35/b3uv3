@@ -51,21 +51,4 @@ jobs:
             git push
           fi
 
-      - name: Build static site
-        if: ${{ steps.window.outputs.run == 'true' }}
-        env:
-          NEXT_PUBLIC_FORMS_API: ${{ vars.NEXT_PUBLIC_FORMS_API }}
-          CUSTOM_DOMAIN: ${{ vars.CUSTOM_DOMAIN }}
-        run: npm run predeploy
 
-      - name: Deploy to GitHub Pages
-        if: ${{ steps.window.outputs.run == 'true' }}
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: gh-pages
-          publish_dir: ./out
-          force_orphan: true
-          enable_jekyll: false
-          allow_empty_commit: false
-          cname: ${{ vars.CUSTOM_DOMAIN }}

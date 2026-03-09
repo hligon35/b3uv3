@@ -3,6 +3,13 @@ import { useEffect, useRef, useState } from 'react';
 import { useFormsApi } from '@/lib/useFormsApi';
 import { submitFormToEndpoint } from '@/lib/formsSubmit';
 
+const NAME_FIELD_MIN = 2;
+const NAME_FIELD_MAX = 128;
+const EMAIL_FIELD_MIN = 6;
+const EMAIL_FIELD_MAX = 254;
+const LONG_FIELD_MIN = 10;
+const LONG_FIELD_MAX = 300;
+
 export default function ContactPage() {
   const { formsApi, setFormsApiOverride, debugEnabled } = useFormsApi();
   const [sent, setSent] = useState(false);
@@ -10,6 +17,7 @@ export default function ContactPage() {
   const [t0, setT0] = useState('');
   const formRef = useRef<HTMLFormElement | null>(null);
   const [overrideInput, setOverrideInput] = useState('');
+  const [messageValue, setMessageValue] = useState('');
 
   const onSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
@@ -28,6 +36,7 @@ export default function ContactPage() {
       await submitFormToEndpoint(form, action);
       setSent(true);
       try { form.reset(); } catch {}
+      setMessageValue('');
       try { setT0(String(Date.now())); } catch {}
     } catch {
       // eslint-disable-next-line no-console
@@ -75,6 +84,8 @@ export default function ContactPage() {
                     required 
                     type="text"
                     name="name"
+                    minLength={NAME_FIELD_MIN}
+                    maxLength={NAME_FIELD_MAX}
                     placeholder="Enter your full name"
                     className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-brandOrange focus:outline-none transition-colors bg-gray-50 focus:bg-white" 
                   />
@@ -85,6 +96,8 @@ export default function ContactPage() {
                     required 
                     type="email"
                     name="email"
+                    minLength={EMAIL_FIELD_MIN}
+                    maxLength={EMAIL_FIELD_MAX}
                     placeholder="Enter your email address"
                     className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-brandOrange focus:outline-none transition-colors bg-gray-50 focus:bg-white" 
                   />
@@ -106,13 +119,20 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-navy mb-2">Message *</label>
-                  <textarea 
-                    required 
-                    rows={6}
-                    name="message"
-                    placeholder="Tell us about your inquiry..."
-                    className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-brandOrange focus:outline-none transition-colors bg-gray-50 focus:bg-white resize-none" 
-                  />
+                  <div className="relative">
+                    <textarea 
+                      required 
+                      rows={6}
+                      name="message"
+                      minLength={LONG_FIELD_MIN}
+                      maxLength={LONG_FIELD_MAX}
+                      value={messageValue}
+                      onChange={(e) => setMessageValue(e.target.value)}
+                      placeholder="Tell us about your inquiry..."
+                      className="w-full px-4 py-3 pb-8 rounded-lg border-2 border-gray-200 focus:border-brandOrange focus:outline-none transition-colors bg-gray-50 focus:bg-white resize-none" 
+                    />
+                    <span className="pointer-events-none absolute bottom-3 right-4 text-xs text-navy/60">{messageValue.length}/{LONG_FIELD_MAX}</span>
+                  </div>
                 </div>
                 <button className="btn-primary w-full py-3 text-lg font-semibold disabled:opacity-50" type="submit" disabled={pending}>
                   {pending ? 'Sending…' : 'Send Message'}

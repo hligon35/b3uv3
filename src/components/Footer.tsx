@@ -5,6 +5,9 @@ import B3ULogo from '@/images/logos/B3U3D.png';
 import { useFormsApi } from '@/lib/useFormsApi';
 import { submitFormToEndpoint } from '@/lib/formsSubmit';
 
+const EMAIL_FIELD_MIN = 6;
+const EMAIL_FIELD_MAX = 254;
+
 export default function Footer() {
   const { formsApi, debugEnabled } = useFormsApi();
   const [footSubbed, setFootSubbed] = useState(false);
@@ -106,7 +109,7 @@ export default function Footer() {
             <input type="text" name="hp" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
             <input type="hidden" name="t0" value={t0} />
             {debugEnabled && <input type="hidden" name="debug" value="1" />}
-            <input name="email" type="email" required placeholder="Email address" className="w-full px-4 py-2 rounded-md bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-brandBlue" />
+            <input name="email" type="email" required minLength={EMAIL_FIELD_MIN} maxLength={EMAIL_FIELD_MAX} placeholder="Email address" className="w-full px-4 py-2 rounded-md bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-brandBlue" />
             <button className="btn-primary w-full disabled:opacity-50" type="submit" disabled={footPending}>
               {footPending ? 'Subscribing…' : 'Subscribe'}
             </button>

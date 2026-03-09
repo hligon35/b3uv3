@@ -177,6 +177,8 @@ export default function AboutPage() {
               <input 
                 type="email" 
                 required 
+                minLength={6}
+                maxLength={254}
                 placeholder="Email address" 
                 className="flex-1 px-4 py-2 rounded-md bg-white border border-navy/20 focus:outline-none focus:ring-2 focus:ring-brandOrange" 
               />

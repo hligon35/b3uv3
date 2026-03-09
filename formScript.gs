@@ -34,7 +34,16 @@ const SUBS_SHEET = PROPS.getProperty('SUBS_SHEET') || 'Subscribers';
 
 const MODERATOR_EMAIL = PROPS.getProperty('MODERATOR_EMAIL') || 'info@b3unstoppable.net';
 const SECRET = PROPS.getProperty('SECRET') || 'change-me';
+const SITE_URL = PROPS.getProperty('SITE_URL') || 'https://b3uv3.vercel.app';
 const MIN_FILL_MS = parseInt(PROPS.getProperty('MIN_FILL_MS') || '800', 10); // anti-bot: require ~0.8s between load and submit when t0 is present
+const NAME_FIELD_MIN = 2;
+const NAME_FIELD_MAX = 128;
+const EMAIL_FIELD_MIN = 6;
+const EMAIL_FIELD_MAX = 254;
+const SUBJECT_FIELD_MIN = 12;
+const SUBJECT_FIELD_MAX = 128;
+const LONG_FIELD_MIN = 30;
+const LONG_FIELD_MAX = 240;
 
 // Headers for each sheet tab (row 1)
 const STORIES_HEADERS = ['id','name','email','story','consent','status','createdAt','decidedAt'];
@@ -118,13 +127,16 @@ function brandEmailTemplate(params) {
   const lead = params.lead || '';
   const body = params.body || '';
   const ctaHtml = params.ctaHtml || '';
+  const logoUrl = getBrandLogoUrl();
   return `<!doctype html>
 <html>
   <body style="margin:0;padding:0;background:#f4f8fb;color:#102437;font-family:Arial,Helvetica,sans-serif;">
     <div style="padding:32px 16px;">
       <div style="max-width:680px;margin:0 auto;background:#ffffff;border:1px solid #d7e5f0;border-radius:24px;overflow:hidden;box-shadow:0 18px 48px rgba(10,26,42,0.12);">
         <div style="background:linear-gradient(135deg,#0A1A2A 0%,#173a58 100%);padding:28px 32px 24px;color:#ffffff;">
-          <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#7BAFD4;font-weight:700;margin-bottom:10px;">B3U</div>
+          <div style="margin:0 0 16px;">
+            <img src="${logoUrl}" alt="B3U" width="84" height="84" style="display:block;width:84px;height:auto;border:0;outline:none;text-decoration:none;">
+          </div>
           <div style="font-size:30px;line-height:1.1;font-weight:700;margin:0 0 8px;">Burn, Break, Become Unstoppable</div>
           <div style="font-size:14px;line-height:1.6;color:#d7e5f0;">Breaking Cycles. Building Legacies.</div>
         </div>
@@ -143,6 +155,10 @@ function brandEmailTemplate(params) {
     </div>
   </body>
 </html>`;
+}
+
+function getBrandLogoUrl() {
+  return String(SITE_URL || 'https://b3uv3.vercel.app').replace(/\/$/, '') + '/images/logos/B3U3D.png';
 }
 
 function debugBlock(meta) {
@@ -166,6 +182,63 @@ function debugBlock(meta) {
 function respond(title, messageHtml, meta, debug) {
   const body = debug ? (messageHtml + debugBlock(meta)) : messageHtml;
   return htmlPage(title, body);
+}
+
+function findTooLongFields(route, payload) {
+  const tooLong = [];
+
+  function check(field, max) {
+    const value = String(payload[field] || '').trim();
+    if (value.length > max) tooLong.push(field);
+  }
+
+  if (route === 'contact') {
+    check('name', NAME_FIELD_MAX);
+    check('email', EMAIL_FIELD_MAX);
+    check('subject', SUBJECT_FIELD_MAX);
+    check('message', LONG_FIELD_MAX);
+  }
+
+  if (route === 'newsletter') {
+    check('email', EMAIL_FIELD_MAX);
+  }
+
+  if (route === 'submit') {
+    check('name', NAME_FIELD_MAX);
+    check('email', EMAIL_FIELD_MAX);
+    check('story', LONG_FIELD_MAX);
+  }
+
+  return tooLong;
+}
+
+function findTooShortFields(route, payload) {
+  const tooShort = [];
+
+  function check(field, min, required) {
+    const value = String(payload[field] || '').trim();
+    if (!value && !required) return;
+    if (value.length < min) tooShort.push(field);
+  }
+
+  if (route === 'contact') {
+    check('name', NAME_FIELD_MIN, true);
+    check('email', EMAIL_FIELD_MIN, true);
+    check('subject', SUBJECT_FIELD_MIN, false);
+    check('message', LONG_FIELD_MIN, true);
+  }
+
+  if (route === 'newsletter') {
+    check('email', EMAIL_FIELD_MIN, true);
+  }
+
+  if (route === 'submit') {
+    check('name', NAME_FIELD_MIN, true);
+    check('email', EMAIL_FIELD_MIN, true);
+    check('story', LONG_FIELD_MIN, true);
+  }
+
+  return tooShort;
 }
 
 function findRowById(id) {
@@ -251,6 +324,14 @@ function handleStorySubmit(e) {
     if (!name || !email || !story) {
       return respond('Missing fields', '<p>Please provide name, email, and story.</p>', { endpoint: 'submit', name: !!name, email: !!email, story: !!story }, debug);
     }
+    const tooLong = findTooLongFields('submit', { name: name, email: email, story: story });
+    if (tooLong.length) {
+      return respond('Too long', '<p>Please keep story submissions within the allowed length.</p>', { endpoint: 'submit', tooLong: tooLong }, debug);
+    }
+    const tooShort = findTooShortFields('submit', { name: name, email: email, story: story });
+    if (tooShort.length) {
+      return respond('Too short', '<p>Please complete story submissions using the minimum required length.</p>', { endpoint: 'submit', tooShort: tooShort }, debug);
+    }
     const id = (p.id || Utilities.getUuid()).toString();
     const createdAt = (p.createdAt || nowISO()).toString();
     if (!skipPersist) {
@@ -287,7 +368,7 @@ function handleStorySubmit(e) {
         htmlBody: brandEmailTemplate({
           eyebrow: 'Story Submission',
           title: `New community story from ${esc(name)}`,
-          lead: 'A new story is ready for moderation.',
+          lead: 'A new story is ready for website.',
           body: `${brandDetailList([
             ['Name', esc(name)],
             ['Email', esc(email)]
@@ -322,6 +403,14 @@ function handleContact(e) {
     const message = (p.message || '').toString().trim();
     if (!name || !email || !message) {
       return respond('Missing fields', '<p>Please provide name, email, and message.</p>', { endpoint: 'contact', name: !!name, email: !!email, message: !!message }, debug);
+    }
+    const tooLong = findTooLongFields('contact', { name: name, email: email, subject: subject, message: message });
+    if (tooLong.length) {
+      return respond('Too long', '<p>Please keep contact form fields within the allowed length.</p>', { endpoint: 'contact', tooLong: tooLong }, debug);
+    }
+    const tooShort = findTooShortFields('contact', { name: name, email: email, subject: subject, message: message });
+    if (tooShort.length) {
+      return respond('Too short', '<p>Please complete contact fields using the minimum required length.</p>', { endpoint: 'contact', tooShort: tooShort }, debug);
     }
 
     // Persist to ContactForm sheet
@@ -387,6 +476,10 @@ function handleNewsletter(e) {
     if (t0 && (delta < MIN_FILL_MS || delta > 86400000)) return respond('Subscribed', '<p>Thanks! You’re subscribed.</p>', { endpoint: 'newsletter', hp: !!hp, delta, note: 'timing-guard' }, debug);
     const email = (p.email || '').toString().trim();
     if (!email) return respond('Missing fields', '<p>Please provide an email.</p>', { endpoint: 'newsletter', email: !!email }, debug);
+    const tooLong = findTooLongFields('newsletter', { email: email });
+    if (tooLong.length) return respond('Too long', '<p>Please keep newsletter fields within the allowed length.</p>', { endpoint: 'newsletter', tooLong: tooLong }, debug);
+    const tooShort = findTooShortFields('newsletter', { email: email });
+    if (tooShort.length) return respond('Too short', '<p>Please complete newsletter fields using the minimum required length.</p>', { endpoint: 'newsletter', tooShort: tooShort }, debug);
 
     // Persist to Subscribers sheet
     const id = (p.id || Utilities.getUuid()).toString();
