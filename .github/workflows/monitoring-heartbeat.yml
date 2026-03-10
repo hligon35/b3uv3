@@ -2,7 +2,7 @@ name: Monitoring heartbeat
 
 on:
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: '*/30 * * * *'
   workflow_dispatch: {}
 
 jobs:
@@ -19,10 +19,14 @@ jobs:
             echo "Missing MONITORING_BASE_URL or MONITORING_CRON_TOKEN secret"
             exit 1
           fi
+
+          BASE_URL="${MONITORING_BASE_URL%/}"
+
           curl --fail --silent --show-error \
+            --location \
             --max-time 20 \
             -H "x-monitoring-token: $MONITORING_CRON_TOKEN" \
-            "$MONITORING_BASE_URL/api/debug/health"
+            "$BASE_URL/api/debug/health/"
 
       - name: Send production outage alert email
         if: failure()
