@@ -2,7 +2,7 @@ name: Monitoring heartbeat
 
 on:
   schedule:
-    - cron: '*/30 * * * *'
+    - cron: '*/5 * * * *'
   workflow_dispatch: {}
 
 jobs:
@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Call monitoring health endpoint
+        id: heartbeat
         env:
           MONITORING_BASE_URL: ${{ secrets.MONITORING_BASE_URL }}
           MONITORING_CRON_TOKEN: ${{ secrets.MONITORING_CRON_TOKEN }}
@@ -19,5 +20,49 @@ jobs:
             exit 1
           fi
           curl --fail --silent --show-error \
+            --max-time 20 \
             -H "x-monitoring-token: $MONITORING_CRON_TOKEN" \
             "$MONITORING_BASE_URL/api/debug/health"
+
+      - name: Send production outage alert email
+        if: failure()
+        env:
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          MONITORING_FROM_EMAIL: ${{ secrets.MONITORING_FROM_EMAIL }}
+          MONITORING_TO_EMAIL: ${{ secrets.MONITORING_TO_EMAIL }}
+          MONITORING_BASE_URL: ${{ secrets.MONITORING_BASE_URL }}
+          GITHUB_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -z "$SENDGRID_API_KEY" ] || [ -z "$MONITORING_FROM_EMAIL" ] || [ -z "$MONITORING_TO_EMAIL" ] || [ -z "$MONITORING_BASE_URL" ]; then
+            echo "Missing SendGrid or monitoring email secrets; cannot send outage email"
+            exit 1
+          fi
+
+          payload=$(cat <<EOF
+          {
+            "personalizations": [
+              {
+                "to": [{ "email": "$MONITORING_TO_EMAIL" }],
+                "subject": "[Production Alert] B3U health check failed"
+              }
+            ],
+            "from": {
+              "email": "$MONITORING_FROM_EMAIL",
+              "name": "B3U Monitoring"
+            },
+            "content": [
+              {
+                "type": "text/html",
+                "value": "<p>The production health check failed for <strong>$MONITORING_BASE_URL</strong>.</p><p>This heartbeat runs every 5 minutes and could not reach <code>/api/debug/health</code>.</p><p>GitHub Actions run: <a href=\"$GITHUB_RUN_URL\">$GITHUB_RUN_URL</a></p>"
+              }
+            ]
+          }
+          EOF
+          )
+
+          curl --fail --silent --show-error \
+            --request POST \
+            --url https://api.sendgrid.com/v3/mail/send \
+            --header "Authorization: Bearer $SENDGRID_API_KEY" \
+            --header "Content-Type: application/json" \
+            --data "$payload"

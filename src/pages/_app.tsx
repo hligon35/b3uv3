@@ -59,7 +59,7 @@ export default function App({ Component, pageProps }: AppProps) {
         <Script
           src="https://static.cloudflareinsights.com/beacon.min.js"
           data-cf-beacon={JSON.stringify({ token: cloudflareAnalyticsToken })}
-          strategy="afterInteractive"
+          strategy="lazyOnload"
         />
       ) : null}
 

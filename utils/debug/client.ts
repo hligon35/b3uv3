@@ -12,6 +12,7 @@ type ClientFetchOptions = {
   label?: string;
   route?: string;
   source?: string;
+  suppressErrorLogging?: boolean;
 };
 
 declare global {
@@ -156,6 +157,10 @@ export async function monitoredFetch(input: RequestInfo | URL, init: RequestInit
       throw error;
     }
 
+    if (options.suppressErrorLogging) {
+      throw error;
+    }
+
     const entry = captureClientError(error, {
       route: options.route || window.location.pathname,
       endpoint: targetUrl,
@@ -278,7 +283,13 @@ function getBaseFetch(): typeof fetch {
 }
 
 function shouldSkipMonitoring(url: string): boolean {
-  return url.includes('/api/debug/ingest') || url.includes('/api/debug/export') || url.includes('/api/debug/weekly-report') || url.includes('/api/debug/health');
+  return url.includes('/api/debug/ingest')
+    || url.includes('/api/debug/export')
+    || url.includes('/api/debug/weekly-report')
+    || url.includes('/api/debug/health')
+    || url.includes('/_next/static/webpack/')
+    || url.includes('.webpack.hot-update.json')
+    || url.includes('/__nextjs_original-stack-frames');
 }
 
 function getSessionId(): string {

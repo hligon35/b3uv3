@@ -5,6 +5,7 @@ import BookImage from '@/images/content/book.png';
 import EventFlyer from '@/images/content/flyer.png';
 import { useFormsApi } from '@/lib/useFormsApi';
 import { submitFormToEndpoint } from '@/lib/formsSubmit';
+import { monitoredFetch } from '../../utils/debug/client';
 
 type Story = {
   id: string;
@@ -24,6 +25,7 @@ const LONG_FIELD_MAX = 300;
 export default function CommunityPage() {
   const { formsApi, debugEnabled } = useFormsApi();
   const [stories, setStories] = useState<Story[]>([]);
+  const [storiesLoading, setStoriesLoading] = useState(true);
   const [expandedStoryIds, setExpandedStoryIds] = useState<Set<string>>(new Set());
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -33,7 +35,6 @@ export default function CommunityPage() {
   const [t0, setT0] = useState('');
   const [editorMode, setEditorMode] = useState(false);
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
-  const [placeholdersOnly, setPlaceholdersOnly] = useState(false);
   const [storyValue, setStoryValue] = useState('');
 
   useEffect(() => {
@@ -59,9 +60,10 @@ export default function CommunityPage() {
     const requestUrls = [`${formsApi}?endpoint=stories`, `${formsApi}/stories`];
 
     const fetchStories = async () => {
+      setStoriesLoading(true);
       for (const url of requestUrls) {
         try {
-          const response = await fetch(`${url}${url.includes('?') ? '&' : '?'}_ts=${Date.now()}`, {
+          const response = await monitoredFetch(`${url}${url.includes('?') ? '&' : '?'}_ts=${Date.now()}`, {
             method: 'GET',
             cache: 'no-store',
             credentials: 'omit',
@@ -69,6 +71,11 @@ export default function CommunityPage() {
               Accept: 'application/json',
             },
             signal: controller.signal,
+          }, {
+            label: 'Community stories fetch',
+            route: '/community',
+            source: 'community-stories',
+            suppressErrorLogging: true,
           });
 
           if (!response.ok) {
@@ -82,6 +89,7 @@ export default function CommunityPage() {
 
           if (Array.isArray(payload?.stories)) {
             setStories(payload.stories as Story[]);
+            setStoriesLoading(false);
             return;
           }
         } catch (error) {
@@ -90,6 +98,8 @@ export default function CommunityPage() {
           }
         }
       }
+
+      setStoriesLoading(false);
     };
 
     void fetchStories();
@@ -136,13 +146,6 @@ export default function CommunityPage() {
       } else {
         try { if (window.localStorage?.getItem('b3u.editor') === '1') setEditorMode(true); } catch {}
       }
-      const ph = params.get('placeholders');
-      if (ph === '1' || ph === 'true') {
-        setPlaceholdersOnly(true);
-        try { window.localStorage?.setItem('b3u.placeholdersOnly', '1'); } catch {}
-      } else {
-        try { setPlaceholdersOnly(window.localStorage?.getItem('b3u.placeholdersOnly') === '1'); } catch {}
-      }
       try {
         const raw = window.localStorage?.getItem('b3u.hiddenStories');
         if (raw) {
@@ -156,9 +159,8 @@ export default function CommunityPage() {
 
   const displayCount = 6; // number of cards to show at minimum
   const filteredStories = useMemo(() => {
-    if (placeholdersOnly) return [] as Story[];
     return stories.filter(st => !hiddenIds.has(st.id));
-  }, [stories, hiddenIds, placeholdersOnly]);
+  }, [stories, hiddenIds]);
   const visibleStories = useMemo(() => filteredStories.slice(0, displayCount), [filteredStories]);
 
   const toggleStoryExpanded = (id: string) => {
@@ -190,17 +192,6 @@ export default function CommunityPage() {
       return next;
     });
   };
-  const togglePlaceholdersOnly = () => {
-    setPlaceholdersOnly(prev => {
-      const val = !prev;
-      try {
-        if (val) window.localStorage?.setItem('b3u.placeholdersOnly', '1');
-        else window.localStorage?.removeItem('b3u.placeholdersOnly');
-      } catch {}
-      return val;
-    });
-  };
-
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (submitting) return; // guard against double submissions
@@ -240,10 +231,6 @@ export default function CommunityPage() {
             <button type="button" className="btn-outline" onClick={() => loadStories()}>Refresh stories</button>
             <button type="button" className="btn-outline" onClick={unhideAll}>Clear local hides</button>
             <button type="button" className="btn-outline" onClick={hideAllFetched}>Hide all fetched</button>
-            <label className="flex items-center gap-2 text-sm">
-              <input type="checkbox" checked={placeholdersOnly} onChange={togglePlaceholdersOnly} />
-              Show placeholders only
-            </label>
             <span className="text-xs text-navy/60">Editor mode</span>
           </div>
         )}
@@ -351,7 +338,7 @@ export default function CommunityPage() {
         </form>
   {/* Iframe removed: switched to fetch-based submission with no-cors fallback */}
         <div className="grid md:grid-cols-3 gap-8 mb-16">
-          {/* Render approved stories if available; otherwise show placeholders. */}
+          {/* Render approved stories only. */}
           {visibleStories.map((st) => (
             <div key={st.id} className="card flex h-full flex-col">
               <p
@@ -376,14 +363,17 @@ export default function CommunityPage() {
               )}
             </div>
           ))}
-          {visibleStories.length === 0 &&
-            Array.from({ length: displayCount }).map((_, i) => (
-              <div key={`ph-${i}`} className="card">
-                <p className="text-sm italic mb-4">“This platform helped me reconnect with my purpose and give back in ways I never imagined.”</p>
-                <p className="text-xs text-navy/60">Story Contributor</p>
-              </div>
-            ))}
         </div>
+        {!storiesLoading && visibleStories.length === 0 && (
+          <div className="mb-16 rounded-xl border border-black/10 bg-[#F8FBFD] px-6 py-5 text-sm text-navy/70">
+            No community stories have been approved for display yet. Check back soon.
+          </div>
+        )}
+        {storiesLoading && (
+          <div className="mb-16 rounded-xl border border-black/10 bg-[#F8FBFD] px-6 py-5 text-sm text-navy/60">
+            Loading community stories...
+          </div>
+        )}
       </section>
   <section className="section-padding bg-[#F4F8FB]">
         <h2 className="text-3xl font-bold mb-8">Event Gallery</h2>
@@ -450,7 +440,6 @@ export default function CommunityPage() {
               fill
               className="object-contain p-4"
               sizes="100vw"
-              priority
             />
           </div>
         </div>

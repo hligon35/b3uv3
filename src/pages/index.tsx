@@ -110,7 +110,6 @@ export default function HomePage() {
                 height={800}
                 className={`w-full aspect-square rounded-3xl object-cover ${i === 2 ? 'object-top' : 'object-center'}`}
                 sizes="(max-width: 768px) 50vw, 25vw"
-                priority={i === 0}
               />
             ))}
           </div>
@@ -145,7 +144,6 @@ export default function HomePage() {
                   fill
                   className="object-contain p-0 md:p-2 scale-150 md:scale-150 transition-transform duration-500 ease-out group-hover:scale-[1.6] group-hover:rotate-[1.5deg]"
                   sizes="(max-width: 768px) 100vw, 420px"
-                  priority
                 />
               </div>
 

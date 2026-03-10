@@ -171,7 +171,8 @@ Report email content is intended to be easy to scan first, technical second.
 Two GitHub Actions workflows were added:
 
 - `.github/workflows/monitoring-heartbeat.yml`
-  - pings `/api/debug/health` every 30 minutes
+  - pings `/api/debug/health` every 5 minutes
+  - sends a direct outage email from GitHub Actions if the production health check fails
 - `.github/workflows/weekly-monitoring-report.yml`
   - triggers `/api/debug/weekly-report?send=1` every Monday
 
@@ -180,6 +181,9 @@ Required GitHub Actions secrets:
 - `MONITORING_BASE_URL`
   - example: `https://b3uv3.vercel.app`
 - `MONITORING_CRON_TOKEN`
+- `SENDGRID_API_KEY`
+- `MONITORING_FROM_EMAIL`
+- `MONITORING_TO_EMAIL`
 
 ## Protected Debug Endpoints
 
