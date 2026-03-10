@@ -1,0 +1,23 @@
+name: Weekly monitoring report
+
+on:
+  schedule:
+    - cron: '0 13 * * 1'
+  workflow_dispatch: {}
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger weekly report email
+        env:
+          MONITORING_BASE_URL: ${{ secrets.MONITORING_BASE_URL }}
+          MONITORING_CRON_TOKEN: ${{ secrets.MONITORING_CRON_TOKEN }}
+        run: |
+          if [ -z "$MONITORING_BASE_URL" ] || [ -z "$MONITORING_CRON_TOKEN" ]; then
+            echo "Missing MONITORING_BASE_URL or MONITORING_CRON_TOKEN secret"
+            exit 1
+          fi
+          curl --fail --silent --show-error \
+            -H "x-monitoring-token: $MONITORING_CRON_TOKEN" \
+            "$MONITORING_BASE_URL/api/debug/weekly-report?send=1"

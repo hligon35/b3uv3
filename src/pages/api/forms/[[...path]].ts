@@ -1,5 +1,6 @@
 import crypto from 'node:crypto';
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { monitoredServerFetch, registerServerProcessMonitoring, withApiMonitoring } from '../../../../utils/debug/server';
 
 type Route = 'contact' | 'newsletter' | 'submit' | 'stories' | 'moderate' | '';
 
@@ -35,7 +36,9 @@ export const config = {
   },
 };
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+registerServerProcessMonitoring();
+
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   applyCors(res);
 
   if (req.method === 'OPTIONS') {
@@ -57,6 +60,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   res.status(405).json({ ok: false, error: 'method-not-allowed' });
 }
+
+export default withApiMonitoring('forms-api', handler, { capturePayload: true });
 
 async function handleGet(req: NextApiRequest, res: NextApiResponse, route: Route) {
   if (!route) {
@@ -299,7 +304,7 @@ async function proxyGetToBackup(req: NextApiRequest, res: NextApiResponse, route
   }
   target.searchParams.set('endpoint', route);
 
-  const response = await fetch(target.toString(), { method: 'GET' });
+  const response = await monitoredServerFetch(target.toString(), { method: 'GET' }, { label: 'Forms backup GET proxy', route: route, source: 'forms-api' });
   const contentType = response.headers.get('content-type') || (route === 'moderate' ? 'text/html; charset=utf-8' : 'application/json; charset=utf-8');
   res.setHeader('Content-Type', contentType);
   res.status(response.status).send(Buffer.from(await response.arrayBuffer()));
@@ -331,10 +336,10 @@ async function relayToAppsScript(
   if (!options.persist) formData.set('skipPersist', '1');
   if (payload.debug) formData.set('debug', '1');
 
-  const response = await fetch(target.toString(), {
+  const response = await monitoredServerFetch(target.toString(), {
     method: 'POST',
     body: formData,
-  });
+  }, { label: 'Forms backup POST relay', route, source: 'forms-api' });
 
   return { ok: response.ok };
 }
@@ -458,7 +463,7 @@ async function sendViaSendGrid(route: Extract<Route, 'contact' | 'newsletter' | 
 
 async function upsertSendGridMarketingContact(params: { email: string; firstName?: string; createdAt?: string }): Promise<void> {
   const listIds = parseSendGridListIds(process.env.SENDGRID_MARKETING_LIST_IDS);
-  const response = await fetch('https://api.sendgrid.com/v3/marketing/contacts', {
+  const response = await monitoredServerFetch('https://api.sendgrid.com/v3/marketing/contacts', {
     method: 'PUT',
     headers: {
       authorization: `Bearer ${process.env.SENDGRID_API_KEY}`,
@@ -473,7 +478,7 @@ async function upsertSendGridMarketingContact(params: { email: string; firstName
         },
       ],
     }),
-  });
+  }, { label: 'SendGrid marketing contact upsert', route: 'forms-api', source: 'forms-api' });
 
   if (!response.ok) {
     const detail = await response.text();
@@ -504,7 +509,7 @@ async function sendGridEmail(params: {
   subject: string;
   html: string;
 }): Promise<void> {
-  const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
+  const response = await monitoredServerFetch('https://api.sendgrid.com/v3/mail/send', {
     method: 'POST',
     headers: {
       authorization: `Bearer ${process.env.SENDGRID_API_KEY}`,
@@ -517,7 +522,7 @@ async function sendGridEmail(params: {
       subject: params.subject,
       content: [{ type: 'text/html', value: params.html }],
     }),
-  });
+  }, { label: 'SendGrid mail send', route: 'forms-api', source: 'forms-api' });
 
   if (!response.ok) {
     const detail = await response.text();
@@ -529,24 +534,39 @@ function brandedEmailTemplate(params: { eyebrow: string; title: string; lead: st
   const logoUrl = getEmailLogoUrl();
   return `<!doctype html>
 <html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      @media only screen and (max-width: 640px) {
+        .email-shell { padding: 18px 10px !important; }
+        .email-card { border-radius: 18px !important; }
+        .email-header,
+        .email-content,
+        .email-footer { padding-left: 20px !important; padding-right: 20px !important; }
+        .email-header { padding-top: 22px !important; }
+        .email-logo { width: 64px !important; }
+        .email-title { font-size: 24px !important; line-height: 1.2 !important; }
+      }
+    </style>
+  </head>
   <body style="margin:0;padding:0;background:#f4f8fb;color:#102437;font-family:Arial,Helvetica,sans-serif;">
-    <div style="padding:32px 16px;">
-      <div style="max-width:680px;margin:0 auto;background:#ffffff;border:1px solid #d7e5f0;border-radius:24px;overflow:hidden;box-shadow:0 18px 48px rgba(10,26,42,0.12);">
-        <div style="background:linear-gradient(135deg,#0A1A2A 0%,#173a58 100%);padding:28px 32px 24px;color:#ffffff;">
+    <div class="email-shell" style="padding:32px 16px;">
+      <div class="email-card" style="max-width:680px;margin:0 auto;background:#ffffff;border:1px solid #d7e5f0;border-radius:24px;overflow:hidden;box-shadow:0 18px 48px rgba(10,26,42,0.12);">
+        <div class="email-header" style="background:linear-gradient(135deg,#0A1A2A 0%,#173a58 100%);padding:28px 32px 24px;color:#ffffff;">
           <div style="margin:0 0 16px;">
-            <img src="${logoUrl}" alt="B3U" width="84" height="84" style="display:block;width:84px;height:auto;border:0;outline:none;text-decoration:none;" />
+            <img class="email-logo" src="${logoUrl}" alt="B3U" width="84" height="84" style="display:block;width:84px;height:auto;border:0;outline:none;text-decoration:none;" />
           </div>
-          <div style="font-size:30px;line-height:1.1;font-weight:700;margin:0 0 8px;">Burn, Break, Become Unstoppable</div>
+          <div class="email-title" style="font-size:30px;line-height:1.1;font-weight:700;margin:0 0 8px;">Burn, Break, Become Unstoppable</div>
           <div style="font-size:14px;line-height:1.6;color:#d7e5f0;">Breaking Cycles. Building Legacies.</div>
         </div>
-        <div style="padding:32px;">
+        <div class="email-content" style="padding:32px;">
           <div style="font-size:12px;letter-spacing:1.8px;text-transform:uppercase;color:#CC5500;font-weight:700;margin-bottom:10px;">${params.eyebrow}</div>
           <h1 style="margin:0 0 12px;font-size:30px;line-height:1.15;color:#0A1A2A;">${params.title}</h1>
           <p style="margin:0 0 24px;font-size:16px;line-height:1.7;color:#36516a;">${params.lead}</p>
           <div style="font-size:15px;line-height:1.7;color:#102437;">${params.body}</div>
           ${params.ctaHtml ? `<div style="margin-top:24px;">${params.ctaHtml}</div>` : ''}
         </div>
-        <div style="padding:20px 32px 28px;border-top:1px solid #e4edf4;background:#fbfdff;color:#5a7389;font-size:13px;line-height:1.7;">
+        <div class="email-footer" style="padding:20px 32px 28px;border-top:1px solid #e4edf4;background:#fbfdff;color:#5a7389;font-size:13px;line-height:1.7;">
           You are receiving this email because of activity on B3U.<br>
           B3U exists to help people burn away fear, break destructive cycles, and become unstoppable.
         </div>
@@ -578,12 +598,22 @@ function getEmailLogoUrl(): string {
   const siteUrl = normalizeUrl(
     process.env.NEXT_PUBLIC_SITE_URL || process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL,
   );
-  if (siteUrl) {
+
+  if (siteUrl && !isLocalHostname(siteUrl)) {
     const baseUrl = siteUrl.startsWith('http') ? siteUrl : `https://${siteUrl}`;
     return `${baseUrl}/images/logos/B3U3D.png`;
   }
 
   return 'https://b3uv3.vercel.app/images/logos/B3U3D.png';
+}
+
+function isLocalHostname(value: string): boolean {
+  try {
+    const parsed = new URL(value.startsWith('http') ? value : `https://${value}`);
+    return ['localhost', '127.0.0.1', '0.0.0.0'].includes(parsed.hostname);
+  } catch {
+    return false;
+  }
 }
 
 function parseSendGridListIds(value?: string): string[] {

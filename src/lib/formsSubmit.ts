@@ -2,13 +2,15 @@
 // Same-origin endpoints can return a real JSON status; cross-origin fallbacks
 // keep the previous fire-and-forget behavior for legacy Apps Script URLs.
 
+import { monitoredFetch } from '../../utils/debug/client';
+
 export async function submitFormToEndpoint(form: HTMLFormElement, actionUrl: string): Promise<'sent'> {
   const data = new FormData(form);
   if (!data.has('via')) data.append('via', 'fetch');
   try {
     const target = new URL(actionUrl, window.location.href);
     const isSameOrigin = target.origin === window.location.origin;
-    const response = await fetch(target.toString(), {
+    const response = await monitoredFetch(target.toString(), {
       method: 'POST',
       ...(isSameOrigin
         ? {
@@ -25,6 +27,10 @@ export async function submitFormToEndpoint(form: HTMLFormElement, actionUrl: str
             body: data,
           }),
       credentials: 'omit',
+    }, {
+      label: 'Form submission request',
+      route: window.location.pathname,
+      source: 'forms-submit',
     });
 
     if (!response.ok) {
@@ -46,7 +52,7 @@ export async function submitFormToEndpoint(form: HTMLFormElement, actionUrl: str
       if (target.origin === window.location.origin) {
         throw new Error('submit-failed');
       }
-      await fetch(target.toString(), { method: 'POST', body: data, mode: 'no-cors', credentials: 'omit' });
+      await monitoredFetch(target.toString(), { method: 'POST', body: data, mode: 'no-cors', credentials: 'omit' }, { label: 'Cross-origin form fallback', route: window.location.pathname, source: 'forms-submit' });
       return 'sent';
     } catch {
       throw new Error('submit-failed');

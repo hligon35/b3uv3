@@ -50,48 +50,53 @@ export default function CommunityPage() {
     };
   }, [flyerOpen]);
 
-  // JSONP loader with cache-busting; returns a cleanup function
+  // Fetch approved stories as JSON with a fallback path; returns a cleanup function
   const loadStories = useCallback(() => {
     if (!formsApi) return () => {};
     let cleaned = false;
-    let loaded = false;
-    const cleanupFns: Array<() => void> = [];
+    const controller = new AbortController();
+    const requestUrls = [`${formsApi}?endpoint=stories`, `${formsApi}/stories`];
 
-    const attachJsonp = (url: string) => {
-      const cbName = `__b3uStories_${Math.random().toString(36).slice(2)}`;
-      (window as any)[cbName] = (data: any) => {
+    const fetchStories = async () => {
+      for (const url of requestUrls) {
         try {
-          if (Array.isArray(data?.stories)) {
-            loaded = true;
-            setStories(data.stories as Story[]);
+          const response = await fetch(`${url}${url.includes('?') ? '&' : '?'}_ts=${Date.now()}`, {
+            method: 'GET',
+            cache: 'no-store',
+            credentials: 'omit',
+            headers: {
+              Accept: 'application/json',
+            },
+            signal: controller.signal,
+          });
+
+          if (!response.ok) {
+            continue;
           }
-        } catch {}
-        try { delete (window as any)[cbName]; } catch {}
-      };
-      const s = document.createElement('script');
-      s.src = `${url}${url.includes('?') ? '&' : '?'}callback=${cbName}&_ts=${Date.now()}`;
-      s.async = true;
-      document.body.appendChild(s);
-      const c = () => {
-        try { document.body.removeChild(s); } catch {}
-        try { delete (window as any)[cbName]; } catch {}
-      };
-      cleanupFns.push(c);
+
+          const contentType = response.headers.get('content-type') || '';
+          const payload = contentType.includes('application/json')
+            ? await response.json()
+            : JSON.parse(await response.text());
+
+          if (Array.isArray(payload?.stories)) {
+            setStories(payload.stories as Story[]);
+            return;
+          }
+        } catch (error) {
+          if (controller.signal.aborted) {
+            return;
+          }
+        }
+      }
     };
 
-    // Primary: query-string endpoint routing (more reliable in Apps Script)
-    attachJsonp(`${formsApi}?endpoint=stories`);
-
-    // Fallback shortly after if the first didn’t load
-    const timer = window.setTimeout(() => {
-      if (!loaded) attachJsonp(`${formsApi}/stories`);
-    }, 700);
+    void fetchStories();
 
     return () => {
       if (cleaned) return;
       cleaned = true;
-      try { window.clearTimeout(timer); } catch {}
-      cleanupFns.forEach(fn => { try { fn(); } catch {} });
+      controller.abort();
     };
   }, [formsApi]);
 
@@ -103,9 +108,17 @@ export default function CommunityPage() {
 
   // Refresh on tab visibility change (useful right after approving)
   useEffect(() => {
-    const onVis = () => { if (document.visibilityState === 'visible') loadStories(); };
+    let cancelRefresh = () => {};
+    const onVis = () => {
+      if (document.visibilityState !== 'visible') return;
+      cancelRefresh();
+      cancelRefresh = loadStories();
+    };
     document.addEventListener('visibilitychange', onVis);
-    return () => document.removeEventListener('visibilitychange', onVis);
+    return () => {
+      document.removeEventListener('visibilitychange', onVis);
+      cancelRefresh();
+    };
   }, [loadStories]);
 
   useEffect(() => {

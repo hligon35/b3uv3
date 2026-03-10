@@ -72,6 +72,7 @@ SENDGRID_TO_EMAIL=info@b3unstoppable.net
 - Vercel Analytics is enabled in `src/pages/_app.tsx` through `@vercel/analytics/react`.
 - Cloudflare Web Analytics can run alongside Vercel Analytics by setting `NEXT_PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN`.
 - Required Vercel env vars: `NEXT_PUBLIC_FORMS_API`, `NEXT_PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN`, `FORMS_BACKUP_URL`, `FORMS_SIGNING_SECRET`, `SENDGRID_API_KEY`, `SENDGRID_FROM_EMAIL`, `SENDGRID_FROM_NAME`, `SENDGRID_REPLY_TO`, `SENDGRID_TO_EMAIL`.
+- Optional weekly-report analytics merge vars: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_TAG`, `CLOUDFLARE_ANALYTICS_TOKEN`.
 - Optional Vercel env var: `SENDGRID_MARKETING_LIST_IDS` as a comma-separated list of SendGrid Marketing list IDs. Newsletter signups are upserted into SendGrid Marketing Contacts and attached to those lists when provided.
 - GitHub Pages deployment has been removed from this repo. If the site is down, check Vercel project status and domain assignment first.
 
