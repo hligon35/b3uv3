@@ -68,6 +68,30 @@ Option B (advanced): manage with clasp (not included here).
 - Scheduled function: `cfAnalyticsRefresh`
 - Manual backfill: `cfAnalyticsBackfill(days)`
 
+## Optional weekly-report endpoint
+
+If you want the Next.js weekly monitoring report to read Cloudflare totals from this Sheet instead of querying Cloudflare directly, deploy this Apps Script as a web app.
+
+1. In Apps Script, set an optional Script Property: `CF_REPORT_SECRET`
+2. Deploy the project as a web app
+3. Add these environment variables to the Next.js app:
+   - `CLOUDFLARE_ANALYTICS_SCRIPT_URL=https://script.google.com/macros/s/your-script-id/exec`
+   - `CLOUDFLARE_ANALYTICS_SCRIPT_SECRET=match-your-CF_REPORT_SECRET`
+
+The web app exposes:
+
+- `?endpoint=weekly_summary`
+
+Optional query parameters used by the weekly report:
+
+- `from`
+- `to`
+- `compareFrom`
+- `compareTo`
+- `secret`
+
+The response is read-only JSON built from the `CF_Web_5m` tab.
+
 ## If Web Analytics fails (schema differences)
 
 Cloudflare’s Web Analytics / RUM GraphQL dataset names can vary by plan.

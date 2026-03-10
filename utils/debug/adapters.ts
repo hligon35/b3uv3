@@ -6,6 +6,22 @@ export type MonitoringAdapter = {
   collectWeeklyMetrics: (range: { from: Date; to: Date }) => Promise<ExternalWeeklyMetrics | null>;
 };
 
+type CloudflareSheetWeeklySummary = {
+  ok?: boolean;
+  source?: string;
+  current?: {
+    visitors?: number | null;
+    pageViews?: number | null;
+  };
+  previous?: {
+    visitors?: number | null;
+    pageViews?: number | null;
+  };
+  lastRefresh?: string | null;
+  notes?: string[];
+  error?: string;
+};
+
 function disabledAdapter(name: string): MonitoringAdapter {
   return {
     name,
@@ -83,20 +99,38 @@ function buildVercelAnalyticsSource(): ExternalWeeklyMetrics {
 }
 
 async function buildCloudflareAnalyticsSource(range: WeeklyComparisonRange): Promise<ExternalWeeklyMetrics | null> {
+  const scriptUrl = readString(process.env.CLOUDFLARE_ANALYTICS_SCRIPT_URL);
+  const scriptSecret = readString(process.env.CLOUDFLARE_ANALYTICS_SCRIPT_SECRET);
   const token = readString(process.env.CLOUDFLARE_API_TOKEN);
   const accountTag = readString(process.env.CLOUDFLARE_ACCOUNT_TAG || process.env.CF_ACCOUNT_TAG);
   const siteTag = readString(
     process.env.CLOUDFLARE_ANALYTICS_TOKEN || process.env.CF_WEB_SITE_TAG || process.env.NEXT_PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN,
   );
 
+  let sheetFailureNote: string | null = null;
+  if (scriptUrl) {
+    try {
+      return await buildCloudflareSheetSource(range, scriptUrl, scriptSecret);
+    } catch (error) {
+      sheetFailureNote = normalizeErrorMessage(error);
+    }
+  }
+
   if (!token || !accountTag || !siteTag) {
+    const notes = [];
+    if (scriptUrl && sheetFailureNote) {
+      notes.push(`Apps Script analytics endpoint failed: ${sheetFailureNote}`);
+    }
+    notes.push('Set CLOUDFLARE_ANALYTICS_SCRIPT_URL to read Cloudflare metrics from the Google Sheets pipeline.');
+    notes.push('Or set CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_TAG, and a Cloudflare site tag to include direct Cloudflare visitor metrics here.');
+
     return {
       id: 'cloudflare',
       label: 'Cloudflare Analytics',
       accentColor: '#F97316',
       status: 'partial',
-      summary: 'Cloudflare analytics can be merged into this weekly report, but the server is missing one or more required Cloudflare credentials.',
-      notes: ['Set CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_TAG, and a Cloudflare site tag to include Cloudflare visitor metrics here.'],
+      summary: 'Cloudflare analytics can be merged into this weekly report, but no working Cloudflare source is configured for this run.',
+      notes,
     };
   }
 
@@ -116,6 +150,7 @@ async function buildCloudflareAnalyticsSource(range: WeeklyComparisonRange): Pro
       notes: [
         `Dataset ${combo.dataset} using ${combo.dimField}.`,
         'Useful as an external traffic comparison against the app-level tracking in this report.',
+        ...(sheetFailureNote ? [`Apps Script analytics endpoint failed, so the report fell back to direct Cloudflare GraphQL: ${sheetFailureNote}`] : []),
       ],
     };
   } catch (error) {
@@ -125,9 +160,65 @@ async function buildCloudflareAnalyticsSource(range: WeeklyComparisonRange): Pro
       accentColor: '#F97316',
       status: 'partial',
       summary: 'Cloudflare analytics is configured, but the weekly report could not read it successfully for this run.',
-      notes: [normalizeErrorMessage(error)],
+      notes: [normalizeErrorMessage(error), ...(sheetFailureNote ? [`Apps Script analytics endpoint also failed: ${sheetFailureNote}`] : [])],
     };
   }
+}
+
+async function buildCloudflareSheetSource(
+  range: WeeklyComparisonRange,
+  scriptUrl: string,
+  scriptSecret: string,
+): Promise<ExternalWeeklyMetrics> {
+  const url = new URL(scriptUrl);
+  url.searchParams.set('endpoint', 'weekly_summary');
+  url.searchParams.set('from', range.current.from.toISOString());
+  url.searchParams.set('to', range.current.to.toISOString());
+  url.searchParams.set('compareFrom', range.previous.from.toISOString());
+  url.searchParams.set('compareTo', range.previous.to.toISOString());
+  if (scriptSecret) {
+    url.searchParams.set('secret', scriptSecret);
+  }
+
+  const response = await fetch(url.toString(), {
+    method: 'GET',
+    headers: {
+      accept: 'application/json',
+    },
+  });
+
+  const bodyText = await response.text();
+  let body: CloudflareSheetWeeklySummary | null = null;
+
+  try {
+    body = bodyText ? (JSON.parse(bodyText) as CloudflareSheetWeeklySummary) : null;
+  } catch {
+    throw new Error(`Apps Script analytics endpoint returned a non-JSON response: ${bodyText || response.statusText}`);
+  }
+
+  if (!response.ok) {
+    throw new Error(body?.error || `Apps Script analytics endpoint failed with status ${response.status}.`);
+  }
+
+  if (!body?.ok) {
+    throw new Error(body?.error || 'Apps Script analytics endpoint returned an unsuccessful response.');
+  }
+
+  const notes = [...(body.notes || [])];
+  if (body.lastRefresh) {
+    notes.push(`Sheet last refreshed at ${body.lastRefresh}.`);
+  }
+
+  return {
+    id: 'cloudflare',
+    label: 'Cloudflare Analytics',
+    accentColor: '#F97316',
+    status: 'active',
+    summary: 'These numbers come from the Cloudflare analytics Google Sheet maintained by the Apps Script refresh job.',
+    visitors: createTrend(firstNumber(body.current?.visitors), firstNumber(body.previous?.visitors)),
+    pageViews: createTrend(firstNumber(body.current?.pageViews), firstNumber(body.previous?.pageViews)),
+    notes,
+  };
 }
 
 async function resolveCloudflareCombo(accountTag: string, siteTag: string, from: Date, to: Date, token: string): Promise<CloudflareCombo> {

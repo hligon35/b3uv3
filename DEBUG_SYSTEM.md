@@ -158,11 +158,22 @@ The weekly email can now separate analytics sources visually:
 - App Tracking
   - direct browser and API telemetry collected by this project
 - Cloudflare Analytics
-  - optional external traffic totals when `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_TAG`, and a Cloudflare site tag are configured
+  - optional external traffic totals when either the Cloudflare Google Sheets Apps Script endpoint is configured or direct Cloudflare credentials are configured
 - Vercel Analytics
   - currently shown as a collection-status source in the report so it is clearly distinguished from internal app metrics
 
-Cloudflare can contribute weekly visitor and pageview comparisons today. Vercel Analytics is still installed on the site, but this monitoring pipeline does not currently fetch weekly Vercel metrics through an API.
+Cloudflare can contribute weekly visitor and pageview comparisons today through either of these paths:
+
+- `CLOUDFLARE_ANALYTICS_SCRIPT_URL`
+  - preferred when you want the weekly report to consume the Google Sheets/App Script analytics pipeline
+- `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_TAG`, and a Cloudflare site tag
+  - used as a direct Cloudflare GraphQL fallback when no Apps Script source is configured
+
+If the Apps Script endpoint is protected, also set:
+
+- `CLOUDFLARE_ANALYTICS_SCRIPT_SECRET`
+
+Vercel Analytics is still installed on the site, but this monitoring pipeline does not currently fetch weekly Vercel metrics through an API.
 
 Report email content is intended to be easy to scan first, technical second.
 
