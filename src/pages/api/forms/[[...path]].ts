@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { captureServerError, monitoredServerFetch, registerServerProcessMonitoring, withApiMonitoring } from '../../../../utils/debug/server';
+import { monitoredServerFetch, registerServerProcessMonitoring, withApiMonitoring } from '../../../../utils/debug/server';
 
 type Route = 'contact' | 'newsletter' | 'submit' | 'stories' | 'moderate' | '';
 
@@ -304,53 +304,7 @@ async function proxyGetToBackup(req: NextApiRequest, res: NextApiResponse, route
   }
   target.searchParams.set('endpoint', route);
 
-  try {
-    const response = await monitoredServerFetch(target.toString(), { method: 'GET' }, { label: 'Forms backup GET proxy', route: route, source: 'forms-api' });
-    const contentType = response.headers.get('content-type') || (route === 'moderate' ? 'text/html; charset=utf-8' : 'application/json; charset=utf-8');
-    const body = await response.text();
-
-    res.setHeader('Content-Type', contentType);
-    res.status(response.status).send(body);
-  } catch (error) {
-    await captureServerProxyError(req, route, target.toString(), error);
-
-    if (route === 'moderate') {
-      res.setHeader('Content-Type', 'text/html; charset=utf-8');
-      res.status(502).send('<!doctype html><html><body><p>Unable to load the Google Apps Script response right now.</p></body></html>');
-      return;
-    }
-
-    res.status(502).json({
-      ok: false,
-      error: 'backup-proxy-failed',
-      detail: isDebugRequest(req) ? String(error) : undefined,
-    });
-  }
-}
-
-async function captureServerProxyError(
-  req: NextApiRequest,
-  route: Extract<Route, 'stories' | 'moderate'>,
-  endpoint: string,
-  error: unknown,
-) {
-  await captureServerError(error, {
-    req,
-    routeName: 'forms-api',
-    endpoint,
-    kind: 'api',
-    critical: true,
-    context: {
-      route,
-      proxy: 'forms-backup-get',
-    },
-  });
-}
-
-function isDebugRequest(req: NextApiRequest): boolean {
-  const value = req.query.debug;
-  const firstValue = Array.isArray(value) ? value[0] : value;
-  return String(firstValue || '').trim() === '1';
+  res.redirect(307, target.toString());
 }
 
 async function relayToAppsScript(
