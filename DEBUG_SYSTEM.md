@@ -56,6 +56,16 @@ Primary integration points:
 - outbound API requests such as SendGrid and backup Apps Script relays
 - server log file output with rolling retention
 
+### Forms protection
+
+Public forms now support layered anti-spam protection:
+
+- hidden honeypot field and minimum fill-time checks
+- Cloudflare Turnstile on contact and story submissions when `TURNSTILE_SECRET_KEY` and `NEXT_PUBLIC_TURNSTILE_SITE_KEY` are configured
+- server-side rate limiting on forms API routes, keyed by route and client fingerprint
+
+The rate limiter is in-memory, which is effective for the current deployment shape but is not a shared distributed limiter across multiple server instances.
+
 ## Log Levels
 
 Supported levels:
@@ -108,6 +118,12 @@ Supported levels:
 
 - `SENDGRID_API_KEY`
 - `SENDGRID_FROM_EMAIL`
+- `TURNSTILE_SECRET_KEY`
+- `NEXT_PUBLIC_TURNSTILE_SITE_KEY`
+- `FORMS_RATE_LIMIT_WINDOW_MS`
+- `FORMS_RATE_LIMIT_CONTACT_MAX`
+- `FORMS_RATE_LIMIT_NEWSLETTER_MAX`
+- `FORMS_RATE_LIMIT_SUBMIT_MAX`
 - `MONITORING_FROM_EMAIL`
   - optional override for monitoring emails
 - `MONITORING_TO_EMAIL`

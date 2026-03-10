@@ -1,4 +1,5 @@
 import Layout from '@/components/Layout';
+import TurnstileField, { isTurnstileEnabled } from '@/components/TurnstileField';
 import Image from 'next/image';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import BookImage from '@/images/content/book.png';
@@ -33,9 +34,12 @@ export default function CommunityPage() {
   const formRef = useRef<HTMLFormElement | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [t0, setT0] = useState('');
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
   const [editorMode, setEditorMode] = useState(false);
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
   const [storyValue, setStoryValue] = useState('');
+  const turnstileRequired = isTurnstileEnabled();
 
   useEffect(() => {
     if (!flyerOpen) return;
@@ -201,6 +205,10 @@ export default function CommunityPage() {
       console.warn('B3U Forms: NEXT_PUBLIC_FORMS_API is not configured; blocking story submit.');
       return;
     }
+    if (turnstileRequired && !turnstileToken) {
+      setError('Please complete the security check before sharing your story.');
+      return;
+    }
     setError(null);
     setSubmitting(true);
     try {
@@ -208,6 +216,8 @@ export default function CommunityPage() {
       setSubmitted(true);
       try { formRef.current?.reset(); } catch {}
       setStoryValue('');
+      setTurnstileToken('');
+      setTurnstileResetKey((value) => value + 1);
       try { setT0(String(Date.now())); } catch {}
     } catch {
       setError('Submission failed. Please try again later.');
@@ -245,6 +255,14 @@ export default function CommunityPage() {
           {debugEnabled && <input type="hidden" name="debug" value="1" />}
           <div className="bg-white border border-black/10 rounded-xl shadow-sm p-6 md:p-8">
             <div className="mb-6">
+              <TurnstileField
+                token={turnstileToken}
+                onTokenChange={setTurnstileToken}
+                resetKey={turnstileResetKey}
+              />
+            </div>
+
+            <div className="mt-6">
               <h2 className="text-2xl font-semibold">Share Your Story</h2>
               <p className="text-sm text-navy/70 mt-1">Your words may encourage someone who needs it today. Fields marked with <span className="text-red-600">*</span> are required.</p>
             </div>

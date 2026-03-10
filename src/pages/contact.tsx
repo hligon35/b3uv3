@@ -1,4 +1,5 @@
 import Layout from '@/components/Layout';
+import TurnstileField, { isTurnstileEnabled } from '@/components/TurnstileField';
 import { useEffect, useRef, useState } from 'react';
 import { useFormsApi } from '@/lib/useFormsApi';
 import { submitFormToEndpoint } from '@/lib/formsSubmit';
@@ -15,9 +16,13 @@ export default function ContactPage() {
   const [sent, setSent] = useState(false);
   const [pending, setPending] = useState(false);
   const [t0, setT0] = useState('');
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement | null>(null);
   const [overrideInput, setOverrideInput] = useState('');
   const [messageValue, setMessageValue] = useState('');
+  const turnstileRequired = isTurnstileEnabled();
 
   const onSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
@@ -29,6 +34,11 @@ export default function ContactPage() {
       setSent(false);
       return;
     }
+    if (turnstileRequired && !turnstileToken) {
+      setSubmitError('Please complete the security check before sending your message.');
+      return;
+    }
+    setSubmitError(null);
     setPending(true);
     const form = formRef.current!;
     const action = `${formsApi}?endpoint=contact`;
@@ -37,10 +47,11 @@ export default function ContactPage() {
       setSent(true);
       try { form.reset(); } catch {}
       setMessageValue('');
+      setTurnstileToken('');
+      setTurnstileResetKey((value) => value + 1);
       try { setT0(String(Date.now())); } catch {}
     } catch {
-      // eslint-disable-next-line no-console
-      console.error('B3U Forms: contact submit failed');
+      setSubmitError('Message failed to send. Please try again in a few minutes.');
     } finally {
       setPending(false);
     }
@@ -134,9 +145,20 @@ export default function ContactPage() {
                     <span className="pointer-events-none absolute bottom-3 right-4 text-xs text-navy/60">{messageValue.length}/{LONG_FIELD_MAX}</span>
                   </div>
                 </div>
+                <TurnstileField
+                  className="pt-1"
+                  token={turnstileToken}
+                  onTokenChange={setTurnstileToken}
+                  resetKey={turnstileResetKey}
+                />
                 <button className="btn-primary w-full py-3 text-lg font-semibold disabled:opacity-50" type="submit" disabled={pending}>
                   {pending ? 'Sending…' : 'Send Message'}
                 </button>
+                {submitError && (
+                  <div className="text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2 text-sm">
+                    {submitError}
+                  </div>
+                )}
                 {sent && (
                   <div className="text-green-700 bg-green-50 border border-green-200 rounded-md px-3 py-2 text-sm">
                     Thanks! Your message was sent. Check your email for confirmation.

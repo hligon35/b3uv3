@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { monitoredServerFetch, registerServerProcessMonitoring, withApiMonitoring } from '../../../../utils/debug/server';
+import { applyFormsRateLimit, verifyTurnstileToken } from '../../../../utils/security/formsProtection';
 
 type Route = 'contact' | 'newsletter' | 'submit' | 'stories' | 'moderate' | '';
 
@@ -14,6 +15,7 @@ type SubmissionPayload = {
   story: string;
   consent: boolean;
   debug: boolean;
+  turnstileToken: string;
   honeypot: string;
   timingRejected: boolean;
   fillMs: number | null;
@@ -93,6 +95,11 @@ async function handlePost(req: NextApiRequest, res: NextApiResponse, route: Rout
   const backupUrl = normalizeUrl(process.env.FORMS_BACKUP_URL);
   const sendGridReady = hasSendGridConfig();
 
+  if (!applyFormsRateLimit(req, res, route)) {
+    res.status(429).json({ ok: false, error: 'rate-limit-exceeded' });
+    return;
+  }
+
   if (payload.honeypot || payload.timingRejected) {
     res.status(200).json({ ok: true, engine: 'filtered' });
     return;
@@ -114,6 +121,18 @@ async function handlePost(req: NextApiRequest, res: NextApiResponse, route: Rout
   if (tooShort.length > 0) {
     res.status(400).json({ ok: false, error: 'field-too-short', fields: tooShort });
     return;
+  }
+
+  if (route === 'contact' || route === 'submit') {
+    const turnstileResult = await verifyTurnstileToken(payload.turnstileToken, req);
+    if (!turnstileResult.ok) {
+      res.status(403).json({
+        ok: false,
+        error: 'turnstile-verification-failed',
+        codes: payload.debug ? turnstileResult.codes : undefined,
+      });
+      return;
+    }
   }
 
   if (route === 'submit' && !backupUrl) {
@@ -200,6 +219,7 @@ function parsePayload(input: Record<string, unknown>): SubmissionPayload {
     story: String(input.story || '').trim(),
     consent: isTruthy(input.consent),
     debug: isTruthy(input.debug),
+    turnstileToken: String(input.turnstileToken || input['cf-turnstile-response'] || '').trim(),
     honeypot,
     timingRejected: Boolean(fillMs !== null && (fillMs < 800 || fillMs > 86_400_000)),
     fillMs,
