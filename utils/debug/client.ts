@@ -152,6 +152,10 @@ export async function monitoredFetch(input: RequestInfo | URL, init: RequestInit
 
     return response;
   } catch (error) {
+    if (isAbortError(error)) {
+      throw error;
+    }
+
     const entry = captureClientError(error, {
       route: options.route || window.location.pathname,
       endpoint: targetUrl,
@@ -319,4 +323,16 @@ function summarizeRequestBody(body: unknown): string | undefined {
     return previewValue(Object.fromEntries(body.entries()));
   }
   return previewValue(body);
+}
+
+function isAbortError(error: unknown): boolean {
+  if (error instanceof DOMException) {
+    return error.name === 'AbortError';
+  }
+
+  if (error instanceof Error) {
+    return error.name === 'AbortError' || /signal is aborted/i.test(error.message);
+  }
+
+  return false;
 }
