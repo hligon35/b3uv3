@@ -24,6 +24,7 @@ const LONG_FIELD_MAX = 300;
 export default function CommunityPage() {
   const { formsApi, debugEnabled } = useFormsApi();
   const [stories, setStories] = useState<Story[]>([]);
+  const [expandedStoryIds, setExpandedStoryIds] = useState<Set<string>>(new Set());
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [flyerOpen, setFlyerOpen] = useState(false);
@@ -159,6 +160,15 @@ export default function CommunityPage() {
     return stories.filter(st => !hiddenIds.has(st.id));
   }, [stories, hiddenIds, placeholdersOnly]);
   const visibleStories = useMemo(() => filteredStories.slice(0, displayCount), [filteredStories]);
+
+  const toggleStoryExpanded = (id: string) => {
+    setExpandedStoryIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   const hideStory = (id: string) => {
     setHiddenIds(prev => {
@@ -341,11 +351,24 @@ export default function CommunityPage() {
         </form>
   {/* Iframe removed: switched to fetch-based submission with no-cors fallback */}
         <div className="grid md:grid-cols-3 gap-8 mb-16">
-          {/* Render approved stories if available; otherwise show placeholders. If fewer than placeholders, fill remaining with placeholders. */}
+          {/* Render approved stories if available; otherwise show placeholders. */}
           {visibleStories.map((st) => (
-            <div key={st.id} className="card">
-              <p className="text-sm italic mb-4">“{st.story}”</p>
-              <p className="text-xs text-white/60">{st.name}</p>
+            <div key={st.id} className="card flex h-full flex-col">
+              <p
+                className={`text-sm italic mb-4 ${expandedStoryIds.has(st.id) ? '' : 'line-clamp-3'}`}
+              >
+                “{st.story}”
+              </p>
+              {st.story.length > 180 && (
+                <button
+                  type="button"
+                  className="mb-4 w-fit text-xs font-semibold text-brandBlue underline underline-offset-2"
+                  onClick={() => toggleStoryExpanded(st.id)}
+                >
+                  {expandedStoryIds.has(st.id) ? 'Show less' : 'More'}
+                </button>
+              )}
+              <p className="mt-auto text-xs text-navy/60">{st.name}</p>
               {editorMode && (
                 <div className="mt-3">
                   <button type="button" className="text-xs text-red-200 underline" onClick={() => hideStory(st.id)}>Hide locally</button>
@@ -353,11 +376,11 @@ export default function CommunityPage() {
               )}
             </div>
           ))}
-          {visibleStories.length < displayCount &&
-            Array.from({ length: displayCount - visibleStories.length }).map((_, i) => (
+          {visibleStories.length === 0 &&
+            Array.from({ length: displayCount }).map((_, i) => (
               <div key={`ph-${i}`} className="card">
                 <p className="text-sm italic mb-4">“This platform helped me reconnect with my purpose and give back in ways I never imagined.”</p>
-                <p className="text-xs text-white/60">Story Contributor</p>
+                <p className="text-xs text-navy/60">Story Contributor</p>
               </div>
             ))}
         </div>
