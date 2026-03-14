@@ -76,6 +76,11 @@ SENDGRID_TO_EMAIL=info@b3unstoppable.net
 - Optional Vercel env var: `SENDGRID_MARKETING_LIST_IDS` as a comma-separated list of SendGrid Marketing list IDs. Newsletter signups are upserted into SendGrid Marketing Contacts and attached to those lists when provided.
 - GitHub Pages deployment has been removed from this repo. If the site is down, check Vercel project status and domain assignment first.
 
+## GitHub Actions Monitoring Secrets
+- The scheduled monitoring workflows read GitHub Actions secrets, not values from `.env.local`.
+- Add these repository or environment secrets in GitHub before enabling the heartbeat and weekly report workflows: `MONITORING_BASE_URL`, `MONITORING_CRON_TOKEN`, `SENDGRID_API_KEY`, `MONITORING_FROM_EMAIL`, `MONITORING_TO_EMAIL`.
+- If those secrets are missing, the workflows now skip with a warning in the run summary instead of failing immediately.
+
 ## Forms Delivery
 - Primary mail delivery runs through SendGrid via the Vercel API route.
 - Apps Script remains the backup mailer and persistence layer.

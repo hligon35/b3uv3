@@ -9,17 +9,37 @@ jobs:
   heartbeat:
     runs-on: ubuntu-latest
     steps:
+      - name: Check monitoring workflow configuration
+        id: config
+        env:
+          MONITORING_BASE_URL: ${{ secrets.MONITORING_BASE_URL }}
+          MONITORING_CRON_TOKEN: ${{ secrets.MONITORING_CRON_TOKEN }}
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          MONITORING_FROM_EMAIL: ${{ secrets.MONITORING_FROM_EMAIL }}
+          MONITORING_TO_EMAIL: ${{ secrets.MONITORING_TO_EMAIL }}
+        run: |
+          if [ -z "$MONITORING_BASE_URL" ] || [ -z "$MONITORING_CRON_TOKEN" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "### Monitoring heartbeat skipped" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "Missing GitHub Actions secret MONITORING_BASE_URL and/or MONITORING_CRON_TOKEN." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+          if [ -n "$SENDGRID_API_KEY" ] && [ -n "$MONITORING_FROM_EMAIL" ] && [ -n "$MONITORING_TO_EMAIL" ] && [ -n "$MONITORING_BASE_URL" ]; then
+            echo "email_configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "email_configured=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Call monitoring health endpoint
+        if: steps.config.outputs.configured == 'true'
         id: heartbeat
         env:
           MONITORING_BASE_URL: ${{ secrets.MONITORING_BASE_URL }}
           MONITORING_CRON_TOKEN: ${{ secrets.MONITORING_CRON_TOKEN }}
         run: |
-          if [ -z "$MONITORING_BASE_URL" ] || [ -z "$MONITORING_CRON_TOKEN" ]; then
-            echo "Missing MONITORING_BASE_URL or MONITORING_CRON_TOKEN secret"
-            exit 1
-          fi
-
           BASE_URL="${MONITORING_BASE_URL%/}"
 
           curl --fail --silent --show-error \
@@ -29,7 +49,7 @@ jobs:
             "$BASE_URL/api/debug/health/"
 
       - name: Send production outage alert email
-        if: failure()
+        if: failure() && steps.config.outputs.email_configured == 'true'
         env:
           SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
           MONITORING_FROM_EMAIL: ${{ secrets.MONITORING_FROM_EMAIL }}
@@ -37,11 +57,6 @@ jobs:
           MONITORING_BASE_URL: ${{ secrets.MONITORING_BASE_URL }}
           GITHUB_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          if [ -z "$SENDGRID_API_KEY" ] || [ -z "$MONITORING_FROM_EMAIL" ] || [ -z "$MONITORING_TO_EMAIL" ] || [ -z "$MONITORING_BASE_URL" ]; then
-            echo "Missing SendGrid or monitoring email secrets; cannot send outage email"
-            exit 1
-          fi
-
           payload=$(cat <<EOF
           {
             "personalizations": [
@@ -70,3 +85,10 @@ jobs:
             --header "Authorization: Bearer $SENDGRID_API_KEY" \
             --header "Content-Type: application/json" \
             --data "$payload"
+
+      - name: Report missing outage email configuration
+        if: failure() && steps.config.outputs.email_configured != 'true'
+        run: |
+          echo "### Outage email was not sent" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "The heartbeat failed, but one or more GitHub Actions secrets for email delivery are missing: SENDGRID_API_KEY, MONITORING_FROM_EMAIL, MONITORING_TO_EMAIL, MONITORING_BASE_URL." >> "$GITHUB_STEP_SUMMARY"
