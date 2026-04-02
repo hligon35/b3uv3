@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import B3ULogo from '@/images/logos/B3U3D.png';
+import { communityEvent } from '@/lib/communityEvent';
 
 const navItems = [
   { href: '/', label: 'Home' },
@@ -39,6 +40,16 @@ export default function Navbar() {
   
   return (
     <header className={`fixed top-0 left-0 w-full z-50 transition backdrop-blur ${bgClass}`}>
+      <a
+        href={communityEvent.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block border-b border-white/10 bg-brandOrange px-4 py-2 text-center text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-brandOrange-dark"
+        aria-label={`Register for ${communityEvent.name} on Eventbrite`}
+      >
+        <span className="hidden md:inline">{communityEvent.shortName} • {communityEvent.scheduleLabel} • {communityEvent.venueName}, {communityEvent.cityStateZip} • Register on Eventbrite</span>
+        <span className="md:hidden">{communityEvent.shortName} • Register Now</span>
+      </a>
       <nav className={`max-w-7xl mx-auto flex items-center justify-between px-6 md:px-10 h-20 ${textClass}`}>
         <Link href="/" className={`flex items-center font-display text-2xl tracking-wide ${textClass}`}>
           <div className="h-30 w-30 relative">
@@ -66,6 +77,17 @@ export default function Navbar() {
             </li>
           ))}
         </ul>
+        <div className="hidden md:flex items-center ml-6">
+          <a
+            href={communityEvent.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-primary px-5 py-2.5 text-sm"
+            aria-label={`Register for ${communityEvent.name} on Eventbrite`}
+          >
+            Reserve Your Seat
+          </a>
+        </div>
         <div className="md:hidden">
           {/* Mobile menu button */}
           <button 
@@ -92,6 +114,16 @@ export default function Navbar() {
       {mobileMenuOpen && (
         <div className="md:hidden bg-white shadow-lg border-t">
           <nav className="container mx-auto px-4 py-4">
+            <a
+              href={communityEvent.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-primary w-full mb-4"
+              onClick={() => setMobileMenuOpen(false)}
+              aria-label={`Register for ${communityEvent.name} on Eventbrite`}
+            >
+              Reserve Your Seat
+            </a>
             <ul className="flex flex-col space-y-4">
               {navItems.map((item) => (
                 <li key={item.href}>

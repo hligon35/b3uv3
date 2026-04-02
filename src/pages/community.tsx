@@ -6,6 +6,7 @@ import BookImage from '@/images/content/book.png';
 import EventFlyer from '@/images/content/flyer.png';
 import { useFormsApi } from '@/lib/useFormsApi';
 import { submitFormToEndpoint } from '@/lib/formsSubmit';
+import { communityEvent, createCommunityEventStructuredData, siteUrl } from '@/lib/communityEvent';
 import { monitoredFetch } from '../../utils/debug/client';
 
 type Story = {
@@ -40,6 +41,10 @@ export default function CommunityPage() {
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
   const [storyValue, setStoryValue] = useState('');
   const turnstileRequired = isTurnstileEnabled();
+  const eventStructuredData = useMemo(() => createCommunityEventStructuredData({
+    pageUrl: `${siteUrl}/community/`,
+    imageUrl: new URL(communityEvent.imagePath, siteUrl).toString(),
+  }), []);
 
   useEffect(() => {
     if (!flyerOpen) return;
@@ -229,8 +234,9 @@ export default function CommunityPage() {
   // Iframe postMessage debug removed.
   return (
       <Layout
-        title="Community | Richmond, VA & Surrounding Areas | B3U"
-        description="Share your story, find encouragement, and connect with the B3U community in Richmond, VA and surrounding Central Virginia areas."
+        title="Community Stories + Prosper on Purpose Brunch | Richmond, VA | B3U"
+        description={`${communityEvent.name} is happening ${communityEvent.scheduleLabel} at ${communityEvent.venueName}, ${communityEvent.streetAddress}, ${communityEvent.cityStateZip}. Join the B3U community in Richmond and register on Eventbrite.`}
+        structuredData={eventStructuredData}
       >
   <section className="section-padding bg-white">
         <h1 className="text-4xl font-bold mb-6">Community Stories</h1>
@@ -433,8 +439,37 @@ export default function CommunityPage() {
               <span className="absolute top-3 left-3 bg-brandOrange text-white text-xs font-semibold px-3 py-1 rounded-full">Conference</span>
             </button>
             <div className="p-6">
-              <h3 className="text-xl font-bold mb-2">Upcoming Brunch Conference</h3>
-              <p className="text-navy/70 text-sm">Join us for a curated business brunch featuring expert insights, meaningful networking, and recognition of leaders making an impact. This is where purpose meets opportunity.</p>
+              <div className="flex flex-wrap items-center gap-2 mb-3">
+                <span className="inline-flex rounded-full bg-brandOrange/10 px-3 py-1 text-xs font-semibold text-brandOrange">Live Event</span>
+                <span className="inline-flex rounded-full bg-navy/5 px-3 py-1 text-xs font-semibold text-navy/70">{communityEvent.dateLabel}</span>
+                <span className="inline-flex rounded-full bg-navy/5 px-3 py-1 text-xs font-semibold text-navy/70">{communityEvent.timeLabel}</span>
+              </div>
+              <h3 className="text-xl font-bold mb-2">{communityEvent.name}</h3>
+              <p className="text-navy/70 text-sm mb-4">{communityEvent.description}</p>
+              <div className="mb-4 rounded-xl bg-[#F4F8FB] p-4 text-sm text-navy/80">
+                <p className="font-semibold text-navy">{communityEvent.scheduleLabel}</p>
+                <p className="mt-1">{communityEvent.venueName}</p>
+                <p>{communityEvent.streetAddress}</p>
+                <p>{communityEvent.cityStateZip}</p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <a
+                  href={communityEvent.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-primary"
+                  aria-label={`Register for ${communityEvent.name} on Eventbrite`}
+                >
+                  Register on Eventbrite
+                </a>
+                <button
+                  type="button"
+                  className="btn-outline"
+                  onClick={() => setFlyerOpen(true)}
+                >
+                  View Flyer
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -8,6 +8,7 @@ type LayoutProps = {
   children: ReactNode;
   title?: string;
   description?: string;
+  structuredData?: Record<string, unknown> | Array<Record<string, unknown>>;
 };
 
 const SITE_NAME = 'B3U — Burn, Break, Become Unstoppable';
@@ -19,7 +20,7 @@ const DEFAULT_DESCRIPTION =
 
 const OG_IMAGE_URL = `${SITE_URL}/og.png`;
 
-export default function Layout({ children, title, description }: LayoutProps) {
+export default function Layout({ children, title, description, structuredData }: LayoutProps) {
   const { pathname, asPath } = useRouter();
   const isHomePage = pathname === '/';
 
@@ -67,6 +68,11 @@ export default function Layout({ children, title, description }: LayoutProps) {
       ],
     };
   }, []);
+
+  const structuredDataItems = useMemo(() => {
+    if (!structuredData) return [];
+    return Array.isArray(structuredData) ? structuredData : [structuredData];
+  }, [structuredData]);
   
   return (
     <>
@@ -104,9 +110,17 @@ export default function Layout({ children, title, description }: LayoutProps) {
           // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+        {structuredDataItems.map((item, index) => (
+          <script
+            key={`structured-data-${index}`}
+            type="application/ld+json"
+            // eslint-disable-next-line react/no-danger
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(item) }}
+          />
+        ))}
       </Head>
       <Navbar />
-      <main className={isHomePage ? '' : 'pt-20'}>
+      <main className={isHomePage ? '' : 'pt-32'}>
         {children}
       </main>
       <Footer />

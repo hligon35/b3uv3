@@ -1,11 +1,9 @@
 ﻿import Layout from '@/components/Layout';
 import Hero from '@/components/Hero';
+import MerchComingSoon from '@/components/MerchComingSoon';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
-import MugImage from '@/images/shop/mug.png';
-import ShirtFrontImage from '@/images/shop/shirt_front.png';
-import ShirtBackImage from '@/images/shop/shirt_back.png';
 import about1 from '@/images/content/about1.jpeg';
 import about2 from '@/images/content/about2.jpeg';
 import about3 from '@/images/content/about3.jpeg';
@@ -19,23 +17,21 @@ import Test1 from '@/images/content/test1.JPG';
 import Test2 from '@/images/content/test2.JPEG';
 import { useFormsApi } from '@/lib/useFormsApi';
 import { submitFormToEndpoint } from '@/lib/formsSubmit';
+import { communityEvent, createCommunityEventStructuredData, siteUrl } from '@/lib/communityEvent';
 
 const EMAIL_FIELD_MIN = 6;
 const EMAIL_FIELD_MAX = 254;
 
 export default function HomePage() {
-
-  // Shop products for homepage preview
-  const shopProducts = [ShirtFrontImage, MugImage];
-
-  // Overlay behavior for home shop tiles
-  const [isTouch, setIsTouch] = useState(false);
-  const [homeOverlay, setHomeOverlay] = useState<Record<number, boolean>>({});
   const [subscribed, setSubscribed] = useState(false);
   const [subPending, setSubPending] = useState(false);
   const newsletterFormRef = useRef<HTMLFormElement | null>(null);
   const [t0, setT0] = useState('');
   const { formsApi, debugEnabled } = useFormsApi();
+  const eventStructuredData = useState(() => createCommunityEventStructuredData({
+    pageUrl: `${siteUrl}/`,
+    imageUrl: new URL(communityEvent.imagePath, siteUrl).toString(),
+  }))[0];
 
   const [subError, setSubError] = useState<string | null>(null);
   async function handleNewsletterSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -65,17 +61,6 @@ export default function HomePage() {
   }
 
   useEffect(() => {
-    const detect = () => {
-      try {
-        return window.matchMedia && window.matchMedia('(hover: none)').matches;
-      } catch {
-        return 'ontouchstart' in window || (navigator as any).maxTouchPoints > 0;
-      }
-    };
-    setIsTouch(detect());
-  }, []);
-
-  useEffect(() => {
     try { setT0(String(Date.now())); } catch {}
   }, []);
 
@@ -85,6 +70,7 @@ export default function HomePage() {
     <Layout
       title="B3U — Burn, Break, Become Unstoppable | Richmond, VA"
       description="Empowerment, speaking, and community with Bree Charles. B3U (Burn, Break, Become Unstoppable) is based in Richmond, VA and serves surrounding areas across Central Virginia."
+      structuredData={eventStructuredData}
     >
       <Hero />
       <section id="about" className="section-padding bg-white">
@@ -229,6 +215,26 @@ export default function HomePage() {
           <h2 className="text-3xl md:text-4xl font-bold mb-4">The Take Back Community</h2>
           <p className="text-black">Stories from listeners who have found the courage to burn away fear, break cycles, and become unstoppable.</p>
         </div>
+        <div className="card max-w-4xl mx-auto mb-10 border-brandOrange/20 bg-white/95">
+          <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-brandOrange">Upcoming event</p>
+              <h3 className="mt-2 text-2xl font-bold">{communityEvent.name}</h3>
+              <p className="mt-2 text-navy/70">Join Bree and other purpose-driven leaders for a community networking brunch built for real connection, collaboration, and momentum.</p>
+              <p className="mt-3 text-sm font-semibold text-navy">{communityEvent.scheduleLabel}</p>
+              <p className="text-sm text-navy/70">{communityEvent.venueName}, {communityEvent.streetAddress}, {communityEvent.cityStateZip}</p>
+            </div>
+            <a
+              href={communityEvent.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-primary whitespace-nowrap"
+              aria-label={`Register for ${communityEvent.name} on Eventbrite`}
+            >
+              Register on Eventbrite
+            </a>
+          </div>
+        </div>
         <div className="flex flex-col gap-10 items-center">
           <div className="card w-full max-w-4xl">
             <div className="flex flex-col md:flex-row gap-6 items-start">
@@ -280,41 +286,11 @@ export default function HomePage() {
         <div className="flex flex-col md:flex-row items-center gap-12">
           <div className="flex-1">
             <h2 className="text-3xl md:text-4xl font-bold mb-6">Gear Up & Give Back</h2>
-            <p className="text-navy/80 mb-6">Every purchase fuels programming and community initiatives. Fresh drops and timeless essentials that support the mission.</p>
+            <p className="text-navy/80 mb-6">The next merch drop is in the works. New B3U pieces are coming soon to support the mission and the movement.</p>
             <Link href="/shop" className="btn-primary">Visit the Shop</Link>
           </div>
-          <div className="flex-1 grid grid-cols-2 gap-4">
-            {shopProducts.map((productImage, index) => (
-              <div
-                key={index}
-                className="relative group h-48 rounded-lg overflow-hidden bg-white"
-                onClick={(e) => {
-                  if (!isTouch) return; // Only toggle on touch devices
-                  const target = e.target as HTMLElement;
-                  if (target.closest('a')) return; // Don't toggle if clicking the link
-                  setHomeOverlay(prev => ({ ...prev, [index]: !prev[index] }));
-                }}
-              >
-                <Image
-                  src={productImage}
-                  alt={index === 0 ? 'B3U T-Shirt' : 'B3U Coffee Mug'}
-                  fill
-                  className="object-contain p-4"
-                />
-                <div
-                  className={
-                    `absolute inset-0 flex items-center justify-center transition pointer-events-none ` +
-                    (isTouch
-                      ? (homeOverlay[index] ? 'opacity-100 bg-black/50' : 'opacity-0 bg-black/0')
-                      : 'opacity-0 bg-black/0 group-hover:opacity-100 group-hover:bg-black/50')
-                  }
-                >
-                  <Link href="/shop" className="pointer-events-auto text-white text-sm font-semibold tracking-wide underline-offset-4 hover:underline">
-                    View
-                  </Link>
-                </div>
-              </div>
-            ))}
+          <div className="flex-1 w-full">
+            <MerchComingSoon compact />
           </div>
         </div>
       </section>
