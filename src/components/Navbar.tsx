@@ -10,6 +10,7 @@ const navItems = [
   { href: '/about', label: 'About' },
   { href: '/podcast', label: 'Podcast' },
   { href: '/community', label: 'Community' },
+  { href: '/event-gallery', label: 'Events' },
   { href: '/shop', label: 'Shop' },
   { href: '/contact', label: 'Contact' },
 ];
@@ -41,7 +42,7 @@ export default function Navbar() {
   return (
     <header className={`fixed top-0 left-0 w-full z-50 transition backdrop-blur ${bgClass}`}>
       <Link
-        href="/community"
+        href="/event-gallery"
         className="block border-b border-white/10 bg-navy px-4 py-3 text-center text-white transition hover:bg-navy/95 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
         aria-label="View The Big Take Back presale update"
       >

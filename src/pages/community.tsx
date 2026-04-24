@@ -2,8 +2,6 @@ import Layout from '@/components/Layout';
 import TurnstileField, { isTurnstileEnabled } from '@/components/TurnstileField';
 import Image from 'next/image';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import BookImage from '@/images/content/book.png';
-import EventFlyer from '@/images/content/flyer.png';
 import { useFormsApi } from '@/lib/useFormsApi';
 import { submitFormToEndpoint } from '@/lib/formsSubmit';
 import { communityEvent, createCommunityEventStructuredData, siteUrl } from '@/lib/communityEvent';
@@ -31,7 +29,6 @@ export default function CommunityPage() {
   const [expandedStoryIds, setExpandedStoryIds] = useState<Set<string>>(new Set());
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [flyerOpen, setFlyerOpen] = useState(false);
   const formRef = useRef<HTMLFormElement | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [t0, setT0] = useState('');
@@ -45,21 +42,6 @@ export default function CommunityPage() {
     pageUrl: `${siteUrl}/community/`,
     imageUrl: new URL(communityEvent.imagePath, siteUrl).toString(),
   }), []);
-
-  useEffect(() => {
-    if (!flyerOpen) return;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setFlyerOpen(false);
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener('keydown', onKeyDown);
-    };
-  }, [flyerOpen]);
 
   // Fetch approved stories as JSON with a fallback path; returns a cleanup function
   const loadStories = useCallback(() => {
@@ -273,105 +255,6 @@ export default function CommunityPage() {
           {debugEnabled && <input type="hidden" name="debug" value="1" />}
           <div className="bg-white border border-black/10 rounded-xl shadow-sm p-6 md:p-8">
             <div className="mb-6">
-              <TurnstileField
-                token={turnstileToken}
-                onTokenChange={setTurnstileToken}
-                resetKey={turnstileResetKey}
-              />
-            </div>
-
-            <div className="mt-6">
-              <h2 className="text-2xl font-semibold">Share Your Story</h2>
-              <p className="text-sm text-navy/70 mt-1">Your words may encourage someone who needs it today. Fields marked with <span className="text-red-600">*</span> are required.</p>
-            </div>
-
-            <div className="grid gap-5 md:grid-cols-2">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-navy mb-1">Name <span className="text-red-600">*</span></label>
-                <input
-                  id="name"
-                  name="name"
-                  type="text"
-                  autoComplete="name"
-                  required
-                  minLength={NAME_FIELD_MIN}
-                  maxLength={NAME_FIELD_MAX}
-                  className="w-full rounded-md border border-black/10 bg-white px-4 py-2 text-navy placeholder:text-navy/40 shadow-sm focus:outline-none focus:ring-2 focus:ring-brandBlue focus:border-brandBlue"
-                  placeholder="Your name"
-                />
-              </div>
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-navy mb-1">Email <span className="text-red-600">*</span></label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  minLength={EMAIL_FIELD_MIN}
-                  maxLength={EMAIL_FIELD_MAX}
-                  className="w-full rounded-md border border-black/10 bg-white px-4 py-2 text-navy placeholder:text-navy/40 shadow-sm focus:outline-none focus:ring-2 focus:ring-brandBlue focus:border-brandBlue"
-                  placeholder="you@example.com"
-                />
-              </div>
-            </div>
-
-            <div className="mt-5">
-              <label htmlFor="story" className="block text-sm font-medium text-navy mb-1">Your story <span className="text-red-600">*</span></label>
-              <div className="relative">
-                <textarea
-                  id="story"
-                  name="story"
-                  rows={7}
-                  required
-                  minLength={LONG_FIELD_MIN}
-                  maxLength={LONG_FIELD_MAX}
-                  value={storyValue}
-                  onChange={(e) => setStoryValue(e.target.value)}
-                  className="w-full rounded-md border border-black/10 bg-white px-4 py-3 pb-8 text-navy placeholder:text-navy/40 shadow-sm focus:outline-none focus:ring-2 focus:ring-brandBlue focus:border-brandBlue"
-                  placeholder="Share what you’ve overcome, what you learned, or a message for others."
-                />
-                <span className="pointer-events-none absolute bottom-3 right-4 text-xs text-navy/60">
-                  {storyValue.length}/{LONG_FIELD_MAX}
-                </span>
-              </div>
-              <p className="mt-2 text-xs text-navy/60">Please avoid sharing sensitive personal details or names you don’t have permission to include.</p>
-            </div>
-
-            <fieldset className="mt-6">
-              <legend className="block text-sm font-medium text-navy mb-2">Authorize name usage</legend>
-              <p className="text-xs text-navy/60 mb-2">Choose whether we can display your name with your story.</p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <label className="inline-flex items-center gap-2 text-sm text-navy/80">
-                  <input type="radio" name="useName" value="yes" required className="h-4 w-4 text-brandOrange focus:ring-brandOrange" />
-                  Yes — use my name in the story post
-                </label>
-                <label className="inline-flex items-center gap-2 text-sm text-navy/80">
-                  <input type="radio" name="useName" value="no" className="h-4 w-4 text-brandOrange focus:ring-brandOrange" />
-                  No — keep me anonymous
-                </label>
-              </div>
-            </fieldset>
-
-            <div className="mt-6">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                <button className="btn-primary disabled:opacity-50" type="submit" disabled={submitting}>
-                  {submitting ? 'Submitting…' : 'Submit Story'}
-                </button>
-                {submitted && (
-                  <div className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-md px-3 py-2">
-                    Thanks! Your story was received. Please check your email for confirmation.
-                  </div>
-                )}
-                {error && (
-                  <div className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2">
-                    {error}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </form>
   {/* Iframe removed: switched to fetch-based submission with no-cors fallback */}
         <div className="grid md:grid-cols-3 gap-8 mb-16">
           {/* Render approved stories only. */}
@@ -411,104 +294,6 @@ export default function CommunityPage() {
           </div>
         )}
       </section>
-  <section className="section-padding bg-[#F4F8FB]">
-        <h2 className="text-3xl font-bold mb-8">Event Gallery</h2>
-        <div className="grid md:grid-cols-2 gap-8">
-          {/* Book Event Card */}
-          <div className="card p-0 overflow-hidden">
-            <div className="relative h-56 bg-white">
-              <Image
-                src={BookImage}
-                alt="The Big Take Back: What I Left Behind book cover"
-                fill
-                className="object-contain p-2"
-                sizes="(max-width: 768px) 100vw, 50vw"
-              />
-              <div className="absolute inset-0 bg-black/20" />
-              <span className="absolute top-3 left-3 bg-brandOrange text-white text-xs font-semibold px-3 py-1 rounded-full">Coming Soon</span>
-            </div>
-            <div className="p-6">
-              <h3 className="text-xl font-bold mb-2">The Big Take Back: What I Left Behind</h3>
-              <p className="text-navy/70 text-sm">“The Big Take Back: What I Left Behind” is Bree’s bold guide to reclaiming the parts of yourself life tried to quiet — your voice, your confidence, and your power. It reveals the subtle ways we give ourselves away and shows how to rise back into ownership with intention. It’s still in the works, but it’s coming — and it’s needed.</p>
-            </div>
-          </div>
-
-          {/* Event Flyer Card */}
-          <div className="card p-0 overflow-hidden">
-            <button
-              type="button"
-              className="relative h-56 bg-white w-full cursor-zoom-in focus:outline-none focus-visible:ring-4 focus-visible:ring-brandOrange/30"
-              onClick={() => setFlyerOpen(true)}
-              aria-label="Enlarge event flyer"
-            >
-              <Image
-                src={EventFlyer}
-                alt="Event flyer"
-                fill
-                className="object-contain p-2"
-                sizes="(max-width: 768px) 100vw, 50vw"
-              />
-              <span className="absolute top-3 left-3 bg-brandOrange text-white text-xs font-semibold px-3 py-1 rounded-full">Conference</span>
-            </button>
-            <div className="p-6">
-              <div className="flex flex-wrap items-center gap-2 mb-3">
-                <span className="inline-flex rounded-full bg-brandOrange/10 px-3 py-1 text-xs font-semibold text-brandOrange">Live Event</span>
-                <span className="inline-flex rounded-full bg-navy/5 px-3 py-1 text-xs font-semibold text-navy/70">{communityEvent.dateLabel}</span>
-                <span className="inline-flex rounded-full bg-navy/5 px-3 py-1 text-xs font-semibold text-navy/70">{communityEvent.timeLabel}</span>
-              </div>
-              <h3 className="text-xl font-bold mb-2">{communityEvent.name}</h3>
-              <p className="text-navy/70 text-sm mb-4">{communityEvent.description}</p>
-              <div className="mb-4 rounded-xl bg-[#F4F8FB] p-4 text-sm text-navy/80">
-                <p className="font-semibold text-navy">{communityEvent.scheduleLabel}</p>
-                <p className="mt-1">{communityEvent.venueName}</p>
-                <p>{communityEvent.streetAddress}</p>
-                <p>{communityEvent.cityStateZip}</p>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <a
-                  href={communityEvent.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-primary"
-                  aria-label={`Register for ${communityEvent.name} on Eventbrite`}
-                >
-                  Register on Eventbrite
-                </a>
-                <button
-                  type="button"
-                  className="btn-outline"
-                  onClick={() => setFlyerOpen(true)}
-                >
-                  View Flyer
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {flyerOpen && (
-        <div
-          className="fixed inset-0 z-50 bg-black/80 p-4 flex items-center justify-center cursor-zoom-out"
-          onClick={() => setFlyerOpen(false)}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Event flyer enlarged"
-        >
-          <div
-            className="relative w-full max-w-3xl h-[85vh] bg-white rounded-2xl overflow-hidden cursor-default"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Image
-              src={EventFlyer}
-              alt="Event flyer"
-              fill
-              className="object-contain p-4"
-              sizes="100vw"
-            />
-          </div>
-        </div>
-      )}
     </Layout>
   );
 }
