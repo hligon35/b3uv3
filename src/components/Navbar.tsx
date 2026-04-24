@@ -40,6 +40,15 @@ export default function Navbar() {
   
   return (
     <header className={`fixed top-0 left-0 w-full z-50 transition backdrop-blur ${bgClass}`}>
+      <Link
+        href="/community"
+        className="block border-b border-white/10 bg-navy px-4 py-3 text-center text-white transition hover:bg-navy/95 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+        aria-label="View The Big Take Back presale update"
+      >
+        <span className="block text-[11px] font-semibold uppercase tracking-[0.22em] text-white/75">Book Update</span>
+        <span className="hidden text-sm font-bold md:block">The Big Take Back: What I Left Behind presales begin May 5</span>
+        <span className="text-sm font-bold md:hidden">Presales begin May 5</span>
+      </Link>
       <a
         href={communityEvent.url}
         target="_blank"

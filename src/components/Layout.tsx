@@ -23,6 +23,7 @@ const OG_IMAGE_URL = `${SITE_URL}/og.png`;
 export default function Layout({ children, title, description, structuredData }: LayoutProps) {
   const { pathname, asPath } = useRouter();
   const isHomePage = pathname === '/';
+  const mainClassName = isHomePage ? '' : 'pt-44';
 
   const canonicalUrl = useMemo(() => {
     const rawPath = (asPath || pathname || '/').split('?')[0].split('#')[0] || '/';
@@ -120,7 +121,7 @@ export default function Layout({ children, title, description, structuredData }:
         ))}
       </Head>
       <Navbar />
-      <main className={isHomePage ? '' : 'pt-32'}>
+      <main className={mainClassName}>
         {children}
       </main>
       <Footer />

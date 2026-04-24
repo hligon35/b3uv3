@@ -241,6 +241,18 @@ export default function CommunityPage() {
   <section className="section-padding bg-white">
         <h1 className="text-4xl font-bold mb-6">Community Stories</h1>
     <p className="max-w-2xl text-navy/80 mb-12">Real impact from real people. Share your journey and help others find strength in theirs.</p>
+        <div className="mb-12 rounded-3xl border border-brandOrange/30 bg-gradient-to-r from-brandOrange to-red-600 p-6 text-white shadow-xl">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/80">Update</p>
+              <h2 className="mt-2 text-2xl font-bold">Presales for The Big Take Back: What I Left Behind begin May 5th.</h2>
+              <p className="mt-2 max-w-2xl text-sm text-white/90">Mark your calendar now so you do not miss the first chance to preorder Bree&apos;s new release.</p>
+            </div>
+            <div className="rounded-2xl bg-white/15 px-4 py-3 text-sm font-semibold backdrop-blur-sm">
+              Presales open May 5
+            </div>
+          </div>
+        </div>
         {/* Share Your Story form moved directly under title and subtext */}
         {editorMode && (
           <div className="flex flex-wrap items-center gap-3 mb-6">
@@ -407,7 +419,7 @@ export default function CommunityPage() {
             <div className="relative h-56 bg-white">
               <Image
                 src={BookImage}
-                alt="The Big Take Back book cover"
+                alt="The Big Take Back: What I Left Behind book cover"
                 fill
                 className="object-contain p-2"
                 sizes="(max-width: 768px) 100vw, 50vw"
@@ -416,8 +428,8 @@ export default function CommunityPage() {
               <span className="absolute top-3 left-3 bg-brandOrange text-white text-xs font-semibold px-3 py-1 rounded-full">Coming Soon</span>
             </div>
             <div className="p-6">
-              <h3 className="text-xl font-bold mb-2">The Big Take Back</h3>
-              <p className="text-navy/70 text-sm">“The Big Take Back” is Bree’s bold guide to reclaiming the parts of yourself life tried to quiet — your voice, your confidence, and your power. It reveals the subtle ways we give ourselves away and shows how to rise back into ownership with intention. It’s still in the works, but it’s coming — and it’s needed.</p>
+              <h3 className="text-xl font-bold mb-2">The Big Take Back: What I Left Behind</h3>
+              <p className="text-navy/70 text-sm">“The Big Take Back: What I Left Behind” is Bree’s bold guide to reclaiming the parts of yourself life tried to quiet — your voice, your confidence, and your power. It reveals the subtle ways we give ourselves away and shows how to rise back into ownership with intention. It’s still in the works, but it’s coming — and it’s needed.</p>
             </div>
           </div>
 

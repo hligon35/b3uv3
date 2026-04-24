@@ -1,6 +1,5 @@
 import Layout from '@/components/Layout';
 import Image from 'next/image';
-import Link from 'next/link';
 import MelaLogo from '@/images/logos/Melalogo.png';
 import THOHLogo from '@/images/logos/THOHlogo.png';
 import aboutBree from '@/images/content/aboutBree.jpeg';
@@ -51,7 +50,7 @@ export default function AboutPage() {
       </section>
 
       {/* The Big Take Back Section */}
-      <section className="section-padding bg-gradient-to-r from-brandOrange to-red-600 text-white">
+      <section className="section-padding bg-gradient-to-r from-brandOrange to-red-600 text-black">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">
             The Big Take Back
@@ -65,13 +64,12 @@ export default function AboutPage() {
             </p>
             <p className="text-lg leading-relaxed">
               Whether she's speaking on stage, teaching a{' '}
-              <Link
-                href="/masterclass"
-                aria-label="Open Bree's masterclass page"
-                className="inline-block align-baseline px-2 py-0 rounded-md bg-navy text-white font-semibold whitespace-nowrap hover:bg-navy/90 focus:outline-none focus:ring-2 focus:ring-navy/60 focus:ring-offset-2 transition-colors"
+              <span
+                aria-disabled="true"
+                className="inline-block align-baseline cursor-not-allowed rounded-md bg-navy/75 px-2 py-0 font-semibold whitespace-nowrap text-white opacity-80"
               >
                 masterclass
-              </Link>
+              </span>
               , or hosting her podcast, Bree's energy, authenticity, and faith ignite transformation. Her message reminds people that no matter what they've endured, they can rise, rebuild, and become unstoppable.
             </p>
           </div>
@@ -82,12 +80,12 @@ export default function AboutPage() {
       <section className="section-padding bg-navy text-white">
         <div className="max-w-4xl mx-auto text-center">
           <div className="relative">
-            <div className="text-6xl text-brandOrange/20 absolute -top-4 -left-4">"</div>
             <blockquote className="text-2xl md:text-3xl font-bold mb-6 relative z-10">
+              <span className="mr-1 align-top text-white">"</span>
               Every time I share my story, I set somebody else free.
+              <span className="align-top text-white">"</span>
             </blockquote>
             <cite className="text-lg text-brandOrange font-semibold">— Bree Charles</cite>
-            <div className="text-6xl text-brandOrange/20 absolute -bottom-4 -right-4 rotate-180">"</div>
           </div>
         </div>
       </section>
