@@ -255,7 +255,106 @@ export default function CommunityPage() {
           {debugEnabled && <input type="hidden" name="debug" value="1" />}
           <div className="bg-white border border-black/10 rounded-xl shadow-sm p-6 md:p-8">
             <div className="mb-6">
-  {/* Iframe removed: switched to fetch-based submission with no-cors fallback */}
+              <TurnstileField
+                token={turnstileToken}
+                onTokenChange={setTurnstileToken}
+                resetKey={turnstileResetKey}
+              />
+            </div>
+
+            <div className="mt-6">
+              <h2 className="text-2xl font-semibold">Share Your Story</h2>
+              <p className="text-sm text-navy/70 mt-1">Your words may encourage someone who needs it today. Fields marked with <span className="text-red-600">*</span> are required.</p>
+            </div>
+
+            <div className="grid gap-5 md:grid-cols-2">
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium text-navy mb-1">Name <span className="text-red-600">*</span></label>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  autoComplete="name"
+                  required
+                  minLength={NAME_FIELD_MIN}
+                  maxLength={NAME_FIELD_MAX}
+                  className="w-full rounded-md border border-black/10 bg-white px-4 py-2 text-navy placeholder:text-navy/40 shadow-sm focus:outline-none focus:ring-2 focus:ring-brandBlue focus:border-brandBlue"
+                  placeholder="Your name"
+                />
+              </div>
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-navy mb-1">Email <span className="text-red-600">*</span></label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  minLength={EMAIL_FIELD_MIN}
+                  maxLength={EMAIL_FIELD_MAX}
+                  className="w-full rounded-md border border-black/10 bg-white px-4 py-2 text-navy placeholder:text-navy/40 shadow-sm focus:outline-none focus:ring-2 focus:ring-brandBlue focus:border-brandBlue"
+                  placeholder="you@example.com"
+                />
+              </div>
+            </div>
+
+            <div className="mt-5">
+              <label htmlFor="story" className="block text-sm font-medium text-navy mb-1">Your story <span className="text-red-600">*</span></label>
+              <div className="relative">
+                <textarea
+                  id="story"
+                  name="story"
+                  rows={7}
+                  required
+                  minLength={LONG_FIELD_MIN}
+                  maxLength={LONG_FIELD_MAX}
+                  value={storyValue}
+                  onChange={(e) => setStoryValue(e.target.value)}
+                  className="w-full rounded-md border border-black/10 bg-white px-4 py-3 pb-8 text-navy placeholder:text-navy/40 shadow-sm focus:outline-none focus:ring-2 focus:ring-brandBlue focus:border-brandBlue"
+                  placeholder="Share what you&apos;ve overcome, what you learned, or a message for others."
+                />
+                <span className="pointer-events-none absolute bottom-3 right-4 text-xs text-navy/60">
+                  {storyValue.length}/{LONG_FIELD_MAX}
+                </span>
+              </div>
+              <p className="mt-2 text-xs text-navy/60">Please avoid sharing sensitive personal details or names you don&apos;t have permission to include.</p>
+            </div>
+
+            <fieldset className="mt-6">
+              <legend className="block text-sm font-medium text-navy mb-2">Authorize name usage</legend>
+              <p className="text-xs text-navy/60 mb-2">Choose whether we can display your name with your story.</p>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <label className="inline-flex items-center gap-2 text-sm text-navy/80">
+                  <input type="radio" name="useName" value="yes" required className="h-4 w-4 text-brandOrange focus:ring-brandOrange" />
+                  Yes &mdash; use my name in the story post
+                </label>
+                <label className="inline-flex items-center gap-2 text-sm text-navy/80">
+                  <input type="radio" name="useName" value="no" className="h-4 w-4 text-brandOrange focus:ring-brandOrange" />
+                  No &mdash; keep me anonymous
+                </label>
+              </div>
+            </fieldset>
+
+            <div className="mt-6">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                <button className="btn-primary disabled:opacity-50" type="submit" disabled={submitting}>
+                  {submitting ? 'Submitting\u2026' : 'Submit Story'}
+                </button>
+                {submitted && (
+                  <div className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-md px-3 py-2">
+                    Thanks! Your story was received. Please check your email for confirmation.
+                  </div>
+                )}
+                {error && (
+                  <div className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2">
+                    {error}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </form>
+        {/* Iframe removed: switched to fetch-based submission with no-cors fallback */}
         <div className="grid md:grid-cols-3 gap-8 mb-16">
           {/* Render approved stories only. */}
           {visibleStories.map((st) => (
